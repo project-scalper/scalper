@@ -1,106 +1,164 @@
 #!/usr/bin/python3
 
 from helper.adapter import adapter, trade_logger
-from datetime import datetime
-from variables import *
-import asyncio
+from datetime import datetime, timedelta
+from variables import risk, reward, exchange, capital, leverage
+# import asyncio
+import time
+import ccxt
 from helper import watchlist
-from exchange import bybit as exchange
 
-async def checker(strat_type:str, symbol:str, signal:str, risk:float=risk, reward:float=reward):
-    if "BUY" in signal:
-        last_ohlcv = None
-        for _ in range(3):
+
+class Checker():
+    risk = risk
+    reward = reward
+    capital = capital
+    leverage = leverage
+    exchange = exchange
+
+    def __init__(self, symbol:str, signal:str, *args, **kwargs):
+        self.symbol = symbol
+        self.signal = signal
+        
+        for key, val in kwargs.items():
+            if hasattr(self, key):
+                setattr(self, key, val)
+
+    def calculate_entry_price(self):
+        for i in range(3):
             try:
-                last_ohlcv = exchange.fetch_ohlcv(symbol, '5m', limit=3)
+                last_ohlcv = self.exchange.fetch_ohlcv(self.symbol, '5m', limit=3)
                 break
             except:
-                adapter.error(f"Error obtaining ohlcv for {symbol}")
-        if not last_ohlcv:
-            return
-        entry_price:float = last_ohlcv[1][-2]
-        amount = (capital * leverage) / entry_price
-        amount = float(exchange.amount_to_precision(symbol, amount))
-        cost = amount * entry_price
-        # print(f"Amount:{type(amount)}, leverage:{type(leverage)}, reward:{type(reward)}")
-        tp_price = (cost + reward) / amount
-        sl_price = (cost - risk) / amount
-        adapter.info(f"Checker called with args: {symbol} - {signal} - entry={entry_price} - tp={tp_price} - sl={sl_price}")
+                if i == 2:
+                    adapter.error(f"Error obtaining ohlcv for {self.symbol}")
+                    return
+        if last_ohlcv:
+            self.entry_price = last_ohlcv[1][-2]
+        else:
+            adapter.warning("Could not obtain entry price for symbol")
 
-        start_time = datetime.now()
-        while True:
+    def calculate_tp_sl(self):
+        if "BUY" in self.signal:
+            amount = (self.capital * self.leverage) / self.entry_price
+            amount = float(self.exchange.amount_to_precision(self.symbol, amount))
+            cost = amount * self.entry_price
+            tp = (cost + reward) / amount
+            sl = (cost - risk) / amount
+
+        if "SELL" in self.signal:
+            amount = (self.capital * self.leverage) / self.entry_price
+            amount = float(self.exchange.amount_to_precision(self.symbol, amount))
+            cost = amount * self.entry_price
+            tp = (cost - self.reward) / amount
+            sl = (cost + self.risk) / amount
+
+        self.tp = float(self.exchange.price_to_precision(self.symbol, tp))
+        self.sl = float(self.exchange.price_to_precision(self.symbol, sl))
+        self.amount = amount
+        adapter.info(f"#{self.symbol}. {self.signal} - Entry={self.entry_price}, tp={self.tp}, sl={self.sl}")
+
+    def enter_trade(self):
+        if not self.entry_price:
+            return
+        enter_flag = False
+        valid_till = datetime.now() + timedelta(minutes=5)
+        adapter.info(f"#{self.symbol}. New trade found. Waiting for right entry...")
+        while datetime.now() <= valid_till:
             try:
-                ticker = exchange.fetch_ticker(symbol)
-                if ticker['last'] >= tp_price:
-                    message = f"{strat_type} - symbol: {symbol}, signal: {signal}, entered_trade_at: {start_time}, entry_price: {entry_price}, *TP hit*"
-                    trade_logger.info(message)
-                    watchlist.reset_one(symbol)
-                    return
-                if ticker['last'] <= sl_price:
-                    message = f"{strat_type} - symbol: {symbol}, signal: {signal}, entered_trade_at: {start_time}, entry_price: {entry_price}, *SL hit*"
-                    trade_logger.warning(message)
-                    watchlist.reset_one(symbol)
-                    return
-                sig = watchlist.get(symbol)
-                if 'BUY' not in sig:
-                    pnl = (ticker['last'] * amount) - (entry_price * amount)
-                    msg = f"{strat_type} - symbol: {symbol}, signal: {signal}, entered_trade_at: {start_time}, entry_price: {entry_price}, *Indicator changed at pnl - {pnl}*"
-                    trade_logger.warning(msg)
-                    # watchlist.reset_one(symbol)
+                ticker = self.exchange.fetch_ticker(self.symbol)
+                if "BUY" in self.signal:
+                    if ticker['last'] <= self.entry_price:
+                        enter_flag = True
+                elif "SELL" in self.signal:
+                    if ticker['last'] >= self.entry_price:
+                        enter_flag = True
+                if enter_flag is True:
+                    adapter.info(f"#{self.symbol}. {self.signal}. Now monitoring trade...")
+                    self.monitor()
                     return
             except Exception as e:
-                msg = f"{type(e).__name__} - {str(e)}"
-                adapter.error(msg)
+                adapter.error(f"{type(e).__name__} - {str(e)}")
             finally:
-                await asyncio.sleep(2)
+                time.sleep(2)
+        adapter.info(f"#{self.symbol}. {self.signal} - Unable to enter trade in time.")
+        watchlist.reset(self.symbol)
 
-    elif "SELL" in signal:
-        last_ohlcv = None
-        for _ in range(3):
-            try:
-                last_ohlcv = exchange.fetch_ohlcv(symbol, '5m', limit=3)
-                break
-            except:
-                adapter.error(f"Error obtaining ohlcv for {symbol}")
-        if not last_ohlcv:
-            return
-        entry_price = last_ohlcv[1][-2]
-        amount = capital / entry_price
-        amount = float(exchange.amount_to_precision(symbol, amount))
-        cost = amount * entry_price
-        tp_price = (cost - reward) / amount
-        sl_price = (cost + risk) / amount
+    def monitor(self):
+        self.start_time = datetime.now()
+        self.alerted = False
 
-        start_time = datetime.now()
         while True:
             try:
-                ticker = exchange.fetch_ticker(symbol)
-                if ticker['last'] <= tp_price:
-                    message = f"{strat_type} - symbol: {symbol}, signal: {signal}, entered_trade_at: {start_time}, entry_price: {entry_price}, *TP hit*"
-                    trade_logger.info(message)
-                    watchlist.reset_one(symbol)
+                ticker = self.exchange.fetch_ticker(self.symbol)
+                if ("BUY" in self.signal and ticker['last'] >= self.tp) or ("SELL" in self.signal and ticker['last'] <= self.tp):
+                    msg = f"#{self.symbol}. signal={self.signal}, start_time={self.start_time}, entry={self.entry_price} "
+                    msg += "*TP hit*"
+                    trade_logger.info(msg)
+                    watchlist.trade_counter(self.signal, "tp")
+                    watchlist.reset(self.symbol)
                     return
-                if ticker['last'] >= sl_price:
-                    message = f"{strat_type} - symbol: {symbol}, signal: {signal}, entered_trade_at: {start_time}, entry_price: {entry_price}, *SL hit*"
-                    trade_logger.warning(message)
-                    watchlist.reset_one(symbol)
+                elif ("BUY" in self.signal and ticker['last'] <= self.sl) or ("SELL" in self.signal and ticker['last'] >= self.sl):
+                    msg = f"#{self.symbol}. signal={self.signal}, start_time={self.start_time}, entry={self.entry_price} "
+                    msg += "*SL hit*"
+                    trade_logger.info(msg)
+                    watchlist.trade_counter(self.signal, 'sl')
+                    watchlist.reset(self.symbol)
                     return
-                sig = watchlist.get(symbol)
-                if 'SELL' not in sig:
-                    pnl = (entry_price * amount) - (ticker['last'] * amount)
-                    msg = f"{strat_type} - symbol: {symbol}, signal: {signal}, entered_trade_at: {start_time}, entry_price: {entry_price}, *Indicator changed at pnl - {pnl}*"
-                    trade_logger.warning(msg)
-                    # watchlist.reset_one(symbol)
-                    return
+                
+                if hasattr(self, "close_position"):
+                    if ("BUY" in self.signal and ticker['last'] <= self.close_position) or ("SELL" in self.signal and ticker['last'] >= self.close_position):
+                        msg = f"#{self.symbol}. {self.signal} - Break-even price hit. start_time={self.start_time}"
+                        trade_logger.info(msg)
+                        # watchlist.trade_counter(self.signal, 0)
+                        watchlist.reset(self.symbol)
+                        return
+                
+                # Raise warning when indicators changes signal
+                sig = watchlist.get(self.symbol)
+                if ("BUY" in self.signal and "BUY" not in sig) or ("SELL" in self.signal and "SELL" not in sig):
+                    if self.alerted is False:
+                        if "BUY" in self.signal:
+                            pnl = (ticker['last'] * self.amount) - (self.entry_price * self.amount)
+                        if "SELL" in self.signal:
+                            pnl = (self.entry_price * self.amount) - (ticker['last'] * self.amount)
+                        self.alerted = True
+                        if pnl <= 0:
+                            watchlist.trade_counter(self.signal, pnl)
+                            watchlist.reset(self.symbol)
+                            msg = f"#{self.symbol}. {self.signal} Trade closed at price={ticker['last']} and pnl={pnl:.3f}, start_time={self.start_time}"
+                            trade_logger.info(msg)
+                            return
+                        else:
+                            adapter.info(f"#{self.symbol}. {self.signal} - start_time={self.start_time}. Adjusting stop_loss...")
+                            self.adjust_sl()
+                        # watchlist.reset(self.symbol)
+                        # return
+
+            except ccxt.NetworkError as e:
+                adapter.error("Seems the network connection is unstable.")
             except Exception as e:
-                msg = f"{type(e).__name__} - {str(e)}"
-                adapter.error(msg)
+                adapter.error(f"{type(e).__name__} - {str(e)}")
             finally:
-                await asyncio.sleep(2)
+                time.sleep(2)
 
-    else:
-        if signal == 'NEUTRAL':
-            return
-        adapter.error("Invalid argument for signal. Set signal to either \"BUY\" or \"SELL\"")
+    def calculate_fee(self):
+        maker_fee = self.exchange.markets[self.symbol]['maker'] * self.amount * self.entry_price
+        taker_fee = self.exchange.markets[self.symbol]['taker'] * self.amount
+        self.fee = maker_fee + taker_fee
 
-    return
+    def adjust_sl(self):
+        cost = self.amount * self.entry_price
+        self.calculate_fee()
+        if "BUY" in self.signal:
+            self.close_position = (cost + self.fee) / self.amount
+        elif "SELL" in self.signal:
+            self.close_position = (cost - self.fee) / self.amount
+
+    def delete(self):
+        del self
+
+    async def execute(self):
+        self.calculate_entry_price()
+        self.calculate_tp_sl()
+        self.enter_trade()

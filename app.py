@@ -37,7 +37,7 @@ def start_checker():
     start_time = datetime(current_dt.year, current_dt.month,
                         current_dt.day, hour, minute, 0)
     print(f"Waiting...")
-    watchlist.reset_all()
+    watchlist.reset()
 
     checker = threading.Thread(target=start_scalper, args=(start_time, ))
     checker.start()

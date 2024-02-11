@@ -1,34 +1,114 @@
-2024-02-01 10:05:34,948 - EMA_ONLY - symbol: BNB/USDT, signal: BUY, entered_trade_at: 2024-02-01 10:05:34.392231, entry_price: 298.464, *TP hit*
-2024-02-01 11:25:49,834 - EMA_ONLY - symbol: BTC/USDT, signal: BUY, entered_trade_at: 2024-02-01 11:25:48.922274, entry_price: 42293.05, *SL hit*
-2024-02-01 11:25:49,849 - EMA_ONLY - symbol: ETH/USDT, signal: BUY, entered_trade_at: 2024-02-01 11:25:48.969274, entry_price: 2276.89, *SL hit*
-2024-02-01 11:30:37,737 - EMA_ONLY - symbol: ETH/USDT, signal: BUY, entered_trade_at: 2024-02-01 11:30:37.332141, entry_price: 2274.39, *SL hit*
-2024-02-01 12:20:59,452 - MACD_ONLY - symbol: DOT/USDT, signal: SELL, entered_trade_at: 2024-02-01 12:20:58.403273, entry_price: 6.654, *Indicator changed at pnl - -0.01502800000000093*
-2024-02-01 13:00:35,232 - MACD_ONLY - symbol: SOL/USDT, signal: SELL, entered_trade_at: 2024-02-01 13:00:34.806365, entry_price: 95.44, *Indicator changed at pnl - -0.13611000000000217*
-2024-02-01 13:15:44,292 - EMA_ONLY - symbol: DOT/USDT, signal: BUY, entered_trade_at: 2024-02-01 13:15:42.954953, entry_price: 6.692, *Indicator changed at pnl - -0.07471600000002354*
-2024-02-01 17:10:41,527 - MACD_ONLY - symbol: SOL/USDT, signal: SELL, entered_trade_at: 2024-02-01 17:10:40.668841, entry_price: 95.95, *Indicator changed at pnl - -0.09378000000000952*
-2024-02-01 17:10:41,924 - MACD_ONLY - symbol: BNB/USDT, signal: SELL, entered_trade_at: 2024-02-01 17:10:41.097843, entry_price: 299.4554, *Indicator changed at pnl - -0.07513425000001916*
-2024-02-01 17:30:41,757 - EMA_ONLY - symbol: SOL/USDT, signal: SELL, entered_trade_at: 2024-02-01 17:30:40.704244, entry_price: 95.49, *Indicator changed at pnl - -0.07329000000000008*
-2024-02-01 17:36:14,990 - EMA_ONLY - symbol: WAVES/USDT, signal: SELL, entered_trade_at: 2024-02-01 17:36:14.151131, entry_price: 2.0964, *Indicator changed at pnl - 0.25281000000001086*
-2024-02-01 17:55:36,466 - EMA_ONLY - symbol: DOGE/USDT, signal: BUY, entered_trade_at: 2024-02-01 17:55:35.591934, entry_price: 0.07933, *Indicator changed at pnl - 0.0*
-2024-02-01 18:04:00,049 - EMA_ONLY - symbol: ETC/USDT, signal: BUY, entered_trade_at: 2024-02-01 17:50:50.514090, entry_price: 24.29, *TP hit*
-2024-02-01 18:04:29,614 - EMA_ONLY - symbol: SOL/USDT, signal: BUY, entered_trade_at: 2024-02-01 18:00:33.437533, entry_price: 96.36, *TP hit*
-2024-02-01 18:05:41,592 - EMA_ONLY - symbol: BTC/USDT, signal: BUY, entered_trade_at: 2024-02-01 18:05:40.397690, entry_price: 42753.75, *Indicator changed at pnl - 0.13471487999999*
-2024-02-01 18:05:41,640 - EMA_ONLY - symbol: WAVES/USDT, signal: BUY, entered_trade_at: 2024-02-01 18:05:40.794682, entry_price: 2.1142, *Indicator changed at pnl - 0.0*
-2024-02-01 18:05:41,991 - EMA_ONLY - symbol: ETC/USDT, signal: BUY, entered_trade_at: 2024-02-01 18:05:41.181691, entry_price: 24.49, *TP hit*
-2024-02-01 18:06:55,973 - EMA_ONLY - symbol: DOT/USDT, signal: BUY, entered_trade_at: 2024-02-01 18:05:41.211688, entry_price: 6.758, *TP hit*
-2024-02-01 18:07:00,510 - EMA_ONLY - symbol: ADA/USDT, signal: BUY, entered_trade_at: 2024-02-01 18:05:39.708684, entry_price: 0.4935, *TP hit*
-2024-02-01 18:07:42,395 - EMA_ONLY - symbol: ETH/USDT, signal: BUY, entered_trade_at: 2024-02-01 18:05:41.210684, entry_price: 2295.02, *TP hit*
-2024-02-01 18:07:55,507 - EMA_ONLY - symbol: BNB/USDT, signal: BUY, entered_trade_at: 2024-02-01 18:05:40.554688, entry_price: 300.2185, *TP hit*
-2024-02-01 18:10:34,514 - EMA_ONLY - symbol: WAVES/USDT, signal: BUY, entered_trade_at: 2024-02-01 18:10:33.545595, entry_price: 2.1171, *Indicator changed at pnl - 0.0*
-2024-02-01 18:15:49,288 - EMA_ONLY - symbol: SOL/USDT, signal: BUY, entered_trade_at: 2024-02-01 18:15:48.410152, entry_price: 96.73, *Indicator changed at pnl - -0.5685900000000288*
-2024-02-01 19:09:31,272 - MACD_ONLY - symbol: ETC/USDT, signal: SELL, entered_trade_at: 2024-02-01 19:00:44.568291, entry_price: 24.72, *TP hit*
-2024-02-01 19:10:41,489 - MACD_ONLY - symbol: BNB/USDT, signal: SELL, entered_trade_at: 2024-02-01 19:10:40.630855, entry_price: 300.1988, *Indicator changed at pnl - -0.027148464999996236*
-2024-02-01 19:20:37,354 - MACD_ONLY - symbol: ADA/USDT, signal: SELL, entered_trade_at: 2024-02-01 19:10:41.267855, entry_price: 0.4944, *Indicator changed at pnl - -0.4651979999999867*
-2024-02-01 19:25:35,596 - EMA_ONLY - symbol: ADA/USDT, signal: BUY, entered_trade_at: 2024-02-01 19:20:37.833932, entry_price: 0.4964, *Indicator changed at pnl - -0.7050750000000221*
-2024-02-01 19:35:41,344 - MACD_ONLY - symbol: ADA/USDT, signal: SELL, entered_trade_at: 2024-02-01 19:25:36.501996, entry_price: 0.496, *Indicator changed at pnl - 0.1209660000000099*
-2024-02-01 19:45:41,684 - MACD_ONLY - symbol: WAVES/USDT, signal: SELL, entered_trade_at: 2024-02-01 19:10:41.171856, entry_price: 2.1147, *Indicator changed at pnl - 0.3735120000000194*
-2024-02-01 19:45:42,517 - EMA_ONLY - symbol: DOGE/USDT, signal: BUY, entered_trade_at: 2024-02-01 19:45:41.619318, entry_price: 0.07961, *Indicator changed at pnl - -0.12561200000004646*
-2024-02-01 19:48:20,425 - EMA_ONLY - symbol: ADA/USDT, signal: BUY, entered_trade_at: 2024-02-01 19:35:41.452473, entry_price: 0.4954, *SL hit*
-2024-02-01 20:30:45,604 - MACD_EMA_BUY - symbol: ADA/USDT, signal: MACD_EMA_BUY, entered_trade_at: 2024-02-01 20:25:47.713277, entry_price: 0.4956, *Indicator changed at pnl - 0.9079830000000015*
-2024-02-01 20:36:02,589 - MACD_EMA_BUY - symbol: DOGE/USDT, signal: MACD_EMA_BUY, entered_trade_at: 2024-02-01 20:30:44.827200, entry_price: 0.07968, *Indicator changed at pnl - -0.3765060000000062*
-2024-02-01 20:50:46,280 - MACD_EMA_BUY - symbol: ETH/USDT, signal: MACD_EMA_BUY, entered_trade_at: 2024-02-01 20:50:45.326506, entry_price: 2305.14, *Indicator changed at pnl - 0.36873000000002776*
+2024-02-05 11:45:47,634 - #DOT/USDT. MACD_EMA_BUY Indicator changed at price=6.921 and pnl=-0.072
+2024-02-05 11:52:26,948 - #DOT/USDT. signal=MACD_EMA_BUY, start_time=2024-02-05 11:45:36.002591, entry=6.922 *SL hit*
+2024-02-05 11:58:30,005 - #DOGE/USDT. signal=MACD_EMA_BUY, start_time=2024-02-05 11:16:52.317011, entry=0.07903 *TP hit*
+2024-02-05 12:21:01,686 - #BNB/USDT. MACD_EMA_BUY Indicator changed at price=304.6007 and pnl=1.127
+2024-02-05 12:39:08,483 - #DOT/USDT. signal=MACD_EMA_BUY, start_time=2024-02-05 12:25:42.462475, entry=6.929 *TP hit*
+2024-02-05 13:05:36,030 - #ETH/USDT. MACD_EMA_BUY Indicator changed at price=2331.06 and pnl=-0.056
+2024-02-05 13:27:37,178 - #ETH/USDT. signal=MACD_EMA_BUY, start_time=2024-02-05 13:05:35.119528, entry=2331.32 *SL hit*
+2024-02-05 13:27:38,530 - #ETH/USDT. MACD_EMA_BUY Indicator changed at price=2326.5 and pnl=-0.995
+2024-02-05 13:28:56,229 - #ETH/USDT. signal=MACD_EMA_BUY, start_time=2024-02-05 13:16:12.544402, entry=2331.14 *SL hit*
+2024-02-05 13:46:41,155 - #BNB/USDT. signal=MACD_EMA_BUY, start_time=2024-02-05 11:45:46.642319, entry=303.9154 *SL hit*
+2024-02-05 13:55:32,553 - #BTC/USDT. MACD_EMA_BUY Indicator changed at price=43241.03 and pnl=0.543
+2024-02-05 13:55:33,745 - #BTC/USDT. MACD_EMA_BUY Indicator changed at price=43241.03 and pnl=-0.022
+2024-02-05 16:21:06,339 - #BNB/USDT. MACD_EMA_SELL Indicator changed at price=301.4581 and pnl=-0.002
+2024-02-05 17:09:59,171 - #ADA/USDT. EMA_MACD_SELL Indicator changed at price=0.4952 and pnl=-0.202
+2024-02-05 17:30:38,035 - #SOL/USDT. EMA_MACD_SELL Indicator changed at price=95.8 and pnl=-0.732
+2024-02-05 17:30:38,966 - #BNB/USDT. MACD_EMA_SELL Indicator changed at price=300.6687 and pnl=-0.000
+2024-02-05 23:35:52,012 - #DOGE/USDT. signal=MACD_EMA_BUY, start_time=2024-02-05 17:46:36.685555, entry=0.07859 *SL hit*
+2024-02-05 23:35:52,015 - #ETH/USDT. signal=MACD_EMA_BUY, start_time=2024-02-05 17:51:14.584937, entry=2299.29 *SL hit*
+2024-02-05 23:35:52,016 - #DOT/USDT. signal=MACD_EMA_BUY, start_time=2024-02-05 17:51:14.709938, entry=6.8 *SL hit*
+2024-02-06 00:20:58,525 - #BNB/USDT. signal=MACD_EMA_SELL, start_time=2024-02-06 00:15:35.249254, entry=300.2112 *SL hit*
+2024-02-06 17:05:33,240 - #BNB/USDT. MACD_EMA_BUY Trade closed at price=303.2578 and pnl=0.687, start_time=2024-02-06 17:02:15.433084
+2024-02-06 17:20:37,157 - #ETH/USDT. MACD_EMA_BUY Trade closed at price=2344.56 and pnl=-0.094, start_time=2024-02-06 17:06:33.747228
+2024-02-06 17:21:41,184 - #ETH/USDT. signal=MACD_EMA_BUY, start_time=2024-02-06 17:06:33.747228, entry=2345.0 *TP hit*
+2024-02-06 17:46:04,651 - #DOT/USDT. signal=MACD_EMA_BUY, start_time=2024-02-06 17:31:06.270323, entry=6.788 *SL hit*
+2024-02-06 18:08:56,489 - #SOL/USDT. signal=MACD_EMA_SELL, start_time=2024-02-06 17:51:07.135589, entry=95.42 *SL hit*
+2024-02-06 19:56:04,078 - #BNB/USDT. MACD_EMA_BUY Trade closed at price=303.1294 and pnl=0.316, start_time=2024-02-06 19:10:44.459360
+2024-02-07 01:25:42,248 - #ETH/USDT. MACD_EMA_BUY Trade closed at price=2382.36 and pnl=0.944, start_time=2024-02-07 01:15:40.324092
+2024-02-07 01:27:24,080 - #ETH/USDT. signal=MACD_EMA_BUY, start_time=2024-02-07 01:15:40.324092, entry=2377.87 *TP hit*
+2024-02-07 01:35:32,447 - #BNB/USDT. MACD_EMA_BUY Trade closed at price=302.6347 and pnl=-0.825, start_time=2024-02-07 01:30:32.684231
+2024-02-07 01:36:32,764 - #SOL/USDT. signal=MACD_EMA_BUY, start_time=2024-02-07 01:25:42.040351, entry=97.2 *SL hit*
+2024-02-07 01:36:38,074 - #BNB/USDT. signal=MACD_EMA_BUY, start_time=2024-02-07 01:30:32.684231, entry=303.1351 *SL hit*
+2024-02-07 02:15:32,005 - #SOL/USDT. MACD_EMA_BUY Trade closed at price=97.16 and pnl=0.670, start_time=2024-02-07 02:00:33.493703
+2024-02-07 02:15:32,766 - #ADA/USDT. MACD_EMA_BUY Trade closed at price=0.4997 and pnl=0.300, start_time=2024-02-07 02:10:52.590813
+2024-02-07 02:15:33,304 - #DOT/USDT. MACD_EMA_BUY Trade closed at price=6.823 and pnl=0.954, start_time=2024-02-07 02:11:04.509823
+2024-02-07 02:15:34,003 - #BTC/USDT. MACD_EMA_BUY Trade closed at price=43156.58 and pnl=0.501, start_time=2024-02-07 02:05:33.511033
+2024-02-07 02:43:05,370 - #SOL/USDT. signal=MACD_EMA_BUY, start_time=2024-02-07 02:00:33.493703, entry=97.03 *TP hit*
+2024-02-07 02:53:19,520 - #BNB/USDT. signal=MACD_EMA_BUY, start_time=2024-02-07 02:15:32.956751, entry=303.0817 *SL hit*
+2024-02-07 03:52:00,276 - #ADA/USDT. signal=MACD_EMA_BUY, start_time=2024-02-07 03:50:32.236550, entry=0.5011 *SL hit*
+2024-02-07 09:45:32,980 - #SOL/USDT. MACD_EMA_SELL Trade closed at price=95.54 and pnl=-0.367, start_time=2024-02-07 09:35:33.439307
+2024-02-07 09:56:13,830 - #SOL/USDT. signal=MACD_EMA_SELL, start_time=2024-02-07 09:35:33.439307, entry=95.47 *TP hit*
+2024-02-07 10:22:23,914 - #ETH/USDT. MACD_EMA_BUY Trade closed at price=2364.99 and pnl=0.292, start_time=2024-02-07 09:45:33.951381
+2024-02-07 10:31:34,245 - #ETH/USDT. signal=MACD_EMA_BUY, start_time=2024-02-07 09:45:33.951381, entry=2363.61 *TP hit*
+2024-02-07 11:33:02,995 - #SOL/USDT. signal=MACD_EMA_SELL, start_time=2024-02-07 11:20:33.796579, entry=95.46 *TP hit*
+2024-02-07 12:40:03,128 - #BTC/USDT. signal=EMA_MACD_SELL, start_time=2024-02-07 12:20:32.857121, entry=42983.39 *TP hit*
+2024-02-08 03:08:15,660 - #DOT/USDT. signal=MACD_EMA_BUY, start_time=2024-02-08 03:05:35.142879, entry=6.977 *SL hit*
+2024-02-08 03:50:30,492 - #DOT/USDT. MACD_EMA_BUY Trade closed at price=6.966 and pnl=-0.717, start_time=2024-02-08 03:20:32.236798
+2024-02-08 04:25:32,282 - #DOGE/USDT. MACD_EMA_BUY Trade closed at price=0.08024 and pnl=0.936, start_time=2024-02-08 04:05:14.498171
+2024-02-08 04:27:03,579 - #DOT/USDT. signal=MACD_EMA_BUY, start_time=2024-02-08 03:20:32.236798, entry=6.976 *SL hit*
+2024-02-08 05:00:33,123 - #ETH/USDT. MACD_EMA_BUY Trade closed at price=2434.6 and pnl=-0.455, start_time=2024-02-08 04:50:32.883324
+2024-02-08 05:18:36,132 - #ETH/USDT. signal=MACD_EMA_BUY, start_time=2024-02-08 04:50:32.883324, entry=2436.82 *SL hit*
+2024-02-08 08:33:53,901 - #DOT/USDT. signal=MACD_EMA_BUY, start_time=2024-02-08 08:25:54.073675, entry=6.924 *TP hit*
+2024-02-08 08:35:31,978 - #ETH/USDT. MACD_EMA_BUY Trade closed at price=2423.84 and pnl=0.244, start_time=2024-02-08 08:26:48.062675
+2024-02-08 08:47:21,126 - #SOL/USDT. signal=MACD_EMA_BUY, start_time=2024-02-08 08:31:05.412405, entry=101.01 *SL hit*
+2024-02-08 09:10:34,153 - #DOGE/USDT. MACD_EMA_BUY Trade closed at price=0.07995 and pnl=0.563, start_time=2024-02-08 08:38:24.270914
+2024-02-08 09:13:52,743 - #DOGE/USDT. signal=MACD_EMA_BUY, start_time=2024-02-08 08:38:24.270914, entry=0.07986 *TP hit*
+2024-02-08 09:48:27,602 - #ETH/USDT. signal=MACD_EMA_BUY, start_time=2024-02-08 08:26:48.062675, entry=2422.66 *TP hit*
+2024-02-09 06:21:51,138 - #BNB/USDT. signal=MACD_EMA_BUY, start_time=2024-02-09 06:10:40.003786, entry=322.0879 *SL hit*
+2024-02-09 06:35:02,848 - #SOL/USDT. signal=MACD_EMA_BUY, start_time=2024-02-09 06:25:30.841504, entry=104.54 *TP hit*
+2024-02-09 06:35:28,021 - #DOGE/USDT. MACD_EMA_BUY Trade closed at price=0.08058 and pnl=0.435, start_time=2024-02-09 06:20:31.617732
+2024-02-09 06:36:42,462 - #DOGE/USDT. signal=MACD_EMA_BUY, start_time=2024-02-09 06:20:31.617732, entry=0.08051 *TP hit*
+2024-02-09 08:20:02,379 - #SOL/USDT. signal=MACD_EMA_BUY, start_time=2024-02-09 08:05:54.841189, entry=105.01 *TP hit*
+2024-02-09 08:25:53,782 - #ETH/USDT. MACD_EMA_BUY Trade closed at price=2454.96 and pnl=0.334, start_time=2024-02-09 08:21:03.181027
+2024-02-09 08:35:49,797 - #XRP/USDT. MACD_EMA_BUY Trade closed at price=0.5177 and pnl=0.483, start_time=2024-02-09 08:20:45.895031
+2024-02-09 08:36:19,278 - #ETH/USDT. signal=MACD_EMA_BUY, start_time=2024-02-09 08:21:03.181027, entry=2453.32 *TP hit*
+2024-02-09 08:39:07,456 - #BTC/USDT. signal=MACD_EMA_BUY, start_time=2024-02-09 08:35:49.085359, entry=46333.46 *TP hit*
+2024-02-09 08:39:09,182 - #XRP/USDT. signal=MACD_EMA_BUY, start_time=2024-02-09 08:20:45.895031, entry=0.5172 *TP hit*
+2024-02-09 12:27:28,837 - #ADA/USDT. signal=MACD_EMA_BUY, start_time=2024-02-09 12:20:15.582853, entry=0.5389 *TP hit*
+2024-02-09 13:50:42,023 - #DOT/USDT. signal=MACD_EMA_BUY, start_time=2024-02-09 13:45:42.941398, entry=7.185 *SL hit*
+2024-02-09 13:55:35,684 - #DOGE/USDT. MACD_EMA_BUY Trade closed at price=0.08185 and pnl=-0.366, start_time=2024-02-09 13:50:37.911923
+2024-02-09 14:12:13,693 - #DOGE/USDT. signal=MACD_EMA_BUY, start_time=2024-02-09 14:00:38.248902, entry=0.0819 *TP hit*
+2024-02-09 14:12:21,019 - #DOGE/USDT. signal=MACD_EMA_BUY, start_time=2024-02-09 13:50:37.911923, entry=0.08191 *TP hit*
+2024-02-09 14:56:06,597 - #ADA/USDT. signal=MACD_EMA_BUY, start_time=2024-02-09 14:46:10.262671, entry=0.5425 *TP hit*
+2024-02-09 15:06:48,199 - #SOL/USDT. signal=MACD_EMA_BUY, start_time=2024-02-09 15:00:48.350191, entry=105.92 *TP hit*
+2024-02-09 15:20:43,261 - #ETH/USDT. signal=RSI_EMA_BUY, start_time=2024-02-09 15:20:42.142617, entry=2506.29 *SL hit*
+2024-02-09 15:20:44,216 - #XRP/USDT. signal=RSI_EMA_BUY, start_time=2024-02-09 15:20:43.274570, entry=0.5216 *SL hit*
+2024-02-09 15:20:44,281 - #DOGE/USDT. signal=RSI_EMA_BUY, start_time=2024-02-09 15:20:43.306563, entry=0.08159 *SL hit*
+2024-02-09 15:20:47,340 - #BNB/USDT. signal=RSI_EMA_BUY, start_time=2024-02-09 15:20:43.339626, entry=323.7599 *SL hit*
+2024-02-09 15:25:39,196 - #DOGE/USDT. signal=RSI_EMA_BUY, start_time=2024-02-09 15:25:38.401067, entry=0.08108 *SL hit*
+2024-02-09 15:25:44,926 - #ADA/USDT. signal=RSI_EMA_BUY, start_time=2024-02-09 15:25:38.274068, entry=0.5363 *SL hit*
+2024-02-09 15:25:54,237 - #ETH/USDT. signal=RSI_EMA_BUY, start_time=2024-02-09 15:25:38.496076, entry=2488.79 *SL hit*
+2024-02-09 15:25:55,605 - #SOL/USDT. signal=RSI_EMA_BUY, start_time=2024-02-09 15:25:38.417071, entry=104.86 *SL hit*
+2024-02-09 15:25:55,829 - #BTC/USDT. signal=RSI_EMA_BUY, start_time=2024-02-09 15:25:38.102069, entry=46830.16 *SL hit*
+2024-02-09 15:26:03,924 - #XRP/USDT. signal=RSI_EMA_BUY, start_time=2024-02-09 15:25:38.136103, entry=0.5191 *SL hit*
+2024-02-09 15:27:40,803 - #BNB/USDT. signal=RSI_EMA_BUY, start_time=2024-02-09 15:25:38.606064, entry=321.9433 *TP hit*
+2024-02-09 15:32:38,359 - #XRP/USDT. signal=RSI_EMA_BUY, start_time=2024-02-09 15:31:00.824300, entry=0.5202 *TP hit*
+2024-02-09 15:56:24,583 - #SOL/USDT. signal=RSI_EMA_BUY, start_time=2024-02-09 15:55:25.743385, entry=104.69 *TP hit*
+2024-02-09 15:57:15,987 - #DOGE/USDT. signal=RSI_EMA_BUY, start_time=2024-02-09 15:55:26.120324, entry=0.08107 *TP hit*
+2024-02-09 15:57:21,242 - #DOGE/USDT. RSI_EMA_BUY Trade closed at price=0.08123 and pnl=0.555, start_time=2024-02-09 15:50:42.396772
+2024-02-09 15:57:24,240 - #DOGE/USDT. RSI_EMA_BUY has hit adjusted sl. start_time=2024-02-09 15:50:42.396772
+2024-02-10 19:50:26,553 - #ADA/USDT. MACD_EMA_BUY Trade closed at price=0.5392 and pnl=-0.371, start_time=2024-02-10 19:45:39.336523
+2024-02-10 19:50:42,778 - #DOGE/USDT. RSI_EMA_SELL Trade closed at price=0.08101 and pnl=0.370, start_time=2024-02-10 19:35:37.117521
+2024-02-10 19:50:45,395 - #DOGE/USDT. RSI_EMA_SELL has hit adjusted sl. start_time=2024-02-10 19:35:37.117521
+2024-02-10 20:00:48,048 - #DOT/USDT. RSI_EMA_SELL Trade closed at price=7.182 and pnl=-0.418, start_time=2024-02-10 19:50:38.168005
+2024-02-10 20:04:43,689 - #DOT/USDT. EMA_BUY Trade closed at price=7.178 and pnl=0.000, start_time=2024-02-10 20:04:42.872729
+2024-02-10 21:40:41,378 - #ETH/USDT. signal=RSI_EMA_SELL, start_time=2024-02-10 20:55:41.435689, entry=2495.61 *SL hit*
+2024-02-10 21:41:40,686 - #XRP/USDT. signal=RSI_EMA_SELL, start_time=2024-02-10 20:55:38.503199, entry=0.5227 *SL hit*
+2024-02-10 21:43:31,249 - #DOGE/USDT. signal=RSI_EMA_SELL, start_time=2024-02-10 20:35:45.186071, entry=0.08112 *SL hit*
+2024-02-10 21:46:30,817 - #BNB/USDT. signal=RSI_EMA_SELL, start_time=2024-02-10 20:45:59.621825, entry=322.1923 *SL hit*
+2024-02-10 22:02:26,695 - #DOGE/USDT. signal=RSI_EMA_SELL, start_time=2024-02-10 22:01:02.342234, entry=0.08123 *SL hit*
+2024-02-11 17:15:41,964 - #BNB/USDT. RSI_EMA_SELL Trade closed at price=321.2139 and pnl=-0.130, start_time=2024-02-11 17:12:49.789270
+2024-02-11 17:18:29,925 - #XRP/USDT. signal=RSI_EMA_BUY, start_time=2024-02-11 17:15:43.764317, entry=0.5276 *SL hit*
+2024-02-11 17:26:36,978 - #BTC/USDT. signal=RSI_EMA_BUY, start_time=2024-02-11 17:15:43.413339, entry=48025.39 *TP hit*
+2024-02-11 17:32:42,611 - #XRP/USDT. signal=RSI_EMA_BUY, start_time=2024-02-11 17:20:50.625598, entry=0.5274 *TP hit*
+2024-02-11 18:05:46,875 - #DOGE/USDT. RSI_EMA_SELL Trade closed at price=0.08203 and pnl=-0.244, start_time=2024-02-11 18:01:32.921601
+2024-02-11 18:15:48,853 - #XRP/USDT. MACD_EMA_BUY - Break-even price hit. start_time=2024-02-11 18:05:45.724486
+2024-02-11 18:26:02,732 - #BNB/USDT. RSI_EMA_SELL Trade closed at price=322.0994 and pnl=-0.206, start_time=2024-02-11 18:20:43.324124
+2024-02-11 18:26:04,974 - #BNB/USDT. RSI_EMA_SELL Trade closed at price=322.0994 and pnl=-0.113, start_time=2024-02-11 18:16:14.527586
+2024-02-11 18:26:04,976 - #ETH/USDT. RSI_EMA_SELL Trade closed at price=2516.92 and pnl=-0.310, start_time=2024-02-11 18:22:27.200185
+2024-02-11 18:29:07,400 - #DOT/USDT. signal=RSI_EMA_SELL, start_time=2024-02-11 18:26:03.961437, entry=7.21 *SL hit*
+2024-02-11 18:30:39,777 - #ADA/USDT. RSI_EMA_SELL Trade closed at price=0.5452 and pnl=-0.092, start_time=2024-02-11 18:26:03.791289
+2024-02-11 18:30:40,365 - #SOL/USDT. RSI_EMA_SELL Trade closed at price=109.04 and pnl=-0.138, start_time=2024-02-11 18:23:26.530292
+2024-02-11 18:45:42,023 - #DOGE/USDT. MACD_EMA_SELL - Break-even price hit. start_time=2024-02-11 18:41:26.707555
+2024-02-11 18:59:12,019 - #DOT/USDT. signal=MACD_EMA_SELL, start_time=2024-02-11 18:51:32.132170, entry=7.198 *SL hit*
+2024-02-11 19:15:51,934 - #ETH/USDT. MACD_EMA_SELL - Break-even price hit. start_time=2024-02-11 18:55:56.344363

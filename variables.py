@@ -3,7 +3,7 @@
 from exchange import bybit as exchange
 
 capital = 100
-risk = 2
+risk = 1
 reward = 1
 leverage = 5
 exchange = exchange

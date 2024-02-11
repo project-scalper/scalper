@@ -38,7 +38,7 @@ async def rsi(exchange:ccxt.Exchange, symbol:str, timeframe:str='5m', rsi_length
 
 async def main():
     from exchange import bybit as exchange
-    resp = await rsi(exchange, "WAVES/USDT", timeframe='5m', rsi_length=6)
+    resp = await rsi(exchange, "DOGE/USDT", timeframe='5m', rsi_length=6)
     print(resp)
     # await exchange.close()
     

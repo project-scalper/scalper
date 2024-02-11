@@ -1,6 +1,7 @@
 #!/usr/bin/python3
 
 from ta.analyser import analyser
+# from strategies.rsi_strategy import analyser
 from datetime import datetime
 from helper.adapter import adapter
 from exchange import bybit as exchange
@@ -9,8 +10,8 @@ import asyncio
 
 
 async def main():
-    symbols = ['BTC/USDT', 'ETH/USDT', 'ADA/USDT', 'SOL/USDT', 'WAVES/USDT', 'ETC/USDT',
-               'DOGE/USDT', 'BNB/USDT', 'DOT/USDT']
+    symbols = ['BTC/USDT', 'ETH/USDT', 'ADA/USDT', 'SOL/USDT',
+               'DOGE/USDT', 'BNB/USDT', 'DOT/USDT', 'XRP/USDT']
     # mkt = exchange.load_markets()
     while True:
         try:
@@ -24,17 +25,24 @@ async def main():
         finally:
             current_dt = datetime.now()
             if current_dt.minute >= 55:
-                hour = current_dt.hour + 1
+                if current_dt.hour == 23:
+                    hour = 0
+                    day = current_dt.day + 1
+                else:
+                    hour = current_dt.hour + 1
+                    day = current_dt.day
                 minute = 0
             elif current_dt.minute % 5 > 0:
                 minute = current_dt.minute + (5 - (current_dt.minute % 5))
                 hour = current_dt.hour
+                day = current_dt.day
             else:
                 minute = current_dt.minute + 5
                 hour = current_dt.hour
+                day = current_dt.day
 
             next_time = datetime(current_dt.year, current_dt.month,
-                                current_dt.day, hour, minute, 0)
+                                day, hour, minute, 0)
             while datetime.now() < next_time:
                 pass
 
