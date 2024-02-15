@@ -3,13 +3,12 @@
 from utils.ema_calculator import ema
 from utils.macd_calculator import macd
 from utils.rsi_calculator import rsi
-from exchange import bybit as exchange
 from strategies.checker import Checker
 import threading
-from typing import Dict, List
+# from typing import Dict, List
 from helper.adapter import adapter
 from helper import watchlist
-from variables import timeframe
+from variables import timeframe, exchange
 import asyncio
 import ccxt
 
