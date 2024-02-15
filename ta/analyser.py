@@ -25,8 +25,8 @@ async def run_thread(symbol, sig_type):
     nt.start()
 
 async def new_checker(symbol, sig_type):
-    trade = Checker(symbol, signal=sig_type)
-    await trade.execute()
+    trade = Checker()
+    await trade.execute(symbol, sig_type)
     trade.delete()
 
 

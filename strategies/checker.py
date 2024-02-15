@@ -10,21 +10,19 @@ from helper import watchlist
 
 
 class Checker():
-    risk = risk
-    reward = reward
     capital = capital
+    risk = 0.01 * capital
+    reward = 0.02 * capital
     leverage = leverage
     exchange = exchange
 
-    def __init__(self, symbol:str, signal:str, *args, **kwargs):
-        self.symbol = symbol
-        self.signal = signal
-        
+    def __init__(self, *args, **kwargs):
         for key, val in kwargs.items():
             if hasattr(self, key):
                 setattr(self, key, val)
 
     def calculate_entry_price(self):
+        """Calculates the limit entry price for the trade"""
         for i in range(3):
             try:
                 last_ohlcv = self.exchange.fetch_ohlcv(self.symbol, '5m', limit=3)
@@ -33,12 +31,15 @@ class Checker():
                 if i == 2:
                     adapter.error(f"Error obtaining ohlcv for {self.symbol}")
                     return
+                else:
+                    continue
         if last_ohlcv:
             self.entry_price = last_ohlcv[1][-2]
         else:
             adapter.warning("Could not obtain entry price for symbol")
 
     def calculate_tp_sl(self):
+        """Calculates takeProfit and stopLoss"""
         if "BUY" in self.signal:
             amount = (self.capital * self.leverage) / self.entry_price
             amount = float(self.exchange.amount_to_precision(self.symbol, amount))
@@ -91,6 +92,14 @@ class Checker():
         while True:
             try:
                 ticker = self.exchange.fetch_ticker(self.symbol)
+                if "BUY" in self.signal:
+                    pnl = (ticker['last'] * self.amount) - (self.entry_price * self.amount)
+                elif "SELL" in self.signal:
+                    pnl = (self.entry_price * self.amount) - (ticker['last'] * self.amount)
+
+                if pnl >= 0.5 * self.reward:
+                    self.adjust_sl()
+
                 if ("BUY" in self.signal and ticker['last'] >= self.tp) or ("SELL" in self.signal and ticker['last'] <= self.tp):
                     msg = f"#{self.symbol}. signal={self.signal}, start_time={self.start_time}, entry={self.entry_price} "
                     msg += "*TP hit*"
@@ -118,10 +127,6 @@ class Checker():
                 sig = watchlist.get(self.symbol)
                 if ("BUY" in self.signal and "BUY" not in sig) or ("SELL" in self.signal and "SELL" not in sig):
                     if self.alerted is False:
-                        if "BUY" in self.signal:
-                            pnl = (ticker['last'] * self.amount) - (self.entry_price * self.amount)
-                        if "SELL" in self.signal:
-                            pnl = (self.entry_price * self.amount) - (ticker['last'] * self.amount)
                         self.alerted = True
                         if pnl <= 0:
                             watchlist.trade_counter(self.signal, pnl)
@@ -143,6 +148,7 @@ class Checker():
                 time.sleep(2)
 
     def calculate_fee(self):
+        """Calculates maker fee and taker fee"""
         maker_fee = self.exchange.markets[self.symbol]['maker'] * self.amount * self.entry_price
         taker_fee = self.exchange.markets[self.symbol]['taker'] * self.amount
         self.fee = maker_fee + taker_fee
@@ -158,7 +164,10 @@ class Checker():
     def delete(self):
         del self
 
-    async def execute(self):
+    async def execute(self, symbol:str, signal:str):
+        self.symbol = symbol
+        self.signal = signal
+
         self.calculate_entry_price()
         self.calculate_tp_sl()
         self.enter_trade()

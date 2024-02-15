@@ -11,3 +11,36 @@
 2024-02-11 19:06:05,474 - WARNING - One or more indicators are missing for DOT/USDT
 2024-02-11 19:06:05,474 - WARNING - One or more indicators are missing for XRP/USDT
 2024-02-11 19:14:41,726 - ERROR - Seems the network connection is unstable.
+2024-02-15 10:46:02,214 - ERROR - RequestTimeout bybit GET https://api.bybit.com/v5/market/kline?symbol=DOGEUSDT&limit=500&interval=5&category=spot
+2024-02-15 10:46:19,242 - WARNING - One or more indicators are missing for DOGE/USDT
+2024-02-15 11:45:25,566 - ERROR - RequestTimeout - bybit GET https://api.bybit.com/v5/market/kline?symbol=ETHUSDT&limit=500&interval=5&category=spot
+2024-02-15 11:45:36,599 - ERROR - RequestTimeout - bybit GET https://api.bybit.com/v5/market/kline?symbol=ETHUSDT&limit=500&interval=5&category=spot
+2024-02-15 11:45:38,583 - ERROR - Seems the network connection is unstable.
+2024-02-15 11:46:11,573 - ERROR - Seems the network connection is unstable.
+2024-02-15 11:46:33,926 - WARNING - One or more indicators are missing for ETH/USDT
+2024-02-15 11:46:33,926 - WARNING - One or more indicators are missing for SOL/USDT
+2024-02-15 11:52:24,650 - ERROR - Seems the network connection is unstable.
+2024-02-15 11:52:46,018 - ERROR - Seems the network connection is unstable.
+2024-02-15 12:00:30,646 - ERROR - RequestTimeout bybit GET https://api.bybit.com/v5/market/kline?symbol=DOGEUSDT&limit=500&interval=5&category=spot
+2024-02-15 12:00:39,381 - WARNING - One or more indicators are missing for DOGE/USDT
+2024-02-15 12:15:01,401 - ERROR - NetworkError - bybit GET https://api.bybit.com/v5/market/kline?symbol=BTCUSDT&limit=500&interval=5&category=spot
+2024-02-15 12:16:00,857 - WARNING - One or more indicators are missing for BTC/USDT
+2024-02-15 12:21:09,812 - WARNING - One or more indicators are missing for ADA/USDT
+2024-02-15 12:25:53,358 - ERROR - RequestTimeout - bybit GET https://api.bybit.com/v5/market/kline?symbol=XRPUSDT&limit=500&interval=5&category=spot
+2024-02-15 12:26:13,259 - ERROR - RequestTimeout bybit GET https://api.bybit.com/v5/market/kline?symbol=XRPUSDT&limit=500&interval=5&category=spot
+2024-02-15 12:26:25,032 - WARNING - One or more indicators are missing for XRP/USDT
+2024-02-15 12:30:10,008 - ERROR - RequestTimeout - bybit GET https://api.bybit.com/v5/market/kline?symbol=BTCUSDT&limit=500&interval=5&category=spot
+2024-02-15 12:31:22,052 - WARNING - One or more indicators are missing for BTC/USDT
+2024-02-15 17:10:12,767 - ERROR - RequestTimeout - bybit GET https://api.bybit.com/v5/market/kline?symbol=BTCUSDT&limit=500&interval=5&category=linear
+2024-02-15 17:11:10,927 - WARNING - One or more indicators are missing for BTC/USDT:USDT
+2024-02-15 17:32:51,359 - ERROR - Seems the network connection is unstable.
+2024-02-15 19:15:56,772 - WARNING - One or more indicators are missing for XRP/USDT:USDT
+2024-02-15 19:30:19,993 - ERROR - RequestTimeout - bybit GET https://api.bybit.com/v5/market/tickers?symbol=BNBUSDT&category=linear
+2024-02-15 19:30:29,893 - ERROR - Seems the network connection is unstable.
+2024-02-15 19:31:07,213 - ERROR - Seems the network connection is unstable.
+2024-02-15 19:51:05,885 - ERROR - Seems the network connection is unstable.
+2024-02-15 19:51:12,955 - ERROR - RequestTimeout - bybit GET https://api.bybit.com/v5/market/kline?symbol=XRPUSDT&limit=500&interval=5&category=linear
+2024-02-15 19:51:22,290 - WARNING - One or more indicators are missing for XRP/USDT:USDT
+2024-02-15 20:15:53,697 - ERROR - RequestTimeout - bybit GET https://api.bybit.com/v5/market/kline?symbol=BNBUSDT&limit=500&interval=5&category=linear
+2024-02-15 20:16:27,768 - WARNING - One or more indicators are missing for BNB/USDT:USDT
+2024-02-15 20:21:22,568 - WARNING - One or more indicators are missing for SOL/USDT:USDT

@@ -24,8 +24,8 @@ async def run_thread(symbol, sig_type):
     nt.start()
 
 async def new_checker(symbol, sig_type):
-    trade = Checker(symbol, signal=sig_type)
-    await trade.execute()
+    trade = Checker()
+    await trade.execute(symbol, signal=sig_type)
 
 
 async def analyser(symbol:str, exchange:ccxt.Exchange)-> None:
@@ -76,19 +76,20 @@ async def analyser(symbol:str, exchange:ccxt.Exchange)-> None:
             if _rsi[0]['RSI_6'] > _rsi[1]['RSI_6']:
                 watchlist.reset(symbol)
             
-    if trend == 'UPTREND':
-        if _rsi[0]['RSI_6'] > 70:
-            sig_type = 'NEUTRAL'
-        elif _rsi[0]['RSI_6'] <= 30 or _rsi[1]['RSI_6'] <= 30:
-            if _rsi[1]['RSI_6'] > _rsi[0]['RSI_6']:
-                sig_type = "RSI_EMA_BUY"
+    if sig_type is None:
+        if trend == 'UPTREND':
+            if _rsi[0]['RSI_6'] > 85:
+                sig_type = 'NEUTRAL'
+            elif _rsi[0]['RSI_6'] <= 15 or _rsi[1]['RSI_6'] <= 15:
+                if _rsi[1]['RSI_6'] > _rsi[0]['RSI_6']:
+                    sig_type = "RSI_EMA_BUY"
 
-    if trend == 'DOWNTREND':
-        if _rsi[0]['RSI_6'] < 30:
-            sig_type = 'NEUTRAL'
-        elif _rsi[0]['RSI_6'] >= 70 or _rsi[1]['RSI_6'] >= 70:
-            if _rsi[1]['RSI_6'] > _rsi[0]['RSI_6']:
-                sig_type = "RSI_EMA_SELL"
+        elif trend == 'DOWNTREND':
+            if _rsi[0]['RSI_6'] < 15:
+                sig_type = 'NEUTRAL'
+            elif _rsi[0]['RSI_6'] >= 85 or _rsi[1]['RSI_6'] >= 85:
+                if _rsi[1]['RSI_6'] > _rsi[0]['RSI_6']:
+                    sig_type = "RSI_EMA_SELL"
 
     if sig_type is not None:
         watchlist.put(symbol, sig_type)
