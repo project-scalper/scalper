@@ -1,4 +1,3 @@
 pandas
 pandas_ta
 ccxt
-TA-Lib
