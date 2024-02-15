@@ -2,3 +2,6 @@ pandas
 pandas_ta
 ccxt
 gunicorn
+Flask==2.0.1
+Flask-Cors==3.0.10
+Flask-HTTPAuth==4.7.0
