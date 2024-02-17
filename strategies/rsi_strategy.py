@@ -3,7 +3,6 @@
 from utils.ema_calculator import ema
 from utils.macd_calculator import macd
 from utils.rsi_calculator import rsi
-from strategies.checker import Checker
 import threading
 # from typing import Dict, List
 from helper.adapter import adapter
@@ -11,6 +10,8 @@ from helper import watchlist
 from variables import timeframe, exchange
 import asyncio
 import ccxt
+
+active = False
 
 
 def start_checker(symbol, signal):
@@ -23,6 +24,7 @@ async def run_thread(symbol, sig_type):
     nt.start()
 
 async def new_checker(symbol, sig_type):
+    from strategies.checker import Checker
     trade = Checker()
     await trade.execute(symbol, signal=sig_type)
 
@@ -79,16 +81,18 @@ async def analyser(symbol:str, exchange:ccxt.Exchange)-> None:
         if trend == 'UPTREND':
             if _rsi[0]['RSI_6'] > 85:
                 sig_type = 'NEUTRAL'
-            elif _rsi[0]['RSI_6'] <= 15 or _rsi[1]['RSI_6'] <= 15:
-                if _rsi[1]['RSI_6'] > _rsi[0]['RSI_6']:
-                    sig_type = "RSI_EMA_BUY"
+            elif (_rsi[0]['RSI_6'] < 15 or _rsi[1]['RSI_6'] < 15) and _rsi[1]['RSI_6'] < _rsi[0]['RSI_6']:
+            # elif _rsi[0]['RSI_6'] <= 15 or _rsi[1]['RSI_6'] <= 15:
+                # if _rsi[1]['RSI_6'] > _rsi[0]['RSI_6']:
+                sig_type = "RSI_EMA_BUY"
 
         elif trend == 'DOWNTREND':
             if _rsi[0]['RSI_6'] < 15:
                 sig_type = 'NEUTRAL'
-            elif _rsi[0]['RSI_6'] >= 85 or _rsi[1]['RSI_6'] >= 85:
-                if _rsi[1]['RSI_6'] > _rsi[0]['RSI_6']:
-                    sig_type = "RSI_EMA_SELL"
+            elif (_rsi[0]['RSI_6'] >= 85 or _rsi[1]['RSI_6'] >= 85) and _rsi[1]['RSI_6'] > _rsi[0]['RSI_6']:
+            # elif _rsi[0]['RSI_6'] >= 85 or _rsi[1]['RSI_6'] >= 85:
+                # if _rsi[1]['RSI_6'] > _rsi[0]['RSI_6']:
+                sig_type = "RSI_EMA_SELL"
 
     if sig_type is not None:
         watchlist.put(symbol, sig_type)

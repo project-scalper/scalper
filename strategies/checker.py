@@ -4,6 +4,7 @@ from helper.adapter import adapter, trade_logger
 from datetime import datetime, timedelta
 from variables import risk, reward, exchange, capital, leverage
 # import asyncio
+from strategies.rsi_strategy import active
 import time
 import ccxt
 from helper import watchlist
@@ -15,6 +16,7 @@ class Checker():
     reward = 0.02 * capital
     leverage = leverage
     exchange = exchange
+    # active = False
 
     def __init__(self, *args, **kwargs):
         for key, val in kwargs.items():
@@ -62,21 +64,21 @@ class Checker():
     def enter_trade(self):
         if not self.entry_price:
             return
-        enter_flag = False
+        global active
+
         valid_till = datetime.now() + timedelta(minutes=5)
-        adapter.info(f"#{self.symbol}. New trade found. Waiting for right entry...")
-        while datetime.now() <= valid_till:
+        while datetime.now() <= valid_till and active is False:
             try:
                 ticker = self.exchange.fetch_ticker(self.symbol)
-                if "BUY" in self.signal:
-                    if ticker['last'] <= self.entry_price:
-                        enter_flag = True
-                elif "SELL" in self.signal:
-                    if ticker['last'] >= self.entry_price:
-                        enter_flag = True
-                if enter_flag is True:
-                    adapter.info(f"#{self.symbol}. {self.signal}. Now monitoring trade...")
+                if ("BUY" in self.signal and ticker['last'] <= self.entry_price) or ("SELL" in self.signal and ticker['last'] >= self.entry_price):
+                    self.entry_price = ticker['last']
+                    # self.symbol = symbol
+                    # self.signal = signal
+                    self.calculate_tp_sl()
+                    adapter.info(f"#{self.symbol}. {self.signal}. trade entered at {self.entry_price}, tp={self.tp}, sl={self.sl}")
+                    active = True
                     self.monitor()
+                    active = False
                     return
             except Exception as e:
                 adapter.error(f"{type(e).__name__} - {str(e)}")
@@ -100,6 +102,7 @@ class Checker():
                 if pnl >= 0.5 * self.reward:
                     self.adjust_sl()
 
+                # if pnl >= self.reward:
                 if ("BUY" in self.signal and ticker['last'] >= self.tp) or ("SELL" in self.signal and ticker['last'] <= self.tp):
                     msg = f"#{self.symbol}. signal={self.signal}, start_time={self.start_time}, entry={self.entry_price} "
                     msg += "*TP hit*"
@@ -107,6 +110,7 @@ class Checker():
                     watchlist.trade_counter(self.signal, "tp")
                     watchlist.reset(self.symbol)
                     return
+                # elif pnl <= self.risk:
                 elif ("BUY" in self.signal and ticker['last'] <= self.sl) or ("SELL" in self.signal and ticker['last'] >= self.sl):
                     msg = f"#{self.symbol}. signal={self.signal}, start_time={self.start_time}, entry={self.entry_price} "
                     msg += "*SL hit*"
@@ -165,9 +169,19 @@ class Checker():
         del self
 
     async def execute(self, symbol:str, signal:str):
+        global active
+        if active is True:
+            adapter.warning(f"{symbol}. Could not enter trade, executor is currently active")
+            return
         self.symbol = symbol
         self.signal = signal
 
         self.calculate_entry_price()
         self.calculate_tp_sl()
         self.enter_trade()
+
+    def reset(self):
+        global active
+        active = False
+        delattr(self, "symbol")
+        delattr(self, "signal")

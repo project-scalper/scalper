@@ -4,7 +4,7 @@
 from strategies.rsi_strategy import analyser
 from datetime import datetime
 from helper.adapter import adapter
-from exchange import bybit as exchange
+from variables import exchange
 
 import asyncio
 
