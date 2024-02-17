@@ -12,7 +12,7 @@ import asyncio
 async def main():
     symbols = ['BTC/USDT:USDT', 'ETH/USDT:USDT', 'ADA/USDT:USDT', 'SOL/USDT:USDT',
                'DOGE/USDT:USDT', 'BNB/USDT:USDT', 'DOT/USDT:USDT', 'XRP/USDT:USDT']
-    # mkt = exchange.load_markets()
+    mkt = exchange.load_markets()
     while True:
         try:
             tasks = [analyser(symbol, exchange) for symbol in symbols]

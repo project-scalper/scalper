@@ -13,4 +13,4 @@ bybit = ccxt.bybit({
     }
 })
 
-mkt = bybit.load_markets()
+# mkt = bybit.load_markets()
