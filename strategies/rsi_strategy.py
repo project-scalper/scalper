@@ -7,25 +7,25 @@ import threading
 # from typing import Dict, List
 from helper.adapter import adapter
 from helper import watchlist
-from variables import timeframe, exchange
+from variables import timeframe
 import asyncio
 import ccxt
 
 active = False
 
 
-def start_checker(symbol, signal):
+def start_checker(symbol, signal, exchange):
     loop = asyncio.new_event_loop()
     asyncio.set_event_loop(loop)
-    loop.run_until_complete(new_checker(symbol, signal))
+    loop.run_until_complete(new_checker(symbol, signal, exchange))
 
-async def run_thread(symbol, sig_type):
-    nt = threading.Thread(target=start_checker, args=(symbol, sig_type))
+async def run_thread(symbol, sig_type, exchange):
+    nt = threading.Thread(target=start_checker, args=(symbol, sig_type, exchange))
     nt.start()
 
-async def new_checker(symbol, sig_type):
+async def new_checker(symbol, sig_type, exchange):
     from strategies.checker import Checker
-    trade = Checker()
+    trade = Checker(exchange)
     await trade.execute(symbol, signal=sig_type)
 
 
@@ -97,17 +97,17 @@ async def analyser(symbol:str, exchange:ccxt.Exchange)-> None:
     if sig_type is not None:
         watchlist.put(symbol, sig_type)
         if sig_type != 'NEUTRAL':
-            await run_thread(symbol, sig_type)
+            await run_thread(symbol, sig_type, exchange)
         
 
-async def main():
-    print("Loading markets...")
-    exchange.load_markets()
-    symbols = ['BTC/USDT', 'ETH/USDT', 'ADA/USDT', 'SOL/USDT', 'WAVES/USDT', 'ETC/USDT', 'XRP/USDT']
-    tasks = [analyser(symbol, exchange) for symbol in symbols]
-    await asyncio.gather(*tasks)
-    all_sym = watchlist.get_all()
-    adapter.info(all_sym)
+# async def main():
+#     print("Loading markets...")
+#     exchange.load_markets()
+#     symbols = ['BTC/USDT', 'ETH/USDT', 'ADA/USDT', 'SOL/USDT', 'WAVES/USDT', 'ETC/USDT', 'XRP/USDT']
+#     tasks = [analyser(symbol, exchange) for symbol in symbols]
+#     await asyncio.gather(*tasks)
+#     all_sym = watchlist.get_all()
+#     adapter.info(all_sym)
     
-if __name__ == '__main__':
-    asyncio.run(main())
+# if __name__ == '__main__':
+#     asyncio.run(main())

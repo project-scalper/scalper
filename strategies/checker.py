@@ -2,7 +2,7 @@
 
 from helper.adapter import adapter, trade_logger
 from datetime import datetime, timedelta
-from variables import risk, reward, exchange, capital, leverage
+from variables import risk, reward, capital, leverage
 # import asyncio
 from strategies.rsi_strategy import active
 import time
@@ -15,10 +15,11 @@ class Checker():
     risk = 0.01 * capital
     reward = 0.02 * capital
     leverage = leverage
-    exchange = exchange
+    # exchange = exchange
     # active = False
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, exchange:ccxt.Exchange, *args, **kwargs):
+        self.exchange = exchange
         for key, val in kwargs.items():
             if hasattr(self, key):
                 setattr(self, key, val)
