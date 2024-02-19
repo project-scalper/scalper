@@ -30,12 +30,20 @@ async def new_checker(symbol, sig_type, exchange):
 
 
 async def analyser(symbol:str, exchange:ccxt.Exchange)-> None:
-    ema_50, ema_200, _macd, _rsi = await asyncio.gather(ema(exchange, symbol, 50, timeframe),
-                                                        ema(exchange, symbol, 200, timeframe),
-                                                        macd(exchange, symbol, timeframe),
-                                                        rsi(exchange, symbol, timeframe))
+    for n in range(3):
+        try:
+            ohlcv = exchange.fetch_ohlcv(symbol, timeframe, limit=210)
+            break
+        except Exception as e:
+            if n == 2:
+                adapter.warning(f"Unable to fetch ohlcv for {symbol}")
+                return None
+    ema_50, ema_100, _macd, _rsi = await asyncio.gather(ema(exchange, symbol, 50, timeframe, ohlcv=ohlcv),
+                                                        ema(exchange, symbol, 100, timeframe, ohlcv=ohlcv),
+                                                        macd(exchange, symbol, timeframe, ohlcv=ohlcv),
+                                                        rsi(exchange, symbol, timeframe, ohlcv=ohlcv))
     
-    if not ema_50 or not ema_200 or not _macd or not _rsi:
+    if not ema_50 or not ema_100 or not _macd or not _rsi:
         adapter.warning(f"One or more indicators are missing for {symbol}")
         return
     
@@ -43,12 +51,12 @@ async def analyser(symbol:str, exchange:ccxt.Exchange)-> None:
     sig_type = None
 
     # check EMA values
-    if ema_50[0]['EMA_50'] > ema_200[0]['EMA_200']:
-        # if ema_50[1]['EMA_50'] <= ema_200[1]['EMA_200']:
+    if ema_50[0]['EMA'] > ema_100[0]['EMA']:
+        # if ema_50[1]['EMA_50'] <= ema_100[1]['EMA_200']:
         #     sig_type = 'EMA_BUY'
         trend = "UPTREND"
-    elif ema_50[0]['EMA_50'] < ema_200[0]['EMA_200']:
-        # if ema_50[1]['EMA_50'] >= ema_200[1]['EMA_200']:
+    elif ema_50[0]['EMA'] < ema_100[0]['EMA']:
+        # if ema_50[1]['EMA_50'] >= ema_100[1]['EMA_200']:
         #     sig_type = 'EMA_SELL'
         trend = "DOWNTREND"
 

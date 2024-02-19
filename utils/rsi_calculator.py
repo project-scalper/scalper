@@ -7,7 +7,7 @@ from typing import List
 import ccxt
 import asyncio
 
-async def rsi(exchange:ccxt.Exchange, symbol:str, timeframe:str='5m', rsi_length:int=6):
+async def rsi(exchange:ccxt.Exchange, symbol:str, timeframe:str='5m', rsi_length:int=6, ohlcv:List=None):
     """Relative Strength Index of a  symbol
     Args:
         exchange: A ccxt exchange instance
@@ -17,7 +17,8 @@ async def rsi(exchange:ccxt.Exchange, symbol:str, timeframe:str='5m', rsi_length
     Return:
         A list of dicts containing three instances of open, high, low, close, volume, RSI, datetime"""
     try:
-        ohlcv = exchange.fetch_ohlcv(symbol, timeframe, limit=500)
+        if not ohlcv:
+            ohlcv = exchange.fetch_ohlcv(symbol, timeframe, limit=200)
         if len(ohlcv):
             df = pd.DataFrame(ohlcv, columns=['time', 'open', 'high', 'low', 'close', 'volume'])
             # df['time'] = pd.to_datetime(df['time'], unit='ms')

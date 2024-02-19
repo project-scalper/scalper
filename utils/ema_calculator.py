@@ -12,7 +12,7 @@ from typing import List
 import ccxt  # noqa: E402
 
 
-async def ema(exchange:ccxt.Exchange, symbol:str, length:int, timeframe:str='5m') -> List:
+async def ema(exchange:ccxt.Exchange, symbol:str, length:int, timeframe:str='5m', ohlcv:List=None) -> List:
     """Exponential Moving Average of a symbol.
     Args:
         exchange: A ccxt exchange instance
@@ -23,7 +23,8 @@ async def ema(exchange:ccxt.Exchange, symbol:str, length:int, timeframe:str='5m'
         A list of dicts containing three instances of open, high, low, close, volume, EMA, datetime
     """
     try:
-        ohlcv = exchange.fetch_ohlcv(symbol, timeframe, limit=500)
+        if not ohlcv:
+            ohlcv = exchange.fetch_ohlcv(symbol, timeframe, limit=200)
         if len(ohlcv):
             df = pd.DataFrame(ohlcv, columns=['timestamp', 'open', 'high', 'low', 'close', 'volume'])
             # df['datetime'] = pd.to_datetime(df['timestamp'], unit='ms')
@@ -33,6 +34,8 @@ async def ema(exchange:ccxt.Exchange, symbol:str, length:int, timeframe:str='5m'
             resp = df.to_dict(orient='records')
             for item in resp:
                 item['datetime'] = datetime.fromtimestamp(item['timestamp'] / 1000)
+                key = f"EMA_{length}"
+                item["EMA"] = item[key]
             resp.reverse()
             # ts = time.time() * 1000
             last_close = datetime.now() - timedelta(minutes=5)
@@ -47,8 +50,8 @@ async def ema(exchange:ccxt.Exchange, symbol:str, length:int, timeframe:str='5m'
 
 async def main():
     from exchange import bybit as exchange
-    symbol = 'SOL/USDT'
-    resp = await ema(exchange, symbol, 200)
+    symbol = 'SOL/USDT:USDT'
+    resp = await ema(exchange, symbol, 100)
     print(resp)
 
 if __name__ == '__main__':

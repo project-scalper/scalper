@@ -10,13 +10,14 @@ from datetime import datetime, timedelta
 
 import ccxt  # noqa: E402
 
-async def macd(exchange:ccxt.Exchange, symbol:str, timeframe:str='5m', limit:int=500):
+async def macd(exchange:ccxt.Exchange, symbol:str, timeframe:str='5m', limit:int=200, ohlcv:List=None):
    since = None
    fast = 12
    slow = 26
    signal = 9
    try:
-      ohlcv = exchange.fetch_ohlcv(symbol, timeframe, since, limit)
+      if not ohlcv:
+         ohlcv = exchange.fetch_ohlcv(symbol, timeframe, since, limit)
       if len(ohlcv):
          df = pd.DataFrame(ohlcv, columns=['time', 'open', 'high', 'low', 'close', 'volume'])
 
