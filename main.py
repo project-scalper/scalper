@@ -1,7 +1,8 @@
 #!/usr/bin/python3
 
 # from ta.analyser import analyser
-from strategies.rsi_strategy import analyser
+# from strategies.rsi_strategy import analyser
+from strategies.macd_2 import analyser
 from datetime import datetime
 from helper.adapter import adapter
 from exchange import bybit as exchange

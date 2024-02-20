@@ -85,8 +85,13 @@ class Checker():
                 adapter.error(f"{type(e).__name__} - {str(e)}")
             finally:
                 time.sleep(2)
-        adapter.info(f"#{self.symbol}. {self.signal} - Unable to enter trade in time.")
-        watchlist.reset(self.symbol)
+
+        if active is True:
+            adapter.info(f"#{self.symbol}. Could not enter trade. Executor already active")
+            watchlist.reset(self.symbol)
+        else:
+            adapter.info(f"#{self.symbol}. {self.signal} - Unable to enter trade in time.")
+            watchlist.reset(self.symbol)
 
     def monitor(self):
         self.start_time = datetime.now()
