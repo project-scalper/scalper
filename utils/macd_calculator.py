@@ -28,7 +28,7 @@ async def macd(exchange:ccxt.Exchange, symbol:str, timeframe:str='5m', limit:int
          # print(resp)
          for item in resp:
             item['datetime'] = datetime.fromtimestamp(item['time'] / 1000)
-            key = f"MACD_{fast}_{slow}_{signal}"
+            key = f"MACDh_{fast}_{slow}_{signal}"
             item['MACD'] = item[key]
          resp.reverse()
          # print(datetime.now())

@@ -46,14 +46,16 @@ async def analyser(symbol:str, exchange:ccxt.Exchange)-> None:
         adapter.warning(f"One or more indicators are missing for {symbol}")
         return
     
-    trend = ""
+    trend = 'NEUTRAL'
     sig_type = None
 
     # check EMA values
     if ema_50[0]['EMA'] > ema_100[0]['EMA']:
-        trend = "UPTREND"
+        if ohlcv[0][-2] > ema_50[0]['EMA']:
+            trend = "UPTREND"
     elif ema_50[0]['EMA'] < ema_100[0]['EMA']:
-        trend = "DOWNTREND"
+        if ohlcv[0][-2] < ema_50[0]['EMA']:
+            trend = "DOWNTREND"
 
     # Confirm with MACD value
     signal = watchlist.get(symbol)
