@@ -50,24 +50,24 @@ async def analyser(symbol:str, exchange:ccxt.Exchange)-> None:
     sig_type = None
 
     # check EMA values
-    if ema_50[0]['EMA'] > ema_100[0]['EMA']:
-        if ohlcv[0][-2] > ema_50[0]['EMA']:
-            trend = "UPTREND"
-    elif ema_50[0]['EMA'] < ema_100[0]['EMA']:
-        if ohlcv[0][-2] < ema_50[0]['EMA']:
-            trend = "DOWNTREND"
+    if (ema_50[0]['EMA'] > ema_100[0]['EMA']) and (ohlcv[-1][-2] > ema_50[0]['EMA']):
+        # if ohlcv[-1][-2] > ema_50[0]['EMA']:
+        trend = "UPTREND"
+    elif (ema_50[0]['EMA'] < ema_100[0]['EMA']) and (ohlcv[-1][-2] < ema_50[0]['EMA']):
+        # if ohlcv[-1][-2] < ema_50[0]['EMA']:
+        trend = "DOWNTREND"
 
     # Confirm with MACD value
     signal = watchlist.get(symbol)
     if "RSI" not in signal and 'MACD' not in signal:
         if trend == 'UPTREND' and _macd[0]['MACD'] < 0:
-            if _macd[1]['MACD'] < _macd[0]['MACD']:     # macd is +ve and starts decreasing
+            if _macd[1]['MACD'] < _macd[0]['MACD']:     # macd is -ve and starts increasing
                 if (_macd[2]['MACD'] < _macd[1]['MACD']) and (_macd[3]['MACD'] > _macd[2]['MACD']):
                     sig_type = 'MACD_EMA_2_BUY'
             else:
                 sig_type = 'NEUTRAL'
         elif trend == 'DOWNTREND' and _macd[0]['MACD'] > 0:
-            if _macd[1]['MACD'] > _macd[0]['MACD']:     # macd is -ve and starts increasing
+            if _macd[1]['MACD'] > _macd[0]['MACD']:     # macd is +ve and starts decreasing
                 if (_macd[2]['MACD'] > _macd[1]['MACD']) and (_macd[3]['MACD'] < _macd[2]['MACD']):
                     sig_type = 'MACD_EMA_2_SELL'
             else:
