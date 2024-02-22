@@ -19,7 +19,7 @@ class WatchList:
             with open(self.counterName) as f:
                 self.counter = json.load(f)
         except FileNotFoundError:
-            self.counter = {}
+            self.counter = {'total': {'tp': 0, 'sl': 0, 'close_neg': 0}}
         except Exception as e:
             self.counter = {}
 
@@ -75,6 +75,7 @@ class WatchList:
             self.counter[signal] = {'tp': 0, 'sl': 0, 'close_pos': 0, 'close_neg': 0}
         if result == 'tp':
             self.counter[signal][result] += reward
+            self.counter['total'][result]
         elif result == 'sl':
             self.counter[signal][result] += risk
         else:

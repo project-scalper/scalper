@@ -114,7 +114,7 @@ class Checker():
                     msg += "*TP hit*"
                     trade_logger.info(msg)
                     watchlist.trade_counter(self.signal, "tp")
-                    watchlist.trade_counter(self.symbol, 'tp')
+                    # watchlist.trade_counter(self.symbol, 'tp')
                     watchlist.reset(self.symbol)
                     return
                 # elif pnl <= self.risk:
@@ -123,7 +123,7 @@ class Checker():
                     msg += "*SL hit*"
                     trade_logger.info(msg)
                     watchlist.trade_counter(self.signal, 'sl')
-                    watchlist.trade_counter(self.symbol, 'sl')
+                    # watchlist.trade_counter(self.symbol, 'sl')
                     watchlist.reset(self.symbol)
                     return
                 
@@ -142,7 +142,7 @@ class Checker():
                         self.alerted = True
                         if pnl <= 0:
                             watchlist.trade_counter(self.signal, pnl)
-                            watchlist.trade_counter(self.symbol, pnl)
+                            # watchlist.trade_counter(self.symbol, pnl)
                             watchlist.reset(self.symbol)
                             msg = f"#{self.symbol}. {self.signal} Trade closed at price={ticker['last']} and pnl={pnl:.3f}, start_time={self.start_time}"
                             trade_logger.info(msg)
