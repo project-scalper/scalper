@@ -50,6 +50,10 @@ class Checker():
             tp = (cost + self.reward) / amount
             sl = (cost - self.risk) / amount
 
+            amount_2 = (self.capital * 5) / self.entry_price
+            amount_2 = float(self.exchange.amount_to_precision(self.symbol, amount_2))
+            sl_2 = (cost - self.risk) / amount_2
+
         if "SELL" in self.signal:
             amount = (self.capital * self.leverage) / self.entry_price
             amount = float(self.exchange.amount_to_precision(self.symbol, amount))
@@ -57,8 +61,13 @@ class Checker():
             tp = (cost - self.reward) / amount
             sl = (cost + self.risk) / amount
 
+            amount_2 = (self.capital * 5) / self.entry_price
+            amount_2 = float(self.exchange.amount_to_precision(self.symbol, amount_2))
+            sl_2 = (cost + self.risk) / amount_2
+
         self.tp = float(self.exchange.price_to_precision(self.symbol, tp))
         self.sl = float(self.exchange.price_to_precision(self.symbol, sl))
+        self.sl_2
         self.amount = amount
         adapter.info(f"#{self.symbol}. {self.signal} - Entry={self.entry_price}, tp={self.tp}, sl={self.sl}")
 
@@ -73,8 +82,6 @@ class Checker():
                 ticker = self.exchange.fetch_ticker(self.symbol)
                 if ("BUY" in self.signal and ticker['last'] <= self.entry_price) or ("SELL" in self.signal and ticker['last'] >= self.entry_price):
                     self.entry_price = ticker['last']
-                    # self.symbol = symbol
-                    # self.signal = signal
                     self.calculate_tp_sl()
                     adapter.info(f"#{self.symbol}. {self.signal}. trade entered at {self.entry_price}, tp={self.tp}, sl={self.sl}")
                     active = True
@@ -119,11 +126,10 @@ class Checker():
                     return
                 # elif pnl <= self.risk:
                 elif ("BUY" in self.signal and ticker['last'] <= self.sl) or ("SELL" in self.signal and ticker['last'] >= self.sl):
-                    msg = f"#{self.symbol}. signal={self.signal}, start_time={self.start_time}, entry={self.entry_price} "
-                    msg += "*SL hit*"
+                    msg = f"#{self.symbol}. {self.signal}, start_time={self.start_time}, entry={self.entry_price}, tp={self.tp}, sl={self.sl}, "
+                    msg += f"sl_2={self.sl_2}. *SL hit*"
                     trade_logger.info(msg)
                     watchlist.trade_counter(self.signal, 'sl')
-                    # watchlist.trade_counter(self.symbol, 'sl')
                     watchlist.reset(self.symbol)
                     return
                 
