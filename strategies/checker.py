@@ -52,6 +52,7 @@ class Checker():
 
             amount_2 = (self.capital * 5) / self.entry_price
             amount_2 = float(self.exchange.amount_to_precision(self.symbol, amount_2))
+            cost = amount_2 * self.entry_price
             sl_2 = (cost - self.risk) / amount_2
 
         if "SELL" in self.signal:
@@ -63,6 +64,7 @@ class Checker():
 
             amount_2 = (self.capital * 5) / self.entry_price
             amount_2 = float(self.exchange.amount_to_precision(self.symbol, amount_2))
+            cost = amount_2 * self.entry_price
             sl_2 = (cost + self.risk) / amount_2
 
         self.tp = float(self.exchange.price_to_precision(self.symbol, tp))
