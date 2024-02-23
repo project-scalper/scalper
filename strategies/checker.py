@@ -67,7 +67,7 @@ class Checker():
 
         self.tp = float(self.exchange.price_to_precision(self.symbol, tp))
         self.sl = float(self.exchange.price_to_precision(self.symbol, sl))
-        self.sl_2
+        self.sl_2 = sl_2
         self.amount = amount
         adapter.info(f"#{self.symbol}. {self.signal} - Entry={self.entry_price}, tp={self.tp}, sl={self.sl}")
 
