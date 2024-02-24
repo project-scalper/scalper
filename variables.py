@@ -7,5 +7,4 @@ leverage = 10
 timeframe = '5m'
 
 from exchange import bybit as exchange
-print("loading markets...")
 exchange = exchange

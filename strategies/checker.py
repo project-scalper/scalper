@@ -12,11 +12,10 @@ from helper import watchlist
 
 class Checker():
     capital = capital
-    risk = 0.01 * capital
-    reward = 0.02 * capital
+    risk = risk
+    reward = reward
     leverage = leverage
-    # exchange = exchange
-    # active = False
+    min_profit = 0.005 * capital
 
     def __init__(self, exchange:ccxt.Exchange, *args, **kwargs):
         self.exchange = exchange
@@ -28,18 +27,23 @@ class Checker():
         """Calculates the limit entry price for the trade"""
         for i in range(3):
             try:
-                last_ohlcv = self.exchange.fetch_ohlcv(self.symbol, '5m', limit=3)
+                ohlcv = self.exchange.fetch_ohlcv(self.symbol, '5m', limit=3)
                 break
-            except:
+            except Exception as e:
                 if i == 2:
-                    adapter.error(f"Error obtaining ohlcv for {self.symbol}")
+                    adapter.error(f"Error obtaining ohlcv for {self.symbol}: {e}")
                     return
                 else:
                     continue
-        if last_ohlcv:
-            self.entry_price = last_ohlcv[1][-2]
+        last_ohlcv = ohlcv[1]
+        opn = last_ohlcv[0]
+        cls = last_ohlcv[-2]
+
+        if "BUY" in self.signal:
+            self.entry_price = cls - (0.25 * (cls - opn))
         else:
-            adapter.warning("Could not obtain entry price for symbol")
+            self.entry_price = cls + (0.25 * (cls - opn))
+            # self.entry_price = last_ohlcv[1][-2]
 
     def calculate_tp_sl(self):
         """Calculates takeProfit and stopLoss"""
@@ -69,7 +73,7 @@ class Checker():
 
         self.tp = float(self.exchange.price_to_precision(self.symbol, tp))
         self.sl = float(self.exchange.price_to_precision(self.symbol, sl))
-        self.sl_2 = sl_2
+        self.sl_2 = float(self.exchange.price_to_precision(self.symbol, sl_2))
         self.amount = amount
         adapter.info(f"#{self.symbol}. {self.signal} - Entry={self.entry_price}, tp={self.tp}, sl={self.sl}")
 
@@ -177,10 +181,11 @@ class Checker():
     def adjust_sl(self):
         cost = self.amount * self.entry_price
         self.calculate_fee()
+        profit = self.min_profit + self.fee
         if "BUY" in self.signal:
-            self.close_position = (cost + self.fee) / self.amount
+            self.close_position = (cost + profit) / self.amount
         elif "SELL" in self.signal:
-            self.close_position = (cost - self.fee) / self.amount
+            self.close_position = (cost - profit) / self.amount
 
     def delete(self):
         del self

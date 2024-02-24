@@ -6,6 +6,7 @@ from strategies.macd_2 import analyser
 from datetime import datetime
 from helper.adapter import adapter
 from exchange import bybit as exchange
+from datetime import datetime, timedelta
 
 import asyncio
 
@@ -14,8 +15,9 @@ async def main():
     symbols = ['BTC/USDT:USDT', 'ETH/USDT:USDT', 'ADA/USDT:USDT', 'SOL/USDT:USDT',
                'DOGE/USDT:USDT', 'BNB/USDT:USDT', 'DOT/USDT:USDT', 'XRP/USDT:USDT',
                'MATIC/USDT:USDT', 'OGN/USDT:USDT']
+    run_to = datetime.now() + timedelta(hours=24)
     mkt = exchange.load_markets()
-    while True:
+    while datetime.now() <= run_to:
         try:
             tasks = [analyser(symbol, exchange) for symbol in symbols]
             adapter.info("Starting analysis...")

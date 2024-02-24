@@ -5,6 +5,7 @@ from flask_cors import CORS
 from main import main
 import asyncio
 import threading
+from exchange import bybit as exchange
 from helper import watchlist
 from datetime import datetime
 
@@ -23,6 +24,7 @@ def start_scalper(start_time):
 
 @app.route('/start_checker')
 def start_checker():
+    mkt = exchange.load_markets()
     current_dt = datetime.now()
     if current_dt.minute >= 55:
         hour = current_dt.hour + 1

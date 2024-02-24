@@ -73,18 +73,12 @@ async def analyser(symbol:str, exchange:ccxt.Exchange)-> None:
             else:
                 sig_type = 'NEUTRAL'
 
-        # if _macd[0]['MACDh_12_26_9'] > 0:
-        #     if _macd[1]['MACDh_12_26_9'] <= 0:  # macd just inverted upward
-        #         if trend == 'UPTREND':
-        #             sig_type = 'MACD_EMA_BUY'
-        #         elif trend == 'DOWNTREND':
-        #             sig_type = 'NEUTRAL'
-        # if _macd[0]['MACDh_12_26_9'] < 0:
-        #     if _macd[1]['MACDh_12_26_9'] >= 0:  # macd just inverted downwards
-        #         if trend == 'UPTREND':
-        #             sig_type = 'NEUTRAL'
-        #         elif trend == 'DOWNTREND':
-        #             sig_type = 'MACD_EMA_SELL'
+    if "MACD" in signal and "BUY" in signal:
+        if _macd[1]['MACD'] > _macd[0]['MACD']:
+            sig_type = 'NEUTRAL'
+    elif "MACD"in signal and "SELL" in signal:
+        if _macd[1]['MACD'] < _macd[0]['MACD']:
+            sig_type = 'NEUTRAL'
                 
     # confirm with rsi
     if "RSI" in signal:
@@ -97,15 +91,15 @@ async def analyser(symbol:str, exchange:ccxt.Exchange)-> None:
             
     if sig_type is None:
         if trend == 'UPTREND':
-            if _rsi[0]['RSI_6'] > 85:
+            if _rsi[0]['RSI_6'] > 80:
                 sig_type = 'NEUTRAL'
-            elif (_rsi[0]['RSI_6'] < 15 or _rsi[1]['RSI_6'] < 15) and _rsi[1]['RSI_6'] < _rsi[0]['RSI_6']:
+            elif (_rsi[0]['RSI_6'] < 20 or _rsi[1]['RSI_6'] < 20) and _rsi[1]['RSI_6'] < _rsi[0]['RSI_6']:
                 sig_type = "RSI_EMA_BUY"
 
         elif trend == 'DOWNTREND':
-            if _rsi[0]['RSI_6'] < 15:
+            if _rsi[0]['RSI_6'] < 20:
                 sig_type = 'NEUTRAL'
-            elif (_rsi[0]['RSI_6'] >= 85 or _rsi[1]['RSI_6'] >= 85) and _rsi[1]['RSI_6'] > _rsi[0]['RSI_6']:
+            elif (_rsi[0]['RSI_6'] >= 80 or _rsi[1]['RSI_6'] >= 80) and _rsi[1]['RSI_6'] > _rsi[0]['RSI_6']:
                 sig_type = "RSI_EMA_SELL"
 
     if sig_type is not None:
