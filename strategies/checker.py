@@ -35,7 +35,7 @@ class Checker():
                     return
                 else:
                     continue
-        last_ohlcv = ohlcv[-1]
+        last_ohlcv = ohlcv[-2]
         opn = last_ohlcv[1]
         cls = last_ohlcv[-2]
 
