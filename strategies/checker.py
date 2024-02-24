@@ -35,8 +35,8 @@ class Checker():
                     return
                 else:
                     continue
-        last_ohlcv = ohlcv[1]
-        opn = last_ohlcv[0]
+        last_ohlcv = ohlcv[-1]
+        opn = last_ohlcv[1]
         cls = last_ohlcv[-2]
 
         if "BUY" in self.signal:
