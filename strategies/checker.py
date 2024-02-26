@@ -11,11 +11,11 @@ from helper import watchlist
 
 
 class Checker():
-    capital = capital
-    risk = risk
-    reward = reward
-    leverage = leverage
-    min_profit = 0.005 * capital
+    capital:int = capital
+    risk:float = risk
+    reward: float = reward
+    leverage:int = leverage
+    min_profit = 0.000 * capital
 
     def __init__(self, exchange:ccxt.Exchange, *args, **kwargs):
         self.exchange = exchange
@@ -46,18 +46,13 @@ class Checker():
             # self.entry_price = last_ohlcv[1][-2]
 
     def calculate_tp_sl(self):
-        """Calculates takeProfit and stopLoss"""
+        """Calculates takeProfit and stopLoss prices"""
         if "BUY" in self.signal:
             amount = (self.capital * self.leverage) / self.entry_price
             amount = float(self.exchange.amount_to_precision(self.symbol, amount))
             cost = amount * self.entry_price
             tp = (cost + self.reward) / amount
             sl = (cost - self.risk) / amount
-
-            amount_2 = (self.capital * 5) / self.entry_price
-            amount_2 = float(self.exchange.amount_to_precision(self.symbol, amount_2))
-            cost = amount_2 * self.entry_price
-            sl_2 = (cost - self.risk) / amount_2
 
         if "SELL" in self.signal:
             amount = (self.capital * self.leverage) / self.entry_price
@@ -66,14 +61,8 @@ class Checker():
             tp = (cost - self.reward) / amount
             sl = (cost + self.risk) / amount
 
-            amount_2 = (self.capital * 5) / self.entry_price
-            amount_2 = float(self.exchange.amount_to_precision(self.symbol, amount_2))
-            cost = amount_2 * self.entry_price
-            sl_2 = (cost + self.risk) / amount_2
-
         self.tp = float(self.exchange.price_to_precision(self.symbol, tp))
         self.sl = float(self.exchange.price_to_precision(self.symbol, sl))
-        self.sl_2 = float(self.exchange.price_to_precision(self.symbol, sl_2))
         self.amount = amount
         adapter.info(f"#{self.symbol}. {self.signal} - Entry={self.entry_price}, tp={self.tp}, sl={self.sl}")
 
@@ -88,6 +77,9 @@ class Checker():
                 ticker = self.exchange.fetch_ticker(self.symbol)
                 if ("BUY" in self.signal and ticker['last'] <= self.entry_price) or ("SELL" in self.signal and ticker['last'] >= self.entry_price):
                     self.entry_price = ticker['last']
+                    if active is True:
+                        break
+
                     self.calculate_tp_sl()
                     adapter.info(f"#{self.symbol}. {self.signal}. trade entered at {self.entry_price}, tp={self.tp}, sl={self.sl}")
                     active = True
@@ -119,21 +111,21 @@ class Checker():
                     pnl = (self.entry_price * self.amount) - (ticker['last'] * self.amount)
 
                 if pnl >= 0.5 * self.reward:
+                    self.states = 1
                     self.adjust_sl()
 
                 # if pnl >= self.reward:
                 if ("BUY" in self.signal and ticker['last'] >= self.tp) or ("SELL" in self.signal and ticker['last'] <= self.tp):
-                    msg = f"#{self.symbol}. signal={self.signal}, start_time={self.start_time}, entry={self.entry_price} "
+                    msg = f"#{self.symbol}. {self.signal} - start_time={self.start_time}, entry={self.entry_price} "
                     msg += "*TP hit*"
                     trade_logger.info(msg)
                     watchlist.trade_counter(self.signal, "tp")
-                    # watchlist.trade_counter(self.symbol, 'tp')
                     watchlist.reset(self.symbol)
                     return
                 # elif pnl <= self.risk:
                 elif ("BUY" in self.signal and ticker['last'] <= self.sl) or ("SELL" in self.signal and ticker['last'] >= self.sl):
-                    msg = f"#{self.symbol}. {self.signal}, start_time={self.start_time}, entry={self.entry_price}, tp={self.tp}, sl={self.sl}, "
-                    msg += f"sl_2={self.sl_2}. *SL hit*"
+                    msg = f"#{self.symbol}. {self.signal} - start_time={self.start_time}, entry={self.entry_price}, tp={self.tp}, sl={self.sl}, "
+                    msg += "*SL hit*"
                     trade_logger.info(msg)
                     watchlist.trade_counter(self.signal, 'sl')
                     watchlist.reset(self.symbol)
@@ -143,7 +135,8 @@ class Checker():
                     if ("BUY" in self.signal and ticker['last'] <= self.close_position) or ("SELL" in self.signal and ticker['last'] >= self.close_position):
                         msg = f"#{self.symbol}. {self.signal} - Break-even price hit. start_time={self.start_time}"
                         trade_logger.info(msg)
-                        # watchlist.trade_counter(self.signal, 0)
+                        if hasattr(self, 'states'):
+                            watchlist.trade_counter(self.signal, self.states)
                         watchlist.reset(self.symbol)
                         return
                 
@@ -154,16 +147,14 @@ class Checker():
                         self.alerted = True
                         if pnl <= 0:
                             watchlist.trade_counter(self.signal, pnl)
-                            # watchlist.trade_counter(self.symbol, pnl)
                             watchlist.reset(self.symbol)
-                            msg = f"#{self.symbol}. {self.signal} Trade closed at price={ticker['last']} and pnl={pnl:.3f}, start_time={self.start_time}"
+                            msg = f"#{self.symbol}. {self.signal} - Trade closed at price={ticker['last']} and pnl={pnl:.3f}, start_time={self.start_time}"
                             trade_logger.info(msg)
                             return
                         else:
                             adapter.info(f"#{self.symbol}. {self.signal} - start_time={self.start_time}. Adjusting stop_loss...")
+                            self.states = 0
                             self.adjust_sl()
-                        # watchlist.reset(self.symbol)
-                        # return
 
             except ccxt.NetworkError as e:
                 adapter.error("Seems the network connection is unstable.")
@@ -180,6 +171,7 @@ class Checker():
 
     def adjust_sl(self):
         cost = self.amount * self.entry_price
+        
         self.calculate_fee()
         profit = self.min_profit + self.fee
         if "BUY" in self.signal:

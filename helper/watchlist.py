@@ -73,11 +73,11 @@ class WatchList:
     def trade_counter(self, signal:str, result):
         if signal not in self.counter:
             self.counter[signal] = {'tp': 0, 'sl': 0, 'close_pos': 0, 'close_neg': 0}
-        if result == 'tp':
+        if result == 'tp' or result == 'sl':
             self.counter[signal][result] += reward
-            self.counter['total'][result]
-        elif result == 'sl':
-            self.counter[signal][result] += risk
+            self.counter['total'][result] += reward
+        # elif result == 'sl':
+        #     self.counter[signal][result] += risk
         else:
             if result > 0:
                 self.counter[signal]['close_pos'] += result

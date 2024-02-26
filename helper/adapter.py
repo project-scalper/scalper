@@ -3,6 +3,8 @@ import logging
 adapter = logging.Logger(__name__)
 trade_logger = logging.Logger(__name__)
 
+time_fmt = "%b %Y, %I:%M:%S %p"
+
 # Creating handlers
 c_handler = logging.StreamHandler()  # console handler
 f_handler = logging.FileHandler('./file.log', mode="a")  # file handle
@@ -12,7 +14,7 @@ f_handler.setLevel(logging.WARN)
 t_handler.setLevel(logging.INFO)
 
 # Creating formats
-c_format = logging.Formatter('%(asctime)s - %(message)s')
+c_format = logging.Formatter('%(asctime)s - %(message)s', datefmt=time_fmt)
 f_format = logging.Formatter(
     '%(asctime)s - %(levelname)s - %(message)s')
 t_format = logging.Formatter('%(asctime)s - %(message)s')
