@@ -73,8 +73,12 @@ class Executor(Checker):
         else:
             side = 'sell'
 
-        order = self.exchange.create_order(self.symbol, type="limit", side=side,
-                            amount=self.amount, price=self.entry_price, params=params)
+        try:
+            order = self.exchange.create_order(self.symbol, type="limit", side=side,
+                                amount=self.amount, price=self.entry_price, params=params)
+        except Exception as e:
+            adapter.error(f"{type(e).__name__} - {str(e)}")
+            return
         
         self.order = order
 
@@ -90,6 +94,8 @@ class Executor(Checker):
                         elif order['takeProfitPrice']:
                             tp_order = order
                 if sl_order and tp_order:
+                    self.sl_order = sl_order
+                    self.tp_order = tp_order
                     break
             except Exception as e:
                 adapter.warning(f"#{self.symbol}. Unable to fetch trade - {str(e)}")
@@ -120,16 +126,17 @@ class Executor(Checker):
             finally:
                 time.sleep(2)
 
-    def adjust_sl(self, order):
+    def adjust_sl(self, profit:float=0):
         cost = self.amount * self.entry_price
         self.calculate_fee()
         if "BUY" in self.signal:
-            new_price = (cost + self.fee) / self.amount
+            new_price = (cost + self.fee + profit) / self.amount
         elif "SELL" in self.signal:
-            new_price = (cost - self.fee) / self.amount
+            new_price = (cost - self.fee - profit) / self.amount
         try:
-            self.exchange.edit_order(order['id'], self.symbol, 'limit', order['side'], order['amount'],
-                                     new_price)
+            self.exchange.edit_order(self.sl_order['id'], self.symbol, 'limit',
+                                        self.sl_order['side'], self.sl_order['amount'],
+                                        new_price)
         except Exception as e:
             adapter.error(f"{type(e).__name__} - {str(e)}")
 

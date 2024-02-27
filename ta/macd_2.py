@@ -3,6 +3,7 @@
 from utils.ema_calculator import ema
 from utils.macd_calculator import macd
 from utils.rsi_calculator import rsi
+from utils.candle_patterns import main
 import threading
 from helper.adapter import adapter
 from helper import watchlist
@@ -104,6 +105,7 @@ async def analyser(symbol:str, exchange:ccxt.Exchange)-> None:
 
     if sig_type is not None:
         watchlist.put(symbol, sig_type)
-        if sig_type != 'NEUTRAL':
+        candle_analysis = main(ohlcv=ohlcv, signal=sig_type)
+        if sig_type != 'NEUTRAL' and candle_analysis:
             await run_thread(symbol, sig_type, exchange)
         

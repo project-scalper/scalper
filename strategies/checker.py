@@ -3,7 +3,6 @@
 from helper.adapter import adapter, trade_logger
 from datetime import datetime, timedelta
 from variables import risk, reward, capital, leverage
-# import asyncio
 from strategies.rsi_strategy import active
 import time
 import ccxt
@@ -111,7 +110,7 @@ class Checker():
                     pnl = (self.entry_price * self.amount) - (ticker['last'] * self.amount)
 
                 if pnl >= 0.5 * self.reward:
-                    self.states = 1
+                    self.breakeven_profit = 0.5 * self.reward
                     self.adjust_sl()
 
                 # if pnl >= self.reward:
@@ -133,10 +132,11 @@ class Checker():
                 
                 if hasattr(self, "close_position"):
                     if ("BUY" in self.signal and ticker['last'] <= self.close_position) or ("SELL" in self.signal and ticker['last'] >= self.close_position):
-                        msg = f"#{self.symbol}. {self.signal} - Break-even price hit. start_time={self.start_time}"
+                        msg = f"#{self.symbol}. {self.signal} - start_time={self.start_time}. Break-even price hit. "
+                        if hasattr(self, 'breakeven_profit'):
+                            watchlist.trade_counter(self.signal, self.breakeven_profit)
+                            msg += f"profit={self.breakeven_profit}"
                         trade_logger.info(msg)
-                        if hasattr(self, 'states'):
-                            watchlist.trade_counter(self.signal, self.states)
                         watchlist.reset(self.symbol)
                         return
                 
@@ -153,7 +153,7 @@ class Checker():
                             return
                         else:
                             adapter.info(f"#{self.symbol}. {self.signal} - start_time={self.start_time}. Adjusting stop_loss...")
-                            self.states = 0
+                            self.breakeven_profit = 0
                             self.adjust_sl()
 
             except ccxt.NetworkError as e:
