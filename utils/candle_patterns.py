@@ -58,7 +58,7 @@ def inverted_hammer(ohlcv:List) -> bool:
         close:float = ohlcv[idx][4]
         
         # check if prev candle is green and next candle is red
-        if not (ohlcv[idx - 1][4] > ohlcv[idx - 1][1]) and not (ohlcv[idx + 1][4] < ohlcv[idx + 1][1]):
+        if not ((ohlcv[idx - 1][4] > ohlcv[idx - 1][1]) and (ohlcv[idx + 1][4] < ohlcv[idx + 1][1])):
             continue
 
         # check the upper and lower wick
