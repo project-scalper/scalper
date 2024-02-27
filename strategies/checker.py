@@ -36,12 +36,14 @@ class Checker():
                     continue
         last_ohlcv = ohlcv[-2]
         opn = last_ohlcv[1]
-        cls = last_ohlcv[-2]
+        cls = last_ohlcv[4]
+        body_length = max([opn, cls]) - min([opn, cls])
 
+        # Entry should be quarter way of the previous candle body
         if "BUY" in self.signal:
-            self.entry_price = cls - (0.25 * (cls - opn))
+            self.enter_price = cls - (0.25 * body_length)
         else:
-            self.entry_price = cls + (0.25 * (cls - opn))
+            self.entry_price = cls + (0.25 * body_length)
             # self.entry_price = last_ohlcv[1][-2]
 
     def calculate_tp_sl(self):
