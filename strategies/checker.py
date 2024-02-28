@@ -41,7 +41,7 @@ class Checker():
 
         # Entry should be quarter way of the previous candle body
         if "BUY" in self.signal:
-            self.enter_price = cls - (0.25 * body_length)
+            self.entry_price = cls - (0.25 * body_length)
         else:
             self.entry_price = cls + (0.25 * body_length)
             # self.entry_price = last_ohlcv[1][-2]
