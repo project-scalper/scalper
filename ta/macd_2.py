@@ -106,6 +106,6 @@ async def analyser(symbol:str, exchange:ccxt.Exchange)-> None:
     if sig_type is not None:
         watchlist.put(symbol, sig_type)
         candle_analysis = main(ohlcv=ohlcv, signal=sig_type)
-        if sig_type != 'NEUTRAL' and candle_analysis:
+        if sig_type != 'NEUTRAL' and candle_analysis is True:
             await run_thread(symbol, sig_type, exchange)
         

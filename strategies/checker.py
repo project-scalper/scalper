@@ -39,12 +39,15 @@ class Checker():
         cls = last_ohlcv[4]
         body_length = max([opn, cls]) - min([opn, cls])
 
-        # Entry should be quarter way of the previous candle body
+        # Entry should be one-third way of the previous candle body
         if "BUY" in self.signal:
-            self.enter_price = cls - (0.25 * body_length)
+            self.entry_price = cls - (0.33 * body_length)
         else:
-            self.entry_price = cls + (0.25 * body_length)
+            self.entry_price = cls + (0.33 * body_length)
             # self.entry_price = last_ohlcv[1][-2]
+
+        self.entry_price = float(self.exchange.price_to_precision(self.symbol, self.entry_price))
+
 
     def calculate_tp_sl(self):
         """Calculates takeProfit and stopLoss prices"""
