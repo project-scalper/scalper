@@ -9,6 +9,7 @@ import time
 
 class Executor(Checker):
     active = False
+    max_daily_loss = 5
 
     def __init__(self):
         super().__init__()
@@ -25,16 +26,30 @@ class Executor(Checker):
             return
         enter_flag = False
         valid_till = datetime.now() + timedelta(minutes=5)
-        adapter.info(f"#{self.symbol}. New trade found. Waiting for right entry...")
-        self.place_order()
+        adapter.info(f"#{self.symbol}. New trade found. entry={self.entry_price}, tp={self.tp}, sl={self.sl}")
+        # self.place_order()
         while datetime.now() <= valid_till:
             try:
-                order = self.exchange.fetch_open_orders(self.order['id'], self.symbol)
-                if order['status'] == 'closed':
-                    self.active = True
-                    adapter.info(f"#{self.symbol}. {self.signal} - trade entered")
-                    enter_flag = True
+                ticker = self.exchange.fetch_ticker(self.symbol)
+                if ("BUY" in self.signal and ticker['last'] <= self.entry_price) or ("SELL" in self.signal and ticker['last'] >= self.entry_price):
+                    self.entry_price = ticker['last']
+                    if active is True:
+                        break
+
+                    self.calculate_tp_sl()
+                    self.place_order()
+                    active = True
+                    while True:
+                        order = self.exchange.fetch_order(self.order['id'], self.symbol)
+                        if order['status'] == 'closed':
+                            enter_flag = True
+                            adapter.info(f"#{self.symbol}. {self.signal}. trade entered at {self.entry_price}, tp={self.tp}, sl={self.sl}")
+                            break
+                        else:
+                            time.sleep(1)
+                    
                     self.monitor()
+                    active = False
                     return
             except Exception as e:
                 adapter.error(f"{type(e).__name__} - {str(e)}")
@@ -42,8 +57,11 @@ class Executor(Checker):
                 time.sleep(2)
 
         if enter_flag is False:
-            adapter.info(f"#{self.symbol}. {self.signal} - Unable to enter trade in time.")
-            self.exchange.cancel_order(self.order['id'], self.symbol)
+            if active is True:
+                adapter.info(f"#{self.symbol}. Unable to enter trade, executor is active")
+            else:
+                adapter.info(f"#{self.symbol}. {self.signal} - Unable to enter trade in time.")
+            # self.exchange.cancel_order(self.order['id'], self.symbol)
 
         self.reset()
         watchlist.reset(self.symbol)
@@ -97,6 +115,9 @@ class Executor(Checker):
                     self.sl_order = sl_order
                     self.tp_order = tp_order
                     break
+                else:
+                    time.sleep(1)
+                    continue
             except Exception as e:
                 adapter.warning(f"#{self.symbol}. Unable to fetch trade - {str(e)}")
             finally:
@@ -116,10 +137,10 @@ class Executor(Checker):
                         self.adjust_sl(sl_order)
 
                 if tp_ord['status'] == 'closed':
-                    adapter.info(f"#{self.symbol}. {self.signal} - TP hit")
+                    adapter.info(f"#{self.symbol}. {self.signal} - *TP hit*")
                     return
                 elif sl_ord['status'] == 'closed':
-                    adapter.info(f"#{self.symbol}. {self.signal} - SL hit")
+                    adapter.info(f"#{self.symbol}. {self.signal} - *SL hit*")
                     return
             except Exception as e:
                 adapter.error(f"{type(e).__name__} - {str(e)}")
@@ -133,12 +154,16 @@ class Executor(Checker):
             new_price = (cost + self.fee + profit) / self.amount
         elif "SELL" in self.signal:
             new_price = (cost - self.fee - profit) / self.amount
-        try:
-            self.exchange.edit_order(self.sl_order['id'], self.symbol, 'limit',
-                                        self.sl_order['side'], self.sl_order['amount'],
-                                        new_price)
-        except Exception as e:
-            adapter.error(f"{type(e).__name__} - {str(e)}")
+        
+        for n in range(3):
+            try:
+                self.exchange.edit_order(self.sl_order['id'], self.symbol, 'limit',
+                                            self.sl_order['side'], self.sl_order['amount'],
+                                            new_price)
+                break
+            except Exception as e:
+                if n == 2:
+                    adapter.error(f"{type(e).__name__} - {str(e)}")
 
     def reset(self):
         self.active = False

@@ -42,7 +42,7 @@ async def analyser(symbol:str, exchange:ccxt.Exchange)-> None:
                                                         ema(exchange, symbol, 100, timeframe, ohlcv=ohlcv),
                                                         macd(exchange, symbol, timeframe, ohlcv=ohlcv),
                                                         rsi(exchange, symbol, timeframe, ohlcv=ohlcv))
-    
+
     if not ema_50 or not ema_100 or not _macd or not _rsi:
         adapter.warning(f"One or more indicators are missing for {symbol}")
         return
@@ -74,6 +74,7 @@ async def analyser(symbol:str, exchange:ccxt.Exchange)-> None:
             else:
                 sig_type = 'NEUTRAL'
 
+    # Return signal type to NEUTRAL if indicator changes
     if "MACD" in signal and "BUY" in signal:
         if _macd[1]['MACD'] > _macd[0]['MACD']:
             sig_type = 'NEUTRAL'

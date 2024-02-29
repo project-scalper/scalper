@@ -48,21 +48,20 @@ class Checker():
 
         self.entry_price = float(self.exchange.price_to_precision(self.symbol, self.entry_price))
 
-
     def calculate_tp_sl(self):
         """Calculates takeProfit and stopLoss prices"""
         if "BUY" in self.signal:
             amount = (self.capital * self.leverage) / self.entry_price
             amount = float(self.exchange.amount_to_precision(self.symbol, amount))
             cost = amount * self.entry_price
-            tp = (cost + self.reward) / amount
+            tp = (cost + self.reward + self.fee) / amount
             sl = (cost - self.risk) / amount
 
         if "SELL" in self.signal:
             amount = (self.capital * self.leverage) / self.entry_price
             amount = float(self.exchange.amount_to_precision(self.symbol, amount))
             cost = amount * self.entry_price
-            tp = (cost - self.reward) / amount
+            tp = (cost - self.reward - self.fee) / amount
             sl = (cost + self.risk) / amount
 
         self.tp = float(self.exchange.price_to_precision(self.symbol, tp))
@@ -114,9 +113,9 @@ class Checker():
                 elif "SELL" in self.signal:
                     pnl = (self.entry_price * self.amount) - (ticker['last'] * self.amount)
 
-                if pnl >= 0.5 * self.reward:
-                    self.breakeven_profit = 0.5 * self.reward
-                    self.adjust_sl()
+                # if pnl >= 0.5 * self.reward:
+                #     self.breakeven_profit = 0.5 * self.reward
+                #     self.adjust_sl()
 
                 # if pnl >= self.reward:
                 if ("BUY" in self.signal and ticker['last'] >= self.tp) or ("SELL" in self.signal and ticker['last'] <= self.tp):
@@ -153,7 +152,7 @@ class Checker():
                         if pnl <= 0:
                             watchlist.trade_counter(self.signal, pnl)
                             watchlist.reset(self.symbol)
-                            msg = f"#{self.symbol}. {self.signal} - Trade closed at price={ticker['last']} and pnl={pnl:.3f}, start_time={self.start_time}"
+                            msg = f"#{self.symbol}. {self.signal} - Trade closed start_time={self.start_time}, entry={self.entry_price}, tp={self.tp}, sl={self.sl} price={ticker['last']} and pnl={pnl:.3f}"
                             trade_logger.info(msg)
                             return
                         else:
@@ -170,8 +169,8 @@ class Checker():
 
     def calculate_fee(self):
         """Calculates maker fee and taker fee"""
-        maker_fee = self.exchange.markets[self.symbol]['maker'] * self.amount * self.entry_price
-        taker_fee = self.exchange.markets[self.symbol]['taker'] * self.amount
+        maker_fee = self.exchange.fetchTradingFee(self.symbol)['maker'] * self.amount * self.entry_price
+        taker_fee = self.exchange.fetchTradingFee(self.symbol)['taker'] * self.amount * self.tp
         self.fee = maker_fee + taker_fee
 
     def adjust_sl(self):
@@ -197,6 +196,7 @@ class Checker():
 
         self.calculate_entry_price()
         self.calculate_tp_sl()
+        self.calculate_fee()
         self.enter_trade()
 
     def reset(self):

@@ -3,3 +3,4 @@ file.log
 trades.log
 watchlist.json
 counter.json
+.env

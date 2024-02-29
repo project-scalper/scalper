@@ -1,11 +1,22 @@
 #!/usr/bin/python3
 
 import ccxt
+from helper.loadenv import handleEnv
 
 
 bybit = ccxt.bybit({
-    'apiKey': "ATyAQgtjl27jFGO4wq",
-    'secret': "34OCq6xVUChtKzoVFd9IQQOjZfJv6eBRavnP",
+    'apiKey': handleEnv("bybit_apiKey"),
+    'secret': handleEnv("bybit_secret"),
+    'nonce': ccxt.Exchange.milliseconds,
+    'enableRateLimit': True,
+    'options': {
+        'defaultType': 'future'
+    }
+})
+
+binance = ccxt.binance({
+    'apiKey': handleEnv("binance_apiKey"),
+    'secret': handleEnv("binance_secret"),
     'nonce': ccxt.Exchange.milliseconds,
     'enableRateLimit': True,
     'options': {
