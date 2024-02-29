@@ -54,14 +54,14 @@ class Checker():
             amount = (self.capital * self.leverage) / self.entry_price
             amount = float(self.exchange.amount_to_precision(self.symbol, amount))
             cost = amount * self.entry_price
-            tp = (cost + self.reward + self.fee) / amount
+            tp = (cost + self.reward) / amount
             sl = (cost - self.risk) / amount
 
         if "SELL" in self.signal:
             amount = (self.capital * self.leverage) / self.entry_price
             amount = float(self.exchange.amount_to_precision(self.symbol, amount))
             cost = amount * self.entry_price
-            tp = (cost - self.reward - self.fee) / amount
+            tp = (cost - self.reward) / amount
             sl = (cost + self.risk) / amount
 
         self.tp = float(self.exchange.price_to_precision(self.symbol, tp))
