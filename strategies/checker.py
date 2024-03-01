@@ -34,6 +34,8 @@ class Checker():
                     return
                 else:
                     continue
+
+        self.last_timestamp = ohlcv[-1][0] / 1000
         last_ohlcv = ohlcv[-2]
         opn = last_ohlcv[1]
         cls = last_ohlcv[4]
@@ -54,6 +56,8 @@ class Checker():
             amount = (self.capital * self.leverage) / self.entry_price
             amount = float(self.exchange.amount_to_precision(self.symbol, amount))
             cost = amount * self.entry_price
+            if hasattr(self, "fee"):
+                cost += self.fee
             tp = (cost + self.reward) / amount
             sl = (cost - self.risk) / amount
 
@@ -61,6 +65,8 @@ class Checker():
             amount = (self.capital * self.leverage) / self.entry_price
             amount = float(self.exchange.amount_to_precision(self.symbol, amount))
             cost = amount * self.entry_price
+            if hasattr(self, "fee"):
+                cost -= self.fee
             tp = (cost - self.reward) / amount
             sl = (cost + self.risk) / amount
 
@@ -74,7 +80,8 @@ class Checker():
             return
         global active
 
-        valid_till = datetime.now() + timedelta(minutes=5)
+        # valid_till = datetime.now() + timedelta(seconds=60)
+        valid_till = datetime.fromtimestamp(self.last_timestamp) + timedelta(seconds=60)
         while datetime.now() <= valid_till and active is False:
             try:
                 ticker = self.exchange.fetch_ticker(self.symbol)
@@ -152,7 +159,7 @@ class Checker():
                         if pnl <= 0:
                             watchlist.trade_counter(self.signal, pnl)
                             watchlist.reset(self.symbol)
-                            msg = f"#{self.symbol}. {self.signal} - Trade closed start_time={self.start_time}, entry={self.entry_price}, tp={self.tp}, sl={self.sl} price={ticker['last']} and pnl={pnl:.3f}"
+                            msg = f"#{self.symbol}. {self.signal} - Trade closed. start_time={self.start_time}, entry={self.entry_price}, tp={self.tp}, sl={self.sl} price={ticker['last']} and pnl={pnl:.3f}"
                             trade_logger.info(msg)
                             return
                         else:
@@ -195,8 +202,9 @@ class Checker():
         self.signal = signal
 
         self.calculate_entry_price()
-        self.calculate_tp_sl()
+        self.calculate_tp_sl()  # This method is called to get an estimated tp value without fees
         self.calculate_fee()
+        self.calculate_tp_sl()  # This method is called again to account for fees
         self.enter_trade()
 
     def reset(self):
