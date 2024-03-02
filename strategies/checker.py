@@ -80,8 +80,8 @@ class Checker():
             return
         global active
 
-        # valid_till = datetime.now() + timedelta(seconds=60)
-        valid_till = datetime.fromtimestamp(self.last_timestamp) + timedelta(seconds=60)
+        valid_till = datetime.now() + timedelta(seconds=60)
+        # valid_till = datetime.fromtimestamp(self.last_timestamp) + timedelta(seconds=60)
         while datetime.now() <= valid_till and active is False:
             try:
                 ticker = self.exchange.fetch_ticker(self.symbol)
