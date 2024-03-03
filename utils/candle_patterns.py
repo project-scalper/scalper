@@ -16,19 +16,21 @@ def hammer(ohlcv:List) -> bool:
 
         # check the upper and lower wick
         if open < close:    # candle is green
-            if high <= (close * 1.001):
-                body_length = close - open
-                if (open - low) >= 2 * body_length:
-                    return True
+            body_length = close - open
+            upper_wick = high - close
+            lower_wick = open - low
+            if (upper_wick <= (body_length * 0.3)) and (lower_wick >= (2 * body_length)):
+                return True
         elif open > close:  # candle is red
-            if high <= (open * 1.001):
-                body_length = open - close
-                if (close - low) >= 2 * body_length:
-                    return True
+            body_length = open - close
+            upper_wick = high - open
+            lower_wick = close - low
+            if (upper_wick <= (body_length * 0.3)) and (lower_wick >= (2 * body_length)):
+                return True
         else:
-            low_wick = open - low
-            up_wick = high - open
-            if low_wick >= 3 * up_wick:
+            lower_wick = open - low
+            upper_wick = high - open
+            if lower_wick >= 3 * upper_wick:
                 return True
     return False
 
@@ -44,7 +46,7 @@ def bullish_engulfing(ohlcv:List) -> bool:
             prev_length = ohlcv[idx - 1][1] - ohlcv[idx - 1][4]
             if open < close:   # current candle is green
                 current_length = close - open
-                if (current_length >= prev_length) and (high > ohlcv[idx - 1][2]) and (low < ohlcv[idx - 1][3]):
+                if (close > ohlcv[idx - 1][2]) and (low < ohlcv[idx - 1][3]):
                     return True
                 
     return False
@@ -63,19 +65,21 @@ def inverted_hammer(ohlcv:List) -> bool:
 
         # check the upper and lower wick
         if open < close:    # green candle
-            if low >= (open * 0.999):
-                body_length = close - open
-                if (high - close) >= 2 * body_length:
-                    return True
+            body_length = close - open
+            upper_wick = high - close
+            lower_wick = open - low
+            if (lower_wick <= (upper_wick * 0.3)) and (upper_wick >= (2 * body_length)):
+                return True
         elif open > close:  # red candle
-            if low >= (close * 0.999):
-                body_length = open - close
-                if (high - open) >= 2 * body_length:
-                    return True
+            body_length = open - close
+            upper_wick = high - open
+            lower_wick = close - low
+            if (lower_wick <= (upper_wick * 0.3)) and (upper_wick >= (2 * body_length)):
+                return True
         else:
-            low_wick = open - low
-            up_wick = high - open
-            if low_wick >= 3 * up_wick:
+            lower_wick = open - low
+            upper_wick = high - open
+            if lower_wick >= 3 * upper_wick:
                 return True
     return False
 
@@ -91,7 +95,7 @@ def bearish_engulfing(ohlcv:List) -> bool:
             prev_length = ohlcv[idx - 1][4] - ohlcv[idx - 1][1]
             if close < open:   # current candle is red
                 current_length = open - close
-                if (current_length >= prev_length) and (low < ohlcv[idx - 1][3]) and (high > ohlcv[idx - 1][2]):
+                if (close < ohlcv[idx - 1][3]) and (high > ohlcv[idx - 1][2]):
                     return True
                 
     return False
