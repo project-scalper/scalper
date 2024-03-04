@@ -11,7 +11,7 @@ def hammer(ohlcv:List) -> bool:
         low:float = ohlcv[idx][3]
         close:float = ohlcv[idx][4]
         # if "BUY" in signal:
-        if not (ohlcv[idx - 1][1] > ohlcv[idx - 1][4]) and not (ohlcv[idx + 1][1] < ohlcv[idx + 1][4]):
+        if not ((ohlcv[idx - 1][1] > ohlcv[idx - 1][4]) and (ohlcv[idx + 1][1] < ohlcv[idx + 1][4])):
             continue
 
         # check the upper and lower wick
@@ -47,7 +47,8 @@ def bullish_engulfing(ohlcv:List) -> bool:
             if open < close:   # current candle is green
                 current_length = close - open
                 if (close > ohlcv[idx - 1][2]) and (low < ohlcv[idx - 1][3]):
-                    return True
+                    if ohlcv[idx - 2][1] > ohlcv[idx - 2][4]:   # the candle before the pattern is bearish
+                        return True
                 
     return False
 
@@ -96,7 +97,8 @@ def bearish_engulfing(ohlcv:List) -> bool:
             if close < open:   # current candle is red
                 current_length = open - close
                 if (close < ohlcv[idx - 1][3]) and (high > ohlcv[idx - 1][2]):
-                    return True
+                    if ohlcv[idx - 2][1] < ohlcv[idx - 2][4]:   # the candle before the pattern is green
+                        return True
                 
     return False
 
