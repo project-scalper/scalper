@@ -2,7 +2,7 @@
 
 from helper.adapter import adapter, trade_logger
 from datetime import datetime, timedelta
-from variables import risk, reward, capital, leverage
+from variables import risk, reward, capital, leverage, timeframe
 from strategies.rsi_strategy import active
 import time
 import ccxt
@@ -26,7 +26,7 @@ class Checker():
         """Calculates the limit entry price for the trade"""
         for i in range(3):
             try:
-                ohlcv = self.exchange.fetch_ohlcv(self.symbol, '5m', limit=3)
+                ohlcv = self.exchange.fetch_ohlcv(self.symbol, timeframe, limit=3)
                 break
             except Exception as e:
                 if i == 2:

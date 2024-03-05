@@ -36,7 +36,7 @@ async def analyser(symbol:str, exchange:ccxt.Exchange)-> None:
             break
         except Exception as e:
             if n == 2:
-                adapter.warning(f"Unable to fetch ohlcv for {symbol}")
+                adapter.warning(f"Unable to fetch ohlcv for {symbol} - {str(e)}")
                 return None
     ema_50, ema_100, _macd, _rsi = await asyncio.gather(ema(exchange, symbol, 50, timeframe, ohlcv=ohlcv),
                                                         ema(exchange, symbol, 100, timeframe, ohlcv=ohlcv),

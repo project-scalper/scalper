@@ -4,12 +4,13 @@ import pandas_ta as ta
 import pandas as pd
 import asyncio
 from datetime import datetime
+from variables import timeframe
 
 
 import ccxt  # noqa: E402
 
 
-async def bbands(exchange:ccxt.Exchange, symbol:str, length:int=20, timeframe:str='5m'):
+async def bbands(exchange:ccxt.Exchange, symbol:str, length:int=20):
     """Obtains the Bollinger band values for a symbol
     Args:
         exchange: The ccxt exchange instance
