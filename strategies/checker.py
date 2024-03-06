@@ -35,7 +35,6 @@ class Checker():
                 else:
                     continue
 
-        self.last_timestamp = ohlcv[-1][0] / 1000
         last_ohlcv = ohlcv[-2]
         opn = last_ohlcv[1]
         cls = last_ohlcv[4]
@@ -81,7 +80,6 @@ class Checker():
         global active
 
         valid_till = datetime.now() + timedelta(seconds=60)
-        # valid_till = datetime.fromtimestamp(self.last_timestamp) + timedelta(seconds=60)
         while datetime.now() <= valid_till and active is False:
             try:
                 ticker = self.exchange.fetch_ticker(self.symbol)

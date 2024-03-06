@@ -76,7 +76,7 @@ async def analyser(symbol:str, exchange:ccxt.Exchange)-> None:
             else:
                 sig_type = 'NEUTRAL'
 
-    # Return signal type to NEUTRAL if indicator changes
+    # Return signal type to NEUTRAL if macd changes
     if "MACD" in signal and "BUY" in signal:
         if _macd[1]['MACD'] > _macd[0]['MACD']:
             sig_type = 'NEUTRAL'
@@ -107,7 +107,21 @@ async def analyser(symbol:str, exchange:ccxt.Exchange)-> None:
                 sig_type = "RSI_EMA_SELL"
 
     if sig_type is not None:
+        signal = watchlist.get(symbol)
+        if "BUY" in sig_type or "BUY" in signal:
+            if _rsi[0]['RSI_6'] > 80:
+                sig_type = 'NEUTRAL'
+            if ohlcv[-2][4] <= ohlcv[-2][1]:
+                sig_type = 'NEUTRAL'
+
+        elif "SELL" in sig_type or "SELL" in signal:
+            if _rsi[0]['RSI_6'] < 20:
+                sig_type = 'NEUTRAL'
+            if ohlcv[-2][4] >= ohlcv[-2][1]:
+                sig_type = 'NEUTRAL'
+                
         watchlist.put(symbol, sig_type)
+
         candle_analysis = main(ohlcv=ohlcv, signal=sig_type)
         if sig_type != 'NEUTRAL' and candle_analysis is True:
             await run_thread(symbol, sig_type, exchange)
