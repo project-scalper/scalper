@@ -33,13 +33,15 @@ class Bot(BaseModel):
     def update_balance(self):
         user = model.storage.get("User", self.user_id)
         exchange = getattr(ccxt, user.exchange)()
-        exchange.options['defaultType'] = 'future'
+        # exchange.options['defaultType'] = 'future'
         exchange.apiKey = user.keys.get("apiKey")
         exchange.secret = user.keys.get("secret")
         exchange.none = ccxt.Exchange.milliseconds
         bal = exchange.fetch_balance()['free']
         if "USDT" in bal:
             bal = bal['USDT']
+        else:
+            bal = 0
 
         self.balance = bal
         self.save()
