@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Crypto Trading Bot</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+    <header>
+        <h1>Crypto Trading Bot</h1>
+    </header>
+
+    <!-- Start Bot Page -->
+    <div id="startBotPage" style="display: block;">
+        <h2>Start Bot</h2>
+        <div class="form" id="startBotForm">
+            <label for="capital">Capital:</label>
+            <input type="number" id="capital" name="capital" required>
+
+            <label for="apiKey">API Key:</label>
+            <input type="text" id="apiKey" name="apiKey" required>
+
+            <label for="secretKey">Secret Key:</label>
+            <input type="text" id="secretKey" name="secretKey" required>
+
+            <label for="exchange">Exchange:</label>
+            <select id="exchange" name="exchange">
+                <option value="binance">Binance</option>
+                <option value="coinbase">Bybit</option>
+                <!-- Add more options for different exchanges as needed -->
+            </select>
+
+            <button id="create-bot" type="submit">Start Bot</button>
+        </div>
+    </div>
+    <SCRIPT src="https://code.jquery.com/jquery-3.2.1.min.js"></SCRIPT>
+    <script src="scripts/script.js"></script>
+    <script src="scripts/start_bot.js"></script>
+</body>
+</html>

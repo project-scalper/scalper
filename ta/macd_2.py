@@ -7,7 +7,7 @@ from utils.candle_patterns import main
 import threading
 from helper.adapter import adapter
 from helper import watchlist
-from variables import timeframe
+from variables import timeframe, confirmation_timeframe
 import asyncio
 import ccxt
 
@@ -50,7 +50,7 @@ async def analyser(symbol:str, exchange:ccxt.Exchange)-> None:
     trend = 'NEUTRAL'
     sig_type = None
 
-    # check EMA values
+    # check EMA values to get trend
     if (ema_50[0]['EMA'] > ema_100[0]['EMA']) and (ohlcv[-1][-2] > ema_50[0]['EMA']):
         # if ohlcv[-1][-2] > ema_50[0]['EMA']:
         trend = "UPTREND"
@@ -64,14 +64,17 @@ async def analyser(symbol:str, exchange:ccxt.Exchange)-> None:
         # if trend == 'UPTREND' and _macd[0]['MACD'] < 0:
         if trend == 'UPTREND':
             if _macd[1]['MACD'] < _macd[0]['MACD']:     # macd is -ve and starts increasing
-                if (_macd[2]['MACD'] < _macd[1]['MACD']) and (_macd[3]['MACD'] > _macd[2]['MACD']):
+            #     if (_macd[2]['MACD'] < _macd[1]['MACD']) and (_macd[3]['MACD'] > _macd[2]['MACD']):
+                if (_macd[2]['MACD'] > _macd[1]['MACD']):
                     sig_type = 'MACD_EMA_2_BUY'
             else:
                 sig_type = 'NEUTRAL'
+
         # elif trend == 'DOWNTREND' and _macd[0]['MACD'] > 0:
         elif trend == 'DOWNTREND':
             if _macd[1]['MACD'] > _macd[0]['MACD']:     # macd is +ve and starts decreasing
-                if (_macd[2]['MACD'] > _macd[1]['MACD']) and (_macd[3]['MACD'] < _macd[2]['MACD']):
+                # if (_macd[2]['MACD'] > _macd[1]['MACD']) and (_macd[3]['MACD'] < _macd[2]['MACD']):
+                if (_macd[2]['MACD'] < _macd[1]['MACD']):
                     sig_type = 'MACD_EMA_2_SELL'
             else:
                 sig_type = 'NEUTRAL'
@@ -109,12 +112,24 @@ async def analyser(symbol:str, exchange:ccxt.Exchange)-> None:
     if sig_type is not None:
         signal = watchlist.get(symbol)
         if "BUY" in sig_type or "BUY" in signal:
+            # check higher tf to confirm trend
+            confirm_ema_50 = ema(exchange, symbol, 50, confirmation_timeframe)
+            confirm_ema_100 = ema(exchange, symbol, 100, confirmation_timeframe)
+            if confirm_ema_100 > confirm_ema_50:
+                sig_type = 'NEUTRAL'
+
             if _rsi[0]['RSI_6'] > 80:
                 sig_type = 'NEUTRAL'
             if ohlcv[-2][4] <= ohlcv[-2][1]:
                 sig_type = 'NEUTRAL'
 
         elif "SELL" in sig_type or "SELL" in signal:
+            # check higher tf to confirm trend
+            confirm_ema_50 = ema(exchange, symbol, 50, confirmation_timeframe)
+            confirm_ema_100 = ema(exchange, symbol, 100, confirmation_timeframe)
+            if confirm_ema_100 < confirm_ema_50:
+                sig_type = 'NEUTRAL'
+
             if _rsi[0]['RSI_6'] < 20:
                 sig_type = 'NEUTRAL'
             if ohlcv[-2][4] >= ohlcv[-2][1]:

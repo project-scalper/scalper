@@ -3,16 +3,32 @@
 from strategies.checker import Checker
 from helper.adapter import adapter
 from helper import watchlist
+import ccxt
 from datetime import datetime, timedelta
+from typing import Dict
 import time
+import model
+import uuid
 
 
 class Executor(Checker):
     active = False
-    max_daily_loss = 5
+    max_daily_loss = 8
 
-    def __init__(self):
-        super().__init__()
+    def __init__(self, user:Dict):
+        self.bot_id = user['bot_id']
+        self.exchange = self.get_exchange(user)
+        super().__init__(self.exchange)
+        self.bot = model.storage.get("Bot", self.bot_id)
+
+    def get_exchange(self, user):
+        exchange: ccxt.Exchange = getattr(ccxt, user['exchange'])()
+        exchange.apiKey = user['keys']['apiKey']
+        exchange.secret = user['keys']['secret']
+        exchange.options['defaultType'] = 'future'
+        exchange.nonce = ccxt.Exchange.milliseconds
+        exchange.enableRateLimit = True
+        return exchange
 
     def set_leverage(self, symbol:str, value:int):
         try:
@@ -180,3 +196,4 @@ class Executor(Checker):
             watchlist.reset(self.symbol)
         except Exception as e:
             adapter.error(f"{type(e)} - {str(e)}")
+

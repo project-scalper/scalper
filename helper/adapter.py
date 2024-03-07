@@ -3,7 +3,7 @@ import logging
 adapter = logging.Logger(__name__)
 trade_logger = logging.Logger(__name__)
 
-time_fmt = "%b %Y, %I:%M:%S %p"
+time_fmt = "%b %d %Y, %I:%M:%S %p"
 
 # Creating handlers
 c_handler = logging.StreamHandler()  # console handler

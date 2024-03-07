@@ -1,0 +1,61 @@
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f0f8ff; /* Light Blue */
+}
+
+header {
+    background-color: #87ceeb; /* Sky Blue */
+    padding: 10px;
+    text-align: center;
+    color: #fff;
+}
+
+main {
+    padding: 20px;
+}
+
+.form {
+    max-width: 300px;
+    margin: 0 auto;
+}
+
+label {
+    display: block;
+    margin-bottom: 8px;
+}
+
+input {
+    width: 100%;
+    padding: 8px;
+    margin-bottom: 16px;
+    box-sizing: border-box;
+}
+
+button {
+    background-color: #87ceeb; /* Sky Blue */
+    color: #fff;
+    padding: 10px 20px;
+    border: none;
+    cursor: pointer;
+}
+
+button:hover {
+    background-color: #4682b4; /* Steel Blue */
+}
+
+.dashboard {
+    text-align: center;
+}
+
+.greeting {
+    font-size: 24px;
+    margin-bottom: 16px;
+}
+
+.data {
+    display: flex;
+    justify-content: space-around;
+    margin-top: 20px;
+}
