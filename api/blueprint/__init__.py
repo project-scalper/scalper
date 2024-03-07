@@ -22,4 +22,4 @@ def verify_token(token):
     
 
 from api.blueprint.users import *
-# from api.blueprint.bot import *
+from api.blueprint.bot import *
