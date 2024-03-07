@@ -117,7 +117,7 @@ async def analyser(symbol:str, exchange:ccxt.Exchange)-> None:
             # check higher tf to confirm trend
             confirm_ema_50 = ema(exchange, symbol, 50, confirmation_timeframe)
             confirm_ema_100 = ema(exchange, symbol, 100, confirmation_timeframe)
-            if confirm_ema_100 > confirm_ema_50:
+            if confirm_ema_100[0]['EMA'] > confirm_ema_50[0]['EMA']:
                 sig_type = 'NEUTRAL'
 
             if _rsi[0]['RSI_6'] > 80:
@@ -129,7 +129,7 @@ async def analyser(symbol:str, exchange:ccxt.Exchange)-> None:
             # check higher tf to confirm trend
             confirm_ema_50 = ema(exchange, symbol, 50, confirmation_timeframe)
             confirm_ema_100 = ema(exchange, symbol, 100, confirmation_timeframe)
-            if confirm_ema_100 < confirm_ema_50:
+            if confirm_ema_100[0]['EMA'] < confirm_ema_50[0]['EMA']:
                 sig_type = 'NEUTRAL'
 
             if _rsi[0]['RSI_6'] < 20:
