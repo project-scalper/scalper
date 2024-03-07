@@ -113,10 +113,10 @@ async def analyser(symbol:str, exchange:ccxt.Exchange)-> None:
 
     if sig_type is not None:
         signal = watchlist.get(symbol)
+        confirm_ema_50, confirm_ema_100 = await asyncio.gather(ema(exchange, symbol, 50, confirmation_timeframe),
+                                                         ema(exchange, symbol, 100, confirmation_timeframe))
         if "BUY" in sig_type or "BUY" in signal:
             # check higher tf to confirm trend
-            confirm_ema_50 = ema(exchange, symbol, 50, confirmation_timeframe)
-            confirm_ema_100 = ema(exchange, symbol, 100, confirmation_timeframe)
             if confirm_ema_100[0]['EMA'] > confirm_ema_50[0]['EMA']:
                 sig_type = 'NEUTRAL'
 
@@ -127,8 +127,6 @@ async def analyser(symbol:str, exchange:ccxt.Exchange)-> None:
 
         elif "SELL" in sig_type or "SELL" in signal:
             # check higher tf to confirm trend
-            confirm_ema_50 = ema(exchange, symbol, 50, confirmation_timeframe)
-            confirm_ema_100 = ema(exchange, symbol, 100, confirmation_timeframe)
             if confirm_ema_100[0]['EMA'] < confirm_ema_50[0]['EMA']:
                 sig_type = 'NEUTRAL'
 
