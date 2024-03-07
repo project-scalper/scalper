@@ -10,6 +10,7 @@ from helper import watchlist
 from variables import timeframe, confirmation_timeframe
 import asyncio
 import ccxt
+from model import storage
 
 active = False
 
@@ -25,8 +26,9 @@ async def run_thread(symbol, sig_type, exchange):
 
 async def new_checker(symbol, sig_type, exchange):
     from strategies.checker import Checker
-    trade = Checker(exchange)
-    await trade.execute(symbol, signal=sig_type)
+    for _, bot in storage.all("Bot").items():
+        trade = Checker(exchange, bot_id=bot.id)
+        await trade.execute(symbol, signal=sig_type)
 
 
 async def analyser(symbol:str, exchange:ccxt.Exchange)-> None:

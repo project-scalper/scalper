@@ -28,12 +28,15 @@ class Bot(BaseModel):
         if 'balance' not in kwargs:
             self.balance = 0
 
+        self.update_balance()
+
     def update_balance(self):
         user = model.storage.get("User", self.user_id)
         exchange = getattr(ccxt, user.exchange)()
         exchange.options['defaultType'] = 'future'
         exchange.apiKey = user.keys.get("apiKey")
         exchange.secret = user.keys.get("secret")
+        exchange.none = ccxt.Exchange.milliseconds
         bal = exchange.fetch_balance()['free']
         if "USDT" in bal:
             bal = bal['USDT']

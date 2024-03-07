@@ -165,6 +165,7 @@ class Checker():
                     dt = datetime.now() + timedelta(hours=1)
                     dt = dt.strftime(time_fmt)
                     self.bot.trades.append({"date": dt, "msg": f"#{self.symbol} ({sig}) -> {pnl} USDT"})
+                    self.bot.balance += pnl
                     self.bot.save()
                     return
                 # elif pnl <= self.risk:
@@ -178,6 +179,7 @@ class Checker():
                     dt = datetime.now() + timedelta(hours=1)
                     dt = dt.strftime(time_fmt)
                     self.bot.trades.append({"date": dt, "msg": f"#{self.symbol} ({sig}) -> {pnl} USDT"})
+                    self.bot.balance += pnl
                     self.bot.save()
                     return
                 
