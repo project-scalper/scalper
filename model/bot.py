@@ -20,7 +20,7 @@ class Bot(BaseModel):
         if 'trades' not in kwargs:
             self.trades = []
         if 'today_pnl' not in kwargs:
-            self.today_trades = 0
+            self.today_pnl = 0
         if 'daily_pnl' not in kwargs:
             self.daily_pnl = []
         if 'capital' not in kwargs:
