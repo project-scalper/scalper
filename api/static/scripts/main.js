@@ -8,8 +8,13 @@ function getProfile() {
         $("#capital").text("$" + res.capital)
         request.get('/bot/' + res.bot_id)
         .then((bot) => {
-            $("#daily-pnl").text(bot.daily_pnl)
+            $("#daily-pnl").text(bot.today_pnl)
             $("#current-balance").text("$" + bot.balance)
+            for (var item of bot.daily_pnl) {
+                $("#performance-list").append(
+                    `<li>${item.date}: ${item.msg}\n</li>`
+                )
+            }
             for (var item of bot.trades) {
                 $("#performance-list").append(
                     `<li>${item.date}: ${item.msg}\n</li>`

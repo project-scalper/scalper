@@ -60,19 +60,14 @@ class Checker():
 
     def calculate_tp_sl(self):
         """Calculates takeProfit and stopLoss prices"""
-        last_x_change = ((self.ohlcv[-2][4] - self.ohlcv[-2][1]) / self.ohlcv[-2][1]) * 100
         if "BUY" in self.signal:
             amount = (self.capital * self.leverage) / self.entry_price
             amount = float(self.exchange.amount_to_precision(self.symbol, amount))
             cost = amount * self.entry_price
             if hasattr(self, "fee"):
                 cost += self.fee
-            if abs(last_x_change) >= 1:
-                tp = (cost + (self.reward * 2)) / amount
-                sl = self.ohlcv[-2][3]
-            else:
-                tp = (cost + (self.reward * 2)) / amount
-                sl = (cost - self.risk) / amount
+            tp = (cost + self.reward) / amount
+            sl = (cost - self.risk) / amount
 
         if "SELL" in self.signal:
             amount = (self.capital * self.leverage) / self.entry_price
@@ -80,13 +75,8 @@ class Checker():
             cost = amount * self.entry_price
             if hasattr(self, "fee"):
                 cost -= self.fee
-
-            if abs(last_x_change) >= 1:
-                tp = (cost - (2 * self.reward)) / amount
-                sl = self.ohlcv[-2][2]
-            else:
-                tp = (cost - self.reward) / amount
-                sl = (cost + self.risk) / amount
+            tp = (cost - self.reward) / amount
+            sl = (cost + self.risk) / amount
 
         self.tp = float(self.exchange.price_to_precision(self.symbol, tp))
         self.sl = float(self.exchange.price_to_precision(self.symbol, sl))
@@ -134,27 +124,17 @@ class Checker():
                 ticker = self.exchange.fetch_ticker(self.symbol)
                 if "BUY" in self.signal:
                     sig = "LONG"
-                    pnl = (ticker['last'] * self.amount) - (self.entry_price * self.amount)
+                    pnl:float = (ticker['last'] * self.amount) - (self.entry_price * self.amount)
                 elif "SELL" in self.signal:
                     sig = "SHORT"
-                    pnl = (self.entry_price * self.amount) - (ticker['last'] * self.amount)
+                    pnl:float = (self.entry_price * self.amount) - (ticker['last'] * self.amount)
 
-                current_dt = datetime.now()
-                if len(self.bot.daily_pnl) > 0:
-                    last_dt = self.bot.daily_pnl[-1]['date'].split()[1]
-                    last_dt = datetime.strptime(last_dt, time_fmt)
-                    if last_dt.day + 1 == current_dt.day:
-                        current_dt_str = current_dt.strftime(date_fmt)
-                        self.bot.daily_pnl.append({'date': current_dt_str, 'msg': 0})
-                        self.bot.save()
-                        pass
-
+                pnl -= self.fee
 
                 # if pnl >= 0.5 * self.reward:
                 #     self.breakeven_profit = 0.5 * self.reward
                 #     self.adjust_sl()
 
-                # if pnl >= self.reward:
                 if ("BUY" in self.signal and ticker['last'] >= self.tp) or ("SELL" in self.signal and ticker['last'] <= self.tp):
                     msg = f"#{self.symbol}. {self.signal} - start_time={self.start_time}, entry={self.entry_price}, tp={self.tp}, sl={self.sl}, "
                     msg += "*TP hit*"
@@ -162,11 +142,7 @@ class Checker():
                     watchlist.trade_counter(self.signal, pnl)
                     watchlist.reset(self.symbol)
 
-                    dt = datetime.now() + timedelta(hours=1)
-                    dt = dt.strftime(time_fmt)
-                    self.bot.trades.append({"date": dt, "msg": f"#{self.symbol} ({sig}) -> {pnl} USDT"})
-                    self.bot.update_balance()
-                    self.bot.save()
+                    self.update_bot(pnl)
                     return
                 # elif pnl <= self.risk:
                 elif ("BUY" in self.signal and ticker['last'] <= self.sl) or ("SELL" in self.signal and ticker['last'] >= self.sl):
@@ -176,11 +152,7 @@ class Checker():
                     watchlist.trade_counter(self.signal, 'sl')
                     watchlist.reset(self.symbol)
 
-                    dt = datetime.now() + timedelta(hours=1)
-                    dt = dt.strftime(time_fmt)
-                    self.bot.trades.append({"date": dt, "msg": f"#{self.symbol} ({sig}) -> {pnl} USDT"})
-                    self.bot.update_balance()
-                    self.bot.save()
+                    self.update_bot(pnl)
                     return
                 
                 if hasattr(self, "close_position"):
@@ -192,11 +164,7 @@ class Checker():
                         trade_logger.info(msg)
                         watchlist.reset(self.symbol)
 
-                        dt = datetime.now() + timedelta(hours=1)
-                        dt = dt.strftime(time_fmt)
-                        self.bot.trades.append({"date": dt, "msg": f"#{self.symbol} ({sig}) -> {self.breakeven_profit} USDT"})
-                        self.bot.update_balance()
-                        self.bot.save()
+                        self.update_bot(pnl)
                         return
                 
                 # Raise warning when indicators changes signal
@@ -210,11 +178,7 @@ class Checker():
                             msg = f"#{self.symbol}. {self.signal} - Trade closed. start_time={self.start_time}, entry={self.entry_price}, tp={self.tp}, sl={self.sl} price={ticker['last']} and pnl={pnl:.3f}"
                             trade_logger.info(msg)
 
-                            dt = datetime.now() + timedelta(hours=1)
-                            dt = dt.strftime(time_fmt)
-                            self.bot.trades.append({"date": dt, "msg": f"#{self.symbol} ({sig}) -> {self.breakeven_profit} USDT"})
-                            self.bot.update_balance()
-                            self.bot.save()
+                            self.update_bot(pnl)
                             return
                         else:
                             adapter.info(f"#{self.symbol}. {self.signal} - start_time={self.start_time}. Adjusting stop_loss...")
@@ -266,3 +230,30 @@ class Checker():
         active = False
         delattr(self, "symbol")
         delattr(self, "signal")
+
+    def update_bot(self, pnl:float):
+        current_dt = datetime.now()
+        current_dt_str = current_dt.strftime(date_fmt)
+        if len(self.bot.daily_pnl) > 0:
+            last_dt = self.bot.daily_pnl[-1]['date'].split()[1]
+        else:
+            last_dt = current_dt.day
+            self.bot.daily_pnl.append({'date' : current_dt_str, 'msg': 0})
+
+        if last_dt + 1 == current_dt.day:
+            self.bot.daily_pnl.append({'date': current_dt_str, 'msg': 0})
+            self.bot.save()
+
+        if "BUY" in self.symbol:
+            sig = "LONG"
+        elif "SELL" in self.symbol:
+            sig = "SHORT"
+
+        dt = datetime.now() + timedelta(hours=1)
+        dt = dt.strftime(time_fmt)
+        self.bot.trades.append({"date": dt, "msg": f"#{self.symbol} ({sig}) -> {pnl} USDT"})
+        self.bot.today_pnl += pnl
+        self.bot.daily_pnl[-1]['msg'] += pnl
+        self.bot.update_balance()
+        self.bot.save()
+        

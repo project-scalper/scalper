@@ -7,9 +7,9 @@ from model.base_model import BaseModel
 
 class Bot(BaseModel):
     user_id = ""
-    trades = []
-    today_trades = []
-    daily_pnl = []
+    trades = []     # contains all the trades taken in the current day
+    today_pnl = 0   # contains the pnl for the current day
+    daily_pnl = []  # contains the pnl for each of the last 30 days
     capital = 0
     balance = 0
 
