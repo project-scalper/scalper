@@ -19,8 +19,8 @@ class Bot(BaseModel):
             raise Exception("Bot must include a user id")
         if 'trades' not in kwargs:
             self.trades = []
-        if 'today_trades' not in kwargs:
-            self.today_trades = []
+        if 'today_pnl' not in kwargs:
+            self.today_trades = 0
         if 'daily_pnl' not in kwargs:
             self.daily_pnl = []
         if 'capital' not in kwargs:
