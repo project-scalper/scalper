@@ -244,9 +244,9 @@ class Checker():
             self.bot.daily_pnl.append({'date': current_dt_str, 'msg': 0})
             self.bot.save()
 
-        if "BUY" in self.symbol:
+        if "BUY" in self.signal:
             sig = "LONG"
-        elif "SELL" in self.symbol:
+        elif "SELL" in self.signal:
             sig = "SHORT"
 
         dt = datetime.now() + timedelta(hours=1)
