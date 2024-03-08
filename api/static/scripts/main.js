@@ -1,6 +1,6 @@
 #!/usr/bin/node
 
-function getProfile() {
+async function getProfile() {
     request.get('/user/me')
     .then((res) => {
         console.log(res)
@@ -16,15 +16,19 @@ function getProfile() {
                 )
             }
             for (var item of bot.trades) {
-                $("#performance-list").append(
+                $("#todays-trades").append(
                     `<li>${item.date}: ${item.msg}\n</li>`
                 )
             }
         })
-        .catch(() => {
-            alert("Error fetching bot")
+        .catch((err) => {
+            alert("Error fetching bot");
+            console.log(err);
+            if (err.statusCode === 401) {
+                window.location.href = "login.html"
+            }
         })
     })
 }
 
-getProfile()
+Promise.all([getProfile()])

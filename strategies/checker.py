@@ -149,7 +149,7 @@ class Checker():
                     msg = f"#{self.symbol}. {self.signal} - start_time={self.start_time}, entry={self.entry_price}, tp={self.tp}, sl={self.sl}, "
                     msg += "*SL hit*"
                     trade_logger.info(msg)
-                    watchlist.trade_counter(self.signal, 'sl')
+                    watchlist.trade_counter(self.signal, pnl)
                     watchlist.reset(self.symbol)
 
                     self.update_bot(pnl)
@@ -256,4 +256,3 @@ class Checker():
         self.bot.daily_pnl[-1]['msg'] += pnl
         self.bot.update_balance()
         self.bot.save()
-        

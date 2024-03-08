@@ -36,6 +36,6 @@ $("#login").on('click', () => {
         window.location.href = 'static/start_bot.html';
     })
     .catch((err) => {
-        alert(err['msg'])
+        alert(err)
     })
 })
