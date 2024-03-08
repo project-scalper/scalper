@@ -188,7 +188,7 @@ class Checker():
             except ccxt.NetworkError as e:
                 adapter.error("Seems the network connection is unstable.")
             except Exception as e:
-                adapter.error(f"{type(e).__name__} - {str(e)}")
+                adapter.error(f"{type(e).__name__} - {str(e)}. line: {e.__traceback__.tb_lineno}")
             finally:
                 time.sleep(2)
 
@@ -235,7 +235,7 @@ class Checker():
         current_dt = datetime.now()
         current_dt_str = current_dt.strftime(date_fmt)
         if len(self.bot.daily_pnl) > 0:
-            last_dt = self.bot.daily_pnl[-1]['date'].split()[1]
+            last_dt = int(self.bot.daily_pnl[-1]['date'].split()[1])
         else:
             last_dt = current_dt.day
             self.bot.daily_pnl.append({'date' : current_dt_str, 'msg': 0})
