@@ -84,7 +84,7 @@ class WatchList:
                 self.counter[signal]['close_pos'] += result
             else:
                 self.counter[signal]['close_neg'] += result
-                self.counter['total']['close_neg'] += result
+            self.counter['total']['close_neg'] += result
         self.counter_save()
 
     def counter_save(self):

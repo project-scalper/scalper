@@ -8,16 +8,17 @@ async function getProfile() {
         $("#capital").text("$" + res.capital)
         request.get('/bot/' + res.bot_id)
         .then((bot) => {
-            $("#daily-pnl").text(bot.today_pnl)
-            $("#current-balance").text("$" + bot.balance)
+            $("#daily-pnl").text(bot.today_pnl.toFixed(2))
+            $("#current-balance").text("$" + bot.balance.toFixed(2))
             for (var item of bot.daily_pnl) {
-                $("#performance-list").append(
-                    `<li>${item.date}: ${item.msg}\n</li>`
+                $("#performance-list").prepend(
+                    `<li>${item.date}: ${item.msg.toFixed(2)}\n</li>`
                 )
             }
             for (var item of bot.trades) {
-                $("#todays-trades").append(
-                    `<li>${item.date}: ${item.msg}\n</li>`
+                $("#todays-trades").prepend(
+                    tm = item.date.split(', ')[1]
+                    `<li>${tm}: ${item.msg}\n</li>`
                 )
             }
         })

@@ -211,7 +211,7 @@ class Checker():
     def delete(self):
         del self
 
-    async def execute(self, symbol:str, signal:str):
+    async def execute(self, symbol:str, signal:str, reverse:bool=False):
         global active
         if active is True:
             adapter.warning(f"{symbol}. Could not enter trade, executor is currently active")
@@ -223,6 +223,14 @@ class Checker():
         self.calculate_tp_sl()  # This method is called to get an estimated tp value without fees
         self.calculate_fee()
         self.calculate_tp_sl()  # This method is called again to account for fees
+
+        if reverse is True:
+            self.tp, self.sl = self.sl, self.tp
+            if "BUY" in self.signal:
+                self.signal = "SELL"
+            elif "SELL" in self.signal:
+                self.signal = "BUY"
+
         self.enter_trade()
 
     def reset(self):
@@ -242,6 +250,8 @@ class Checker():
 
         if last_dt + 1 == current_dt.day:
             self.bot.daily_pnl.append({'date': current_dt_str, 'msg': 0})
+            self.bot.today_pnl = 0
+            self.bot.trades = []
             self.bot.save()
 
         if "BUY" in self.signal:
@@ -251,7 +261,7 @@ class Checker():
 
         dt = datetime.now() + timedelta(hours=1)
         dt = dt.strftime(time_fmt)
-        self.bot.trades.append({"date": dt, "msg": f"#{self.symbol} ({sig}) -> {pnl} USDT"})
+        self.bot.trades.append({"date": dt, "msg": f"#{self.symbol} ({sig}) =>  {pnl:.2f} USDT"})
         self.bot.today_pnl += pnl
         self.bot.daily_pnl[-1]['msg'] += pnl
         self.bot.update_balance()
