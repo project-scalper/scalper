@@ -5,11 +5,13 @@ function loadBot(bot_id) {
     .then((bot) => {
         $("#daily-pnl").text(bot.today_pnl.toFixed(2))
         $("#current-balance").text("$" + bot.balance.toFixed(2))
+        $("#performance-list").html('')
         for (var item of bot.daily_pnl) {
             $("#performance-list").prepend(
                 `<li>${item.date}: ${item.msg.toFixed(2)}\n</li>`
             )
         }
+        $("#todays-trades").html('')
         for (var item of bot.trades) {
             var tm = item.date.split(', ')[1]
             $("#todays-trades").prepend(
