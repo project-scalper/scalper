@@ -54,15 +54,15 @@ def login():
     data = request.get_json()
     
     if "username" not in data or "password" not in data:
-        return jsonify({"msg": "Username or password missing"}), 400
+        return jsonify("Username or password missing"), 400
     
     username = data.get("username")
     password = data.get("password")
     user = storage.search("User", username=username)
     if not user:
-        return jsonify({"msg": "No user with this username found"}), 400
+        return jsonify("No user with this username found"), 400
     if user[0].password != password:
-        return jsonify({"msg": "Password is incorrect"}), 400
+        return jsonify("Password is incorrect"), 400
     
     previous_sessions = storage.search("UserSession", user_id=user[0].id)
     for sess in previous_sessions:
