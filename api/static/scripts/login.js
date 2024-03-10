@@ -40,7 +40,11 @@ $("#login").on('click', () => {
         }
     })
     .catch((err) => {
-        alert(err)
+        if (err.responseJSON != undefined) {
+            alert(err.responseJSON)
+        } else {
+            alert("An error was encountered")
+        }
         console.log(err)
     })
 })

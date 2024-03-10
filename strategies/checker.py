@@ -226,7 +226,7 @@ class Checker():
 
         if reverse is True:
             self.tp, self.sl = self.sl, self.tp
-            self.risk, self.reward = self.reward, self.risk
+            # self.risk, self.reward = self.reward, self.risk
             if "BUY" in self.signal:
                 self.signal = self.signal.replace("BUY", "SELL")
                 # self.signal = "SELL"
@@ -265,7 +265,7 @@ class Checker():
 
         dt = datetime.now() + timedelta(hours=1)
         dt = dt.strftime(time_fmt)
-        self.bot.trades.append({"date": dt, "msg": f"#{self.symbol} ({sig}) =>  {pnl:.2f} USDT"})
+        self.bot.trades.append({"date": dt, "msg": f"#{self.symbol.split("/")[0]} ({sig}) =>  {pnl:.2f} USDT"})
         self.bot.today_pnl += pnl
         self.bot.daily_pnl[-1]['msg'] += pnl
         self.bot.update_balance()
