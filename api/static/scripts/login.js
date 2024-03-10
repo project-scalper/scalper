@@ -13,12 +13,12 @@ $("#signup").on('click', () => {
     })
     request.post('/users', payload)
     .then((res) => {
-        alert(res['msg'])
+        alert(res.msg)
         window.localStorage.setItem("session_id", res['session_id'])
         window.location.href = 'static/start_bot.html';
     })
     .catch((err) => {
-        alert(err['msg'])
+        alert(err.msg)
     })
 })
 
@@ -31,7 +31,7 @@ $("#login").on('click', () => {
     })
     request.post('/auth/login', payload)
     .then((res) => {
-        alert(res['msg'])
+        alert(res.msg)
         window.localStorage.setItem("session_id", res['session_id'])
         if (res.has_bot === true) {
             window.location.href = "static/main.html";

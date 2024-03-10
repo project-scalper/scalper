@@ -230,6 +230,7 @@ class Checker():
                 self.signal = "SELL"
             elif "SELL" in self.signal:
                 self.signal = "BUY"
+            watchlist.put(self.symbol, self.signal)
 
         self.enter_trade()
 
