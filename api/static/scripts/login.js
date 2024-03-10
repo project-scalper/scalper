@@ -33,7 +33,11 @@ $("#login").on('click', () => {
     .then((res) => {
         alert(res['msg'])
         window.localStorage.setItem("session_id", res['session_id'])
-        window.location.href = 'static/start_bot.html';
+        if (res.has_bot === true) {
+            window.location.href = "main.html";
+        } else {
+            window.location.href = 'static/start_bot.html';
+        }
     })
     .catch((err) => {
         alert(err)

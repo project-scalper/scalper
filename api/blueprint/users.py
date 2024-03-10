@@ -69,6 +69,7 @@ def login():
         sess.delete()
     session = UserSession(user_id=user[0].id)
     session.save()
-    return jsonify({"msg": f"Welcome back {user[0].username}", "session_id": session.id})
+    return jsonify({"msg": f"Welcome back {user[0].username}", "session_id": session.id,
+                    "has_bot": user[0].has_bot})
 
 # @app_views.route('/users/<')
