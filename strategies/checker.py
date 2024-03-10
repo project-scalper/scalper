@@ -226,10 +226,13 @@ class Checker():
 
         if reverse is True:
             self.tp, self.sl = self.sl, self.tp
+            self.risk, self.reward = self.reward, self.risk
             if "BUY" in self.signal:
-                self.signal = "SELL"
+                self.signal = self.signal.replace("BUY", "SELL")
+                # self.signal = "SELL"
             elif "SELL" in self.signal:
-                self.signal = "BUY"
+                self.signal = self.signal.replace("SELL", "BUY")
+                # self.signal = "BUY"
             watchlist.put(self.symbol, self.signal)
 
         self.enter_trade()

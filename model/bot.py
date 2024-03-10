@@ -45,3 +45,18 @@ class Bot(BaseModel):
 
         self.balance = bal
         self.save()
+
+    def verify_capital(self):
+        user = model.storage.get("User", self.user_id)
+        exchange = getattr(ccxt, user.exchange)()
+        # exchange.options['defaultType'] = 'future'
+        exchange.apiKey = user.keys.get("apiKey")
+        exchange.secret = user.keys.get("secret")
+        exchange.none = ccxt.Exchange.milliseconds
+
+        bal = exchange.fetchBalance()['free']
+        if "USDT" not in bal:
+            raise Exception("Insufficient capital in wallet.")
+        bal = bal['USDT']
+        if bal < self.capital:
+            raise Exception("Insufficient balance in wallet.")

@@ -48,6 +48,10 @@ def start_checker():
 def start_bot():
     user = auth.current_user()
     bot = Bot(user_id=user.id, capital=user.capital)
+    # try:
+    #     bot.verify_capital()
+    # except Exception as e:
+    #     return jsonify(e), 400
     bot.save()
     setattr(user, "has_bot", True)
     setattr(user, 'bot_id', bot.id)

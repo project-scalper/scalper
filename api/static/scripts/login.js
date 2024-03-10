@@ -32,7 +32,7 @@ $("#login").on('click', () => {
     request.post('/auth/login', payload)
     .then((res) => {
         alert(res.msg)
-        window.localStorage.setItem("session_id", res['session_id'])
+        window.localStorage.setItem("session_id", res.session_id)
         if (res.has_bot === true) {
             window.location.href = "static/main.html";
         } else {
@@ -41,5 +41,6 @@ $("#login").on('click', () => {
     })
     .catch((err) => {
         alert(err)
+        console.log(err)
     })
 })
