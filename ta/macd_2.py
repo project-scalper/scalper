@@ -28,7 +28,7 @@ async def new_checker(symbol, sig_type, exchange):
     from strategies.checker import Checker
     for _, bot in storage.all("Bot").items():
         trade = Checker(exchange, bot_id=bot.id)
-        await trade.execute(symbol, signal=sig_type, reverse=True)
+        await trade.execute(symbol, signal=sig_type)
 
 
 async def analyser(symbol:str, exchange:ccxt.Exchange)-> None:
