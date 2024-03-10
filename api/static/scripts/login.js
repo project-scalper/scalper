@@ -40,6 +40,6 @@ $("#login").on('click', () => {
         }
     })
     .catch((err) => {
-        alert(err)
+        alert(err.msg)
     })
 })

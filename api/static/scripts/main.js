@@ -32,7 +32,8 @@ async function getProfile() {
         console.log(res)
         $("#greeting").text(`Hello ${res.username}`)
         $("#capital").text("$" + res.capital)
-        loadBot()
+        window.localStorage.setItem("bot_id", res.bot_id)
+        loadBot(res.bot_id)
     })
     .catch((err) => {
         alert("There was an error getting user info. Please try to log in again")
@@ -41,7 +42,8 @@ async function getProfile() {
 }
 
 $("#reload").on('click', () => {
-    loadBot()
+    bot_id = window.localStorage.getItem("bot_id");
+    loadBot(bot_id);
 })
 
 Promise.all([getProfile()])
