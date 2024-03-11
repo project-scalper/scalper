@@ -34,7 +34,7 @@ async def new_checker(symbol, sig_type:str, exchange):
         elif "SELL" in sig_type:
             sig_type = sig_type.replace("SELL", "BUY")
             
-        await trade.execute(symbol, signal=sig_type, reverse=True)
+        await trade.execute(symbol, signal=sig_type, reverse=False)
 
 
 async def analyser(symbol:str, exchange:ccxt.Exchange)-> None:
