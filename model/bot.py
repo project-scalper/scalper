@@ -12,6 +12,7 @@ class Bot(BaseModel):
     daily_pnl = []  # contains the pnl for each of the last 30 days
     capital = 0
     balance = 0
+    pnl_history = []
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -27,7 +28,8 @@ class Bot(BaseModel):
             self.capital = 0
         if 'balance' not in kwargs:
             self.balance = 0
-
+        if 'pnl_history' not in kwargs:
+            self.pnl_history = []
         self.update_balance()
 
     def update_balance(self):
@@ -48,15 +50,13 @@ class Bot(BaseModel):
 
     def verify_capital(self):
         user = model.storage.get("User", self.user_id)
-        exchange = getattr(ccxt, user.exchange)()
+        exchange:ccxt.Exchange = getattr(ccxt, user.exchange)()
         # exchange.options['defaultType'] = 'future'
         exchange.apiKey = user.keys.get("apiKey")
         exchange.secret = user.keys.get("secret")
         exchange.none = ccxt.Exchange.milliseconds
 
-        bal = exchange.fetchBalance()['free']
-        if "USDT" not in bal:
-            raise Exception("Insufficient capital in wallet.")
-        bal = bal['USDT']
+        bal = exchange.fetch_balance()['free']
+        bal = bal.get("USDT", 0)
         if bal < self.capital:
             raise Exception("Insufficient balance in wallet.")

@@ -14,7 +14,8 @@ import asyncio
 async def main():
     symbols = ['BTC/USDT:USDT', 'ETH/USDT:USDT', 'ADA/USDT:USDT', 'SOL/USDT:USDT',
                'DOGE/USDT:USDT', 'BNB/USDT:USDT', 'DOT/USDT:USDT', 'XRP/USDT:USDT',
-               'MATIC/USDT:USDT', 'OGN/USDT:USDT']
+               'MATIC/USDT:USDT', 'OGN/USDT:USDT', 'GALA/USDT:USDT', 'AVAX/USDT:USDT',
+               'APE/USDT:USDT', 'LINK/USDT:USDT', 'NEAR/USDT:USDT']
     # run_to = datetime.now() + timedelta(hours=24)
     mkt = exchange.load_markets()
     while True:

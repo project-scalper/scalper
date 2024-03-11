@@ -7,6 +7,7 @@ from strategies.rsi_strategy import active
 import time
 import ccxt
 import model
+from model.bot import Bot
 from helper import watchlist
 
 time_fmt = "%b %d %Y, %I:%M:%S %p"
@@ -28,7 +29,7 @@ class Checker():
                 setattr(self, key, val)
 
         if self.bot_id:
-            self.bot = model.storage.get("Bot", self.bot_id)
+            self.bot:Bot = model.storage.get("Bot", self.bot_id)
 
     def calculate_entry_price(self):
         """Calculates the limit entry price for the trade"""
@@ -281,5 +282,7 @@ class Checker():
         self.bot.trades.append({"date": dt, "msg": f"#{self.symbol.split('/')[0]} ({sig}) =>  {pnl:.2f} USDT"})
         self.bot.today_pnl += pnl
         self.bot.daily_pnl[-1]['msg'] += pnl
+        self.bot.pnl_history.append(pnl)
+        self.bot.pnl_history = self.bot.pnl_history[-5:]
         self.bot.update_balance()
         self.bot.save()

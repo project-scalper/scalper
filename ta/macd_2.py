@@ -29,12 +29,16 @@ async def new_checker(symbol, sig_type:str, exchange):
     for _, bot in storage.all("Bot").items():
         trade = Checker(exchange, bot_id=bot.id)
 
-        if "BUY" in sig_type:
-            sig_type = sig_type.replace("BUY", "SELL")
-        elif "SELL" in sig_type:
-            sig_type = sig_type.replace("SELL", "BUY")
-
-        watchlist.put(symbol, sig_type)
+        count = 0
+        for pnl in bot.pnl_history:
+            if pnl < 0:
+                count += 1
+        if count >= 3:
+            if "BUY" in sig_type:
+                sig_type = sig_type.replace("BUY", "SELL")
+            elif "SELL" in sig_type:
+                sig_type = sig_type.replace("SELL", "BUY")
+            watchlist.put(symbol, sig_type)
             
         await trade.execute(symbol, signal=sig_type, reverse=False)
 
