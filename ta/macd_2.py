@@ -33,6 +33,8 @@ async def new_checker(symbol, sig_type:str, exchange):
             sig_type = sig_type.replace("BUY", "SELL")
         elif "SELL" in sig_type:
             sig_type = sig_type.replace("SELL", "BUY")
+
+        watchlist.put(symbol, sig_type)
             
         await trade.execute(symbol, signal=sig_type, reverse=False)
 
