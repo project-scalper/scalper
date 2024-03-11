@@ -160,8 +160,8 @@ class Checker():
                     self.update_bot(pnl)
                     return
                 
-                if hasattr(self, "close_position"):
-                    if ("BUY" in self.signal and ticker['last'] <= self.close_position) or ("SELL" in self.signal and ticker['last'] >= self.close_position):
+                if hasattr(self, "close_price"):
+                    if ("BUY" in self.signal and ticker['last'] <= self.close_price) or ("SELL" in self.signal and ticker['last'] >= self.close_price):
                         msg = f"#{self.symbol}. {self.signal} - start_time={self.start_time}. Break-even price hit. "
                         if hasattr(self, 'breakeven_profit'):
                             watchlist.trade_counter(self.signal, self.breakeven_profit)
@@ -211,9 +211,9 @@ class Checker():
         self.calculate_fee()
         profit = self.min_profit + self.fee
         if "BUY" in self.signal:
-            self.close_position = (cost + profit) / self.amount
+            self.close_price = (cost + profit) / self.amount
         elif "SELL" in self.signal:
-            self.close_position = (cost - profit) / self.amount
+            self.close_price = (cost - profit) / self.amount
 
     def delete(self):
         del self
