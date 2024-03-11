@@ -24,10 +24,16 @@ async def run_thread(symbol, sig_type, exchange):
     nt = threading.Thread(target=start_checker, args=(symbol, sig_type, exchange))
     nt.start()
 
-async def new_checker(symbol, sig_type, exchange):
+async def new_checker(symbol, sig_type:str, exchange):
     from strategies.checker import Checker
     for _, bot in storage.all("Bot").items():
         trade = Checker(exchange, bot_id=bot.id)
+
+        if "BUY" in sig_type:
+            sig_type = sig_type.replace("BUY", "SELL")
+        elif "SELL" in sig_type:
+            sig_type = sig_type.replace("SELL", "BUY")
+            
         await trade.execute(symbol, signal=sig_type, reverse=True)
 
 

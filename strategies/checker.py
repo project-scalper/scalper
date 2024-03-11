@@ -65,23 +65,28 @@ class Checker():
             amount = float(self.exchange.amount_to_precision(self.symbol, amount))
             cost = amount * self.entry_price
             if hasattr(self, "fee"):
-                cost += self.fee
-            tp = (cost + self.reward) / amount
-            sl = (cost - self.risk) / amount
+                # cost += self.fee
+                tp = (cost + self.fee + self.reward) / amount
+                sl = (cost + self.fee_sl - self.risk) / amount
+            else:
+                tp = (cost + self.reward) / amount
+                sl = (cost - self.risk) / amount
 
         if "SELL" in self.signal:
             amount = (self.capital * self.leverage) / self.entry_price
             amount = float(self.exchange.amount_to_precision(self.symbol, amount))
             cost = amount * self.entry_price
             if hasattr(self, "fee"):
-                cost -= self.fee
-            tp = (cost - self.reward) / amount
-            sl = (cost + self.risk) / amount
+                # cost -= self.fee
+                tp = (cost - self.fee - self.reward) / amount
+                sl = (cost - self.fee_sl + self.risk) / amount
+            else:
+                tp = (cost - self.reward) / amount
+                sl = (cost + self.risk) / amount
 
         self.tp = float(self.exchange.price_to_precision(self.symbol, tp))
         self.sl = float(self.exchange.price_to_precision(self.symbol, sl))
         self.amount = amount
-        adapter.info(f"#{self.symbol}. {self.signal} - Entry={self.entry_price}, tp={self.tp}, sl={self.sl}")
 
     def enter_trade(self):
         if not self.entry_price:
@@ -183,7 +188,7 @@ class Checker():
                         else:
                             adapter.info(f"#{self.symbol}. {self.signal} - start_time={self.start_time}. Adjusting stop_loss...")
                             self.breakeven_profit = 0
-                            self.adjust_sl()
+                            self.close_position()
 
             except ccxt.NetworkError as e:
                 adapter.error("Seems the network connection is unstable.")
@@ -196,9 +201,11 @@ class Checker():
         """Calculates maker fee and taker fee"""
         maker_fee = self.exchange.fetchTradingFee(self.symbol)['maker'] * self.amount * self.entry_price
         taker_fee = self.exchange.fetchTradingFee(self.symbol)['taker'] * self.amount * self.tp
+        taker_fee_sl = self.exchange.fetchTradingFee(self.symbol)['taker'] * self.amount * self.sl
         self.fee = maker_fee + taker_fee
+        self.fee_sl = maker_fee + taker_fee_sl
 
-    def adjust_sl(self):
+    def close_position(self):
         cost = self.amount * self.entry_price
         
         self.calculate_fee()
@@ -224,15 +231,15 @@ class Checker():
         self.calculate_fee()
         self.calculate_tp_sl()  # This method is called again to account for fees
 
+        adapter.info(f"#{self.symbol}. {self.signal} - Entry={self.entry_price}, tp={self.tp}, sl={self.sl}")
+
         if reverse is True:
             self.tp, self.sl = self.sl, self.tp
             # self.risk, self.reward = self.reward, self.risk
             if "BUY" in self.signal:
                 self.signal = self.signal.replace("BUY", "SELL")
-                # self.signal = "SELL"
             elif "SELL" in self.signal:
                 self.signal = self.signal.replace("SELL", "BUY")
-                # self.signal = "BUY"
             watchlist.put(self.symbol, self.signal)
 
         self.enter_trade()
@@ -243,7 +250,7 @@ class Checker():
         delattr(self, "symbol")
         delattr(self, "signal")
 
-    def update_bot(self, pnl:float):
+    def update_bot(self, pnl:float, reverse:bool=False):
         current_dt = datetime.now()
         current_dt_str = current_dt.strftime(date_fmt)
         if len(self.bot.daily_pnl) > 0:
@@ -262,6 +269,12 @@ class Checker():
             sig = "LONG"
         elif "SELL" in self.signal:
             sig = "SHORT"
+
+        if reverse is True:
+            if pnl > 0:
+                pnl += self.fee
+            else:
+                pnl += self.fee_sl
 
         dt = datetime.now() + timedelta(hours=1)
         dt = dt.strftime(time_fmt)

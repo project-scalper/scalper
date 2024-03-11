@@ -15,13 +15,14 @@ class Executor(Checker):
     active = False
     max_daily_loss = 8
 
-    def __init__(self, user:Dict):
+    def __init__(self, exchange:ccxt.Exchange, user:Dict):
         self.bot_id = user['bot_id']
-        self.exchange = self.get_exchange(user)
+        self.exchange = exchange
+        # self.exchange = self.get_exchange(user)
         super().__init__(self.exchange)
         self.bot = model.storage.get("Bot", self.bot_id)
 
-    def get_exchange(self, user):
+    def get_exchange(self, user) -> ccxt.Exchange:
         exchange: ccxt.Exchange = getattr(ccxt, user['exchange'])()
         exchange.apiKey = user['keys']['apiKey']
         exchange.secret = user['keys']['secret']
@@ -120,7 +121,7 @@ class Executor(Checker):
         # obtain the order_id of the tp and sl orders
         while True:
             try:
-                orders = self.exchange.fetch_orders(self.symbol, limit=3)
+                orders = self.exchange.fetch_open_orders(self.symbol, limit=3)
                 for order in orders:
                     if order['id'] != self.order['id']:
                         if order['stopLossPrice']:
@@ -143,14 +144,15 @@ class Executor(Checker):
         alert = False
         while True:
             try:
-                tp_ord = self.exchange.fetch_order(tp_order['id'], self.symbol)
-                sl_ord = self.exchange.fetch_order(sl_order['id'], self.symbol)
+                tp_ord = self.exchange.fetch_open_order(tp_order['id'], self.symbol)
+                sl_ord = self.exchange.fetch_open_order(sl_order['id'], self.symbol)
 
                 sig = watchlist.get(self.symbol)
                 if ("BUY" in self.signal and "BUY" not in sig) or ("SELL" in self.signal and "SELL" not in sig):
                     if alert is False:
                         alert = True
-                        self.adjust_sl(sl_order)
+                        self.close_position(sl_order)
+                        return
 
                 if tp_ord['status'] == 'closed':
                     adapter.info(f"#{self.symbol}. {self.signal} - *TP hit*")
@@ -163,37 +165,50 @@ class Executor(Checker):
             finally:
                 time.sleep(2)
 
-    def adjust_sl(self, profit:float=0):
-        cost = self.amount * self.entry_price
-        self.calculate_fee()
+    def close_position(self, profit:float=0):
+        # cost = self.amount * self.entry_price
+        # self.calculate_fee()
         if "BUY" in self.signal:
-            new_price = (cost + self.fee + profit) / self.amount
+            side = "sell"
         elif "SELL" in self.signal:
-            new_price = (cost - self.fee - profit) / self.amount
+            side = "buy"
+        self.exchange.close_position(self.symbol, side=side)
+
+        # new_price = self.exchange.fetch_ticker(self.symbol)
+        # new_price = new_price['last']
+        # if "BUY" in self.signal:
+        #     new_price = (cost + self.fee + profit) / self.amount
+        # elif "SELL" in self.signal:
+        #     new_price = (cost - self.fee - profit) / self.amount
         
-        for n in range(3):
-            try:
-                self.exchange.edit_order(self.sl_order['id'], self.symbol, 'limit',
-                                            self.sl_order['side'], self.sl_order['amount'],
-                                            new_price)
-                break
-            except Exception as e:
-                if n == 2:
-                    adapter.error(f"{type(e).__name__} - {str(e)}")
+        # for n in range(3):
+        #     try:
+        #         self.exchange.edit_order(self.sl_order['id'], self.symbol, 'limit',
+        #                                     self.sl_order['side'], self.sl_order['amount'],
+        #                                     new_price)
+        #         break
+        #     except Exception as e:
+        #         if n == 2:
+        #             adapter.error(f"{type(e).__name__} - {str(e)}")
+        #         else:
+        #             continue
 
-    def reset(self):
-        self.active = False
-
-    def execute(self, symbol, signal):
+    async def execute(self, symbol, signal):
         self.symbol = symbol
         self.signal = signal
 
         try:
+            start_balance = self.exchange.fetch_balance()['free'].get("USDT", 0)
             self.calculate_entry_price()
             self.calculate_tp_sl()
+            self.calculate_fee()
+            self.calculate_tp_sl()
             self.enter_trade()
-            self.reset()
             watchlist.reset(self.symbol)
+            end_balance = self.exchange.fetch_balance()['free'].get("USDT", 0)
+            pnl = end_balance - start_balance
+            self.update_bot(pnl)
+            return
         except Exception as e:
             adapter.error(f"{type(e)} - {str(e)}")
 
