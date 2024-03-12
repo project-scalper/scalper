@@ -26,7 +26,7 @@ class Executor(Checker):
         exchange: ccxt.Exchange = getattr(ccxt, user['exchange'])()
         exchange.apiKey = user['keys']['apiKey']
         exchange.secret = user['keys']['secret']
-        exchange.options['defaultType'] = 'future'
+        # exchange.options['defaultType'] = 'future'
         exchange.nonce = ccxt.Exchange.milliseconds
         exchange.enableRateLimit = True
         return exchange

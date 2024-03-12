@@ -8,10 +8,10 @@ bybit = ccxt.bybit({
     'apiKey': handleEnv("bybit_apiKey"),
     'secret': handleEnv("bybit_secret"),
     'nonce': ccxt.Exchange.milliseconds,
-    'enableRateLimit': True,
-    'options': {
-        'defaultType': 'future'
-    }
+    'enableRateLimit': True
+    # 'options': {
+    #     'defaultType': 'future'
+    # }
 })
 
 binance = ccxt.binance({
