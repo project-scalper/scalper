@@ -33,7 +33,7 @@ async def new_checker(symbol, sig_type:str, exchange):
         for pnl in bot.pnl_history:
             if pnl < 0:
                 count += 1
-        if count >= 3:
+        if count >= 5:
             if "BUY" in sig_type:
                 sig_type = sig_type.replace("BUY", "SELL")
             elif "SELL" in sig_type:

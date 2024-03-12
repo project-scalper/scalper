@@ -112,7 +112,7 @@ class Checker():
             except Exception as e:
                 adapter.error(f"{type(e).__name__} - {str(e)}")
             finally:
-                time.sleep(2)
+                time.sleep(1)
 
         if active is True:
             adapter.info(f"#{self.symbol}. Could not enter trade. Executor already active")
@@ -196,7 +196,7 @@ class Checker():
             except Exception as e:
                 adapter.error(f"{type(e).__name__} - {str(e)}. line: {e.__traceback__.tb_lineno}")
             finally:
-                time.sleep(2)
+                time.sleep(1)
 
     def calculate_fee(self):
         """Calculates maker fee and taker fee"""
