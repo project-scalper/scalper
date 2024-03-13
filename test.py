@@ -1,8 +1,9 @@
 #!/usr/bin/python3
 
 from datetime import datetime, timedelta
-from variables import exchange
+# from variables import exchange
 import time
+from tradingview_ta import Exchange, Interval, TA_Handler
 
 
 flag = False
@@ -104,6 +105,17 @@ def test_trade(symbol):
     print(f"New edited order - {new_order}")
     return
 
+def get_analysis(symbol):
+    handler = TA_Handler(
+        symbol=symbol,
+        exchange='bybit',
+        screener="crypto",
+        interval=Interval.INTERVAL_5_MINUTES,
+        timeout=None
+    )
+
+    analysis = handler.get_analysis().oscillators
+    print(analysis)
 
 
 if __name__ == '__main__':
@@ -112,5 +124,8 @@ if __name__ == '__main__':
     #     changer.change()
     #     print(flag)
     #     changer.reset()
-    current_dt = datetime(2024, 1, 31, 00, 55, 0)
-    print(next(current_dt))
+
+    # current_dt = datetime(2024, 1, 31, 00, 55, 0)
+    # print(next(current_dt))
+
+    get_analysis("SOLUSDT")

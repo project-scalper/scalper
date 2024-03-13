@@ -166,7 +166,7 @@ class Executor(Checker):
                 time.sleep(2)
 
     def close_position(self, profit:float=0):
-        # cost = self.amount * self.entry_price
+        cost = self.amount * self.entry_price
         # self.calculate_fee()
         if "BUY" in self.signal:
             side = "sell"
@@ -174,12 +174,16 @@ class Executor(Checker):
             side = "buy"
         self.exchange.close_position(self.symbol, side=side)
 
-        # new_price = self.exchange.fetch_ticker(self.symbol)
-        # new_price = new_price['last']
-        # if "BUY" in self.signal:
-        #     new_price = (cost + self.fee + profit) / self.amount
-        # elif "SELL" in self.signal:
-        #     new_price = (cost - self.fee - profit) / self.amount
+        new_price = self.exchange.fetch_ticker(self.symbol)
+        new_price = new_price['last']
+        if "BUY" in self.signal:
+            new_price = (cost + self.fee + profit) / self.amount
+        elif "SELL" in self.signal:
+            new_price = (cost - self.fee - profit) / self.amount
+
+        order = self.exchange.edit_order(self.sl_order['id'], self.symbol, 'market',
+                                         self.sl_order['side'], self.amount, new_price,
+                                         params={"triggerPrice": new_price})
         
         # for n in range(3):
         #     try:

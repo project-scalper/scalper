@@ -11,6 +11,7 @@ from variables import timeframe, confirmation_timeframe
 import asyncio
 import ccxt
 from model import storage
+from utils.tradingview import get_analysis
 
 active = False
 
@@ -123,6 +124,7 @@ async def analyser(symbol:str, exchange:ccxt.Exchange)-> None:
             elif (_rsi[0]['RSI_6'] >= 80 or _rsi[1]['RSI_6'] >= 80) and _rsi[1]['RSI_6'] > _rsi[0]['RSI_6']:
                 sig_type = "RSI_EMA_SELL"
 
+
     if sig_type is not None:
         signal = watchlist.get(symbol)
         confirm_ema_50, confirm_ema_100 = await asyncio.gather(ema(exchange, symbol, 50, confirmation_timeframe),
@@ -150,6 +152,10 @@ async def analyser(symbol:str, exchange:ccxt.Exchange)-> None:
         watchlist.put(symbol, sig_type)
 
         candle_analysis = main(ohlcv=ohlcv, signal=sig_type)
+        tv_analysis = get_analysis(symbol)['RECOMMENDATION']
+        if ("BUY" in sig_type and "BUY" not in tv_analysis) or "SELL" in sig_type and 'SELL' not in tv_analysis:
+            watchlist.reset(symbol)
+            return
         if sig_type != 'NEUTRAL' and candle_analysis is True:
             await run_thread(symbol, sig_type, exchange)
         
