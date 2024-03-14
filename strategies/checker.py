@@ -52,9 +52,9 @@ class Checker():
 
         # Entry should be one-third way of the previous candle body
         if "BUY" in self.signal:
-            self.entry_price = cls - (0.33 * body_length)
+            self.entry_price = cls - (0.30 * body_length)
         else:
-            self.entry_price = cls + (0.33 * body_length)
+            self.entry_price = cls + (0.30 * body_length)
             # self.entry_price = last_ohlcv[1][-2]
 
         self.entry_price = float(self.exchange.price_to_precision(self.symbol, self.entry_price))
@@ -94,7 +94,7 @@ class Checker():
             return
         global active
 
-        valid_till = datetime.now() + timedelta(seconds=60)
+        valid_till = datetime.now() + timedelta(seconds=150)
         while datetime.now() <= valid_till and active is False:
             try:
                 ticker = self.exchange.fetch_ticker(self.symbol)
