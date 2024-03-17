@@ -35,28 +35,6 @@ async def main():
                 next_time = next_time.replace(minute=minute)
 
             next_time = next_time.replace(second=0, microsecond=0)
-
-            # next_time = datetime(next_time.year, next_time.month, next_time.day,
-            #                      next_time.hour, minute, 0, 0)
-            # if current_dt.minute >= 55:
-            #     if current_dt.hour == 23:
-            #         hour = 0
-            #         day = current_dt.day + 1
-            #     else:
-            #         hour = current_dt.hour + 1
-            #         day = current_dt.day
-            #     minute = 0
-            # elif current_dt.minute % 5 > 0:
-            #     minute = current_dt.minute + (5 - (current_dt.minute % 5))
-            #     hour = current_dt.hour
-            #     day = current_dt.day
-            # else:
-            #     minute = current_dt.minute + 5
-            #     hour = current_dt.hour
-            #     day = current_dt.day
-
-            # next_time = datetime(current_dt.year, current_dt.month,
-            #                     day, hour, minute, 0)
             while datetime.now() < next_time:
                 pass
 

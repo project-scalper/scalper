@@ -5,6 +5,7 @@ var token = window.localStorage.getItem("session_id")
 class Requests {
     constructor() {
         this.api = "https://scalper-cyk6.onrender.com/bot"
+        // this.api = "http://localhost:8000/bot"
     }
 
     get(endpoint) {

@@ -1,15 +1,13 @@
 #!/usr/bin/node
 
-function getProfile() {
+$(function getProfile() {
     request.get('/user/me')
     .then((res) => {
         if (res.has_bot === true) {
             window.location.href = 'main.html'
         }
     })
-}
-
-getProfile()
+})
 
 $("#create-bot").on('click', () => {
     var capital = $("#capital").val()
@@ -30,6 +28,9 @@ $("#create-bot").on('click', () => {
             window.location.href = "main.html"
         })
         .catch(() => {
+            $("#loader").addClass('disappear')
+            var loader = document.getElementById("loader")
+            loader.style.display = 'none'
             alert("An error occured while creating your bot"), 400
         })
     })

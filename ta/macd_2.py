@@ -12,6 +12,7 @@ import asyncio
 import ccxt
 from model import storage
 from utils.tradingview import get_analysis
+from strategies.checker import Checker
 
 active = False
 
@@ -26,9 +27,12 @@ async def run_thread(symbol, sig_type, exchange):
     nt.start()
 
 async def new_checker(symbol, sig_type:str, exchange):
-    from strategies.checker import Checker
+    
     for _, bot in storage.all("Bot").items():
-        trade = Checker(exchange, bot_id=bot.id)
+        if bot.balance < bot.capital * 0.9:
+            return ("Insufficient capital")
+        
+        trade = Checker(exchange, bot_id=bot.id, capital=bot.capital)
 
         # count = 0
         # for pnl in bot.pnl_history:

@@ -8,79 +8,69 @@ from datetime import datetime, timedelta
 from typing import Dict
 import time
 import model
-import uuid
+from strategies.rsi_strategy import active
+# import uuid
 
 
 class Executor(Checker):
     active = False
     max_daily_loss = 8
 
-    def __init__(self, exchange:ccxt.Exchange, user:Dict):
+    def __init__(self, exchange:ccxt.Exchange, user:Dict, *args, **kwargs):
         self.bot_id = user['bot_id']
-        self.exchange = exchange
+        # self.exchange = exchange
         # self.exchange = self.get_exchange(user)
-        super().__init__(self.exchange)
+        super().__init__(exchange, *args, **kwargs)
         self.bot = model.storage.get("Bot", self.bot_id)
-
-    def get_exchange(self, user) -> ccxt.Exchange:
-        exchange: ccxt.Exchange = getattr(ccxt, user['exchange'])()
-        exchange.apiKey = user['keys']['apiKey']
-        exchange.secret = user['keys']['secret']
-        # exchange.options['defaultType'] = 'future'
-        exchange.nonce = ccxt.Exchange.milliseconds
-        exchange.enableRateLimit = True
-        return exchange
 
     def set_leverage(self, symbol:str, value:int):
         try:
             self.exchange.set_leverage(value, symbol)
             self.exchange.set_margin_mode("isolated", self.symbol)
-        except Exception as e:
-            print(e)
+        except:
+            pass
 
     def enter_trade(self):
         if not self.entry_price:
             return
-        enter_flag = False
-        valid_till = datetime.now() + timedelta(minutes=5)
-        adapter.info(f"#{self.symbol}. New trade found. entry={self.entry_price}, tp={self.tp}, sl={self.sl}")
+        valid_till = datetime.now() + timedelta(seconds=150)
+        adapter.info(f"#{self.symbol}. {self.signal} - New trade found. entry={self.entry_price}, tp={self.tp}, sl={self.sl}")
         # self.place_order()
+        global active
         while datetime.now() <= valid_till:
             try:
                 ticker = self.exchange.fetch_ticker(self.symbol)
                 if ("BUY" in self.signal and ticker['last'] <= self.entry_price) or ("SELL" in self.signal and ticker['last'] >= self.entry_price):
                     self.entry_price = ticker['last']
-                    if active is True:
+                    if self.active is True:
                         break
 
                     self.calculate_tp_sl()
                     self.place_order()
                     active = True
                     while True:
-                        order = self.exchange.fetch_order(self.order['id'], self.symbol)
+                        order = self.exchange.fetch_open_order(self.order['id'], self.symbol)
                         if order['status'] == 'closed':
-                            enter_flag = True
                             adapter.info(f"#{self.symbol}. {self.signal}. trade entered at {self.entry_price}, tp={self.tp}, sl={self.sl}")
+                            self.monitor()
+                            break
+                        elif order['status'] == 'canceled' or order['status'] == 'rejected':
+                            adapter.warning(f"#{self.symbol} - Entry order {order['status']}")
                             break
                         else:
                             time.sleep(1)
                     
-                    self.monitor()
                     active = False
                     return
             except Exception as e:
                 adapter.error(f"{type(e).__name__} - {str(e)}")
             finally:
-                time.sleep(2)
+                time.sleep(1)
 
-        if enter_flag is False:
-            if active is True:
-                adapter.info(f"#{self.symbol}. Unable to enter trade, executor is active")
-            else:
-                adapter.info(f"#{self.symbol}. {self.signal} - Unable to enter trade in time.")
-            # self.exchange.cancel_order(self.order['id'], self.symbol)
-
-        self.reset()
+        if active is True:
+            adapter.info(f"#{self.symbol}. Could not enter trade. Executor already active")
+        else:
+            adapter.info(f"#{self.symbol}. {self.signal} - Unable to enter trade in time.")
         watchlist.reset(self.symbol)
 
     def place_order(self):
@@ -115,10 +105,20 @@ class Executor(Checker):
             adapter.error(f"{type(e).__name__} - {str(e)}")
             return
         
-        self.order = order
-
+        while True:
+            order = self.exchange.fetch_open_order(order['id'], self.symbol)
+            if order['status'] == 'open':
+                time.sleep(1)
+                continue
+            elif order['status'] == 'canceled' or order['status'] == 'rejected':
+                adapter.error("Entry order cancelled")
+                return False
+            elif order['status'] == 'closed':
+                self.order = order
+                return True
+        
     def monitor(self):
-        # obtain the order_id of the tp and sl orders
+        # obtain the  tp and sl orders
         while True:
             try:
                 orders = self.exchange.fetch_open_orders(self.symbol, limit=3)
@@ -138,21 +138,21 @@ class Executor(Checker):
             except Exception as e:
                 adapter.warning(f"#{self.symbol}. Unable to fetch trade - {str(e)}")
             finally:
-                time.sleep(2)
+                time.sleep(1)
 
         # monitor both the tp and sl orders
-        alert = False
+        # alert = False
         while True:
             try:
                 tp_ord = self.exchange.fetch_open_order(tp_order['id'], self.symbol)
                 sl_ord = self.exchange.fetch_open_order(sl_order['id'], self.symbol)
 
-                sig = watchlist.get(self.symbol)
-                if ("BUY" in self.signal and "BUY" not in sig) or ("SELL" in self.signal and "SELL" not in sig):
-                    if alert is False:
-                        alert = True
-                        self.close_position(sl_order)
-                        return
+                # sig = watchlist.get(self.symbol)
+                # if ("BUY" in self.signal and "BUY" not in sig) or ("SELL" in self.signal and "SELL" not in sig):
+                #     if alert is False:
+                #         alert = True
+                #         self.close_position()
+                #         return
 
                 if tp_ord['status'] == 'closed':
                     adapter.info(f"#{self.symbol}. {self.signal} - *TP hit*")
@@ -163,27 +163,23 @@ class Executor(Checker):
             except Exception as e:
                 adapter.error(f"{type(e).__name__} - {str(e)}")
             finally:
-                time.sleep(2)
+                time.sleep(1)
 
-    def close_position(self, profit:float=0):
-        cost = self.amount * self.entry_price
-        # self.calculate_fee()
-        if "BUY" in self.signal:
-            side = "sell"
-        elif "SELL" in self.signal:
-            side = "buy"
-        self.exchange.close_position(self.symbol, side=side)
+    def close_position(self):
+        new_price = self.exchange.fetch_ticker(self.symbol)['last']
 
-        new_price = self.exchange.fetch_ticker(self.symbol)
-        new_price = new_price['last']
-        if "BUY" in self.signal:
-            new_price = (cost + self.fee + profit) / self.amount
-        elif "SELL" in self.signal:
-            new_price = (cost - self.fee - profit) / self.amount
-
-        order = self.exchange.edit_order(self.sl_order['id'], self.symbol, 'market',
-                                         self.sl_order['side'], self.amount, new_price,
-                                         params={"triggerPrice": new_price})
+        for n in range(3):
+            try:
+                self.exchange.edit_order(self.sl_order['id'], self.symbol, 'market',
+                                        self.sl_order['side'], self.amount, new_price,
+                                        params={"triggerPrice": new_price})
+                break
+            except:
+                if n == 2:
+                    adapter.error(f"#{self.symbol}. Unable to close position")
+                    return
+                else:
+                    time.sleep(1)
         
         # for n in range(3):
         #     try:

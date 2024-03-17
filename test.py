@@ -1,8 +1,11 @@
 #!/usr/bin/python3
 
 from datetime import datetime, timedelta
-# from variables import exchange
+from variables import exchange
+from strategies.executor import Executor
 import time
+import asyncio
+from model import storage
 from tradingview_ta import Exchange, Interval, TA_Handler
 
 
@@ -117,6 +120,12 @@ def get_analysis(symbol):
     analysis = handler.get_analysis().oscillators
     print(analysis)
 
+async def test_signal(symbol, signal):
+    user = storage.all('User')[0].to_dict()
+    trade = Executor(exchange, user)
+
+    await trade.execute(symbol, signal)
+
 
 if __name__ == '__main__':
     # changer = Changer()
@@ -128,4 +137,5 @@ if __name__ == '__main__':
     # current_dt = datetime(2024, 1, 31, 00, 55, 0)
     # print(next(current_dt))
 
-    get_analysis("SOLUSDT")
+    asyncio.run(get_analysis("SOLUSDT"))
+    

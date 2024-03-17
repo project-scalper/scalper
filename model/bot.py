@@ -10,8 +10,8 @@ class Bot(BaseModel):
     trades = []     # contains all the trades taken in the current day
     today_pnl = 0   # contains the pnl for the current day
     daily_pnl = []  # contains the pnl for each of the last 30 days
-    capital = 0
-    balance = 0
+    capital = 0     # contains the user's intended capital to start the bot
+    balance = 0     # contains the actual usdt balance in the user wallet
     pnl_history = []
 
     def __init__(self, *args, **kwargs):

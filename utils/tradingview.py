@@ -2,6 +2,7 @@
 
 from tradingview_ta import Interval, TA_Handler
 from datetime import datetime, timedelta
+from helper.adapter import adapter
 # from variables import timeframe
 
 
@@ -28,21 +29,21 @@ def main():
                'APE/USDT:USDT', 'LINK/USDT:USDT', 'NEAR/USDT:USDT']
     prev_sig = {}
     while True:
-        print("Starting")
+        adapter.info("Starting")
         try:
             for symbol in symbols:
                 analysis = get_analysis(symbol)['RECOMMENDATION']
                 if "BUY" in analysis:
                     if prev_sig.get(symbol, None) == 'sell':
-                        print(f'#{symbol} {analysis}')
+                        adapter.info(f'#{symbol} {analysis}')
                     prev_sig[symbol] = 'buy'
                 elif 'SELL' in analysis:
                     if prev_sig.get(symbol, None) == 'buy':
-                        print(f"#{symbol} {analysis}")
+                        adapter.info(f"#{symbol} {analysis}")
                     prev_sig[symbol] = 'sell'
-            print("Done!")
+            adapter.info("Done!\n")
         except Exception as e:
-            print(e)
+            adapter.warning(e)
         finally:
             next_time = datetime.now() + timedelta(minutes=5)
             if next_time.minute % 5 != 0:
@@ -56,15 +57,5 @@ def main():
 
 
 if __name__ == '__main__':
-    # symbols = ['BTC/USDT:USDT', 'ETH/USDT:USDT', 'ADA/USDT:USDT', 'SOL/USDT:USDT',
-    #            'DOGE/USDT:USDT', 'BNB/USDT:USDT', 'DOT/USDT:USDT', 'XRP/USDT:USDT',
-    #            'MATIC/USDT:USDT', 'SAND/USDT:USDT', 'GALA/USDT:USDT', 'AVAX/USDT:USDT',
-    #            'APE/USDT:USDT', 'LINK/USDT:USDT', 'NEAR/USDT:USDT']
-    # for symbol in symbols:
-    #     try:
-    #         analysis = get_analysis(symbol)
-    #         print(f"#{symbol} - {analysis}")
-    #     except Exception as e:
-    #         print(f"\n#{symbol} - {str(e)}\n")
 
     main()

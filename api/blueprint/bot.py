@@ -45,13 +45,13 @@ def start_checker():
 
 @app_views.route('/create_bot', strict_slashes=False)
 @auth.login_required
-def start_bot():
+def create_bot():
     user = auth.current_user()
     bot = Bot(user_id=user.id, capital=user.capital)
-    # try:
-    #     bot.verify_capital()
-    # except Exception as e:
-    #     return jsonify(e), 400
+    try:
+        bot.verify_capital()
+    except Exception as e:
+        return jsonify(e), 400
     bot.save()
     setattr(user, "has_bot", True)
     setattr(user, 'bot_id', bot.id)
@@ -59,7 +59,11 @@ def start_bot():
     return jsonify("Your bot has been created successfully"), 200
 
 @app_views.route('/bot/<bot_id>', strict_slashes=False)
+@auth.login_required
 def get_bot(bot_id):
+    if bot_id == 'me':
+        user = auth.current_user()
+        bot_id = user.bot_id
     bot = storage.get("Bot", bot_id)
     if not bot:
         return jsonify("You have no active bot"), 404

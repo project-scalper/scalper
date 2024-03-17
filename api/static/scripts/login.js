@@ -40,6 +40,9 @@ $("#login").on('click', () => {
         }
     })
     .catch((err) => {
+        $("#loader").addClass('disappear')
+        var loader = document.getElementById("loader")
+        loader.style.display = 'none'
         if (err.responseJSON != undefined) {
             alert(err.responseJSON)
         } else {

@@ -20,10 +20,16 @@ function loadBot(bot_id) {
         }
     })
     .catch((err) => {
-        alert("Error fetching bot");
         console.log(err);
+        var loader = document.getElementById('loader');
+        if (loader != null) {
+            loader.style.display = "none";
+        }
         if (err.statusCode === 401) {
+            alert("Your session has expired, please sign in again")
             window.location.href = "login.html"
+        } else {
+            alert("Error fetching bot");
         }
     })
 }
@@ -38,8 +44,13 @@ async function getProfile() {
         loadBot(res.bot_id)
     })
     .catch((err) => {
-        alert("There was an error getting user info. Please try to log in again")
-        console.log(err);
+        if (err.statusCode === 401) {
+            alert("Your session has expired, please log in again to continue");
+            window.location.href = 'login2.html'
+        } else {
+            alert("There was an error getting user info")
+            console.log(err);
+        }
     })
 }
 
@@ -49,3 +60,9 @@ $("#reload").on('click', () => {
 })
 
 Promise.all([getProfile()])
+.then(() => {
+    var loader = document.getElementById('preloader');
+	if (loader != null) {
+		loader.style.display = "none";
+	}
+})

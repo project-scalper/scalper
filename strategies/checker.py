@@ -16,10 +16,7 @@ date_fmt = "%b %d %Y"
 
 class Checker():
     capital:int = capital
-    risk:float = risk
-    reward: float = reward
     leverage:int = leverage
-    min_profit = 0.000 * capital
     bot_id = None
 
     def __init__(self, exchange:ccxt.Exchange, *args, **kwargs):
@@ -30,6 +27,10 @@ class Checker():
 
         if self.bot_id:
             self.bot:Bot = model.storage.get("Bot", self.bot_id)
+            self.capital = self.bot.capital
+
+        self.risk = self.capital * risk
+        self.reward = self.capital * reward
 
     def calculate_entry_price(self):
         """Calculates the limit entry price for the trade"""
