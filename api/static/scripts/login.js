@@ -2,6 +2,7 @@
 
 $("#signup").on('click', () => {
     // console.log("Signup has been clicked")
+    $("#loader2").style.display = 'block';
     var username = $("#username").val();
     var password = $("#password").val();
     var email = $("#email").val();
@@ -23,6 +24,10 @@ $("#signup").on('click', () => {
 })
 
 $("#login").on('click', () => {
+    // $("#loader").style.display = 'block';
+    var loader = document.getElementById("loader")
+    loader.style.display = 'block'
+
     var username = $("#login-username").val()
     var password = $("#login-password").val()
     var payload = JSON.stringify({

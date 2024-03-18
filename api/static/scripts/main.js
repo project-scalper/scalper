@@ -1,7 +1,7 @@
 #!/usr/bin/node
 
-function loadBot(bot_id) {
-    request.get('/bot/' + bot_id)
+async function loadBot(bot_id) {
+    return request.get('/bot/' + bot_id)
     .then((bot) => {
         $("#daily-pnl").text(bot.today_pnl.toFixed(2))
         $("#current-balance").text("$" + bot.balance.toFixed(2))
@@ -17,6 +17,10 @@ function loadBot(bot_id) {
             $("#todays-trades").prepend(
                 `<li>${tm}: ${item.msg}\n</li>`
             )
+        }
+        var loader = document.getElementById('loader');
+        if (loader != null) {
+            loader.style.display = "none";
         }
     })
     .catch((err) => {
@@ -34,14 +38,14 @@ function loadBot(bot_id) {
     })
 }
 
-async function getProfile() {
-    request.get('/user/me')
+function getProfile() {
+    return request.get('/user/me')
     .then((res) => {
-        console.log(res)
+        // console.log(res)
         $("#greeting").text(`Hello ${res.username}`)
         $("#capital").text("$" + res.capital)
         window.localStorage.setItem("bot_id", res.bot_id)
-        loadBot(res.bot_id)
+        return loadBot(res.bot_id)
     })
     .catch((err) => {
         if (err.statusCode === 401) {
@@ -54,12 +58,18 @@ async function getProfile() {
     })
 }
 
-$("#reload").on('click', () => {
-    bot_id = window.localStorage.getItem("bot_id");
-    loadBot(bot_id);
-})
+function refreshPage() {
+    $("#reload").on('click', () => {
+        var loader = document.getElementById("loader")
+        loader.style.display = 'block'
 
-Promise.all([getProfile()])
+        bot_id = window.localStorage.getItem("bot_id");
+        return loadBot(bot_id);
+        
+    })
+}
+
+Promise.all([getProfile(), refreshPage()])
 .then(() => {
     var loader = document.getElementById('preloader');
 	if (loader != null) {

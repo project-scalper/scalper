@@ -27,10 +27,10 @@ async def run_thread(symbol, sig_type, exchange):
     nt.start()
 
 async def new_checker(symbol, sig_type:str, exchange):
-    
-    for _, bot in storage.all("Bot").items():
-        if bot.balance < bot.capital * 0.9:
-            return ("Insufficient capital")
+    bots = storage.all("Bot")
+    for _, bot in bots.items():
+        # if bot.balance < bot.capital * 0.9:
+        #     return ("Insufficient capital")
         
         trade = Checker(exchange, bot_id=bot.id, capital=bot.capital)
 
@@ -131,12 +131,12 @@ async def analyser(symbol:str, exchange:ccxt.Exchange)-> None:
 
     if sig_type is not None:
         signal = watchlist.get(symbol)
-        confirm_ema_50, confirm_ema_100 = await asyncio.gather(ema(exchange, symbol, 50, confirmation_timeframe),
-                                                         ema(exchange, symbol, 100, confirmation_timeframe))
+        # confirm_ema_50, confirm_ema_100 = await asyncio.gather(ema(exchange, symbol, 50, confirmation_timeframe),
+        #                                                  ema(exchange, symbol, 100, confirmation_timeframe))
         if "BUY" in sig_type or "BUY" in signal:
             # check higher tf to confirm trend
-            if confirm_ema_100[0]['EMA'] > confirm_ema_50[0]['EMA']:
-                sig_type = 'NEUTRAL'
+            # if confirm_ema_100[0]['EMA'] > confirm_ema_50[0]['EMA']:
+            #     sig_type = 'NEUTRAL'
 
             if _rsi[0]['RSI_6'] > 80:
                 sig_type = 'NEUTRAL'
@@ -145,8 +145,8 @@ async def analyser(symbol:str, exchange:ccxt.Exchange)-> None:
 
         elif "SELL" in sig_type or "SELL" in signal:
             # check higher tf to confirm trend
-            if confirm_ema_100[0]['EMA'] < confirm_ema_50[0]['EMA']:
-                sig_type = 'NEUTRAL'
+            # if confirm_ema_100[0]['EMA'] < confirm_ema_50[0]['EMA']:
+            #     sig_type = 'NEUTRAL'
 
             if _rsi[0]['RSI_6'] < 20:
                 sig_type = 'NEUTRAL'
