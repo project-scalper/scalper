@@ -27,7 +27,7 @@ class Checker():
 
         if self.bot_id:
             self.bot:Bot = model.storage.get("Bot", self.bot_id)
-            self.capital = self.bot.capital
+            self.capital = int(self.bot.capital)
 
         self.risk = self.capital * risk
         self.reward = self.capital * reward
