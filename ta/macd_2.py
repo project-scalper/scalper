@@ -30,9 +30,10 @@ async def new_checker(symbol, sig_type:str, exchange):
     bots = storage.all("Bot")
     for _, bot in bots.items():
         # if bot.balance < bot.capital * 0.9:
-        #     return ("Insufficient capital")
+        #     adapter.error("Insufficient capital")
+        cap = float(bot.capital)
         
-        trade = Checker(exchange, bot_id=bot.id, capital=bot.capital)
+        trade = Checker(exchange, bot_id=bot.id, capital=cap)
 
         # count = 0
         # for pnl in bot.pnl_history:
