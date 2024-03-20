@@ -3,11 +3,11 @@
 from utils.ema_calculator import ema
 from utils.macd_calculator import macd
 from utils.rsi_calculator import rsi
-from utils.candle_patterns import main
+from utils.candle_patterns import candle_main
 import threading
 from helper.adapter import adapter
 from helper import watchlist
-from variables import timeframe, confirmation_timeframe
+from variables import timeframe
 import asyncio
 import ccxt
 from model import storage
@@ -156,9 +156,9 @@ async def analyser(symbol:str, exchange:ccxt.Exchange)-> None:
                 
         watchlist.put(symbol, sig_type)
 
-        candle_analysis = main(ohlcv=ohlcv, signal=sig_type)
+        candle_analysis = candle_main(ohlcv=ohlcv, signal=sig_type)
         tv_analysis = get_analysis(symbol)['RECOMMENDATION']
-        if ("BUY" in sig_type and "BUY" not in tv_analysis) or "SELL" in sig_type and 'SELL' not in tv_analysis:
+        if ("BUY" in sig_type and "BUY" not in tv_analysis) or ("SELL" in sig_type and 'SELL' not in tv_analysis):
             watchlist.reset(symbol)
             return
         if sig_type != 'NEUTRAL' and candle_analysis is True:

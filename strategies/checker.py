@@ -136,7 +136,7 @@ class Checker():
                     sig = "SHORT"
                     pnl:float = (self.entry_price * self.amount) - (ticker['last'] * self.amount)
 
-                pnl -= self.fee
+                # pnl -= self.fee
 
                 # if pnl >= 0.5 * self.reward:
                 #     self.breakeven_profit = 0.5 * self.reward
@@ -271,6 +271,13 @@ class Checker():
             sig = "LONG"
         elif "SELL" in self.signal:
             sig = "SHORT"
+
+        # pnl *= -1
+        if pnl > 0:
+            pnl -= self.fee
+        else:
+            pnl -= self.fee_sl
+        # pnl -= max(self.fee_sl, self.fee)
 
         if reverse is True:
             if pnl > 0:

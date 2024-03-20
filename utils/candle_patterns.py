@@ -246,7 +246,7 @@ def three_inside_down(ohlcv:List) -> bool:
     return False
 
 
-def main(ohlcv:List, signal:str):
+def candle_main(ohlcv:List, signal:str):
     if "BUY" in signal:
         return any([hammer(ohlcv), bullish_engulfing(ohlcv), morning_star(ohlcv),
                     three_white_soldiers(ohlcv), three_inside_up(ohlcv)])
