@@ -66,13 +66,13 @@ async def analyser(symbol:str, exchange:ccxt.Exchange)-> None:
     if trend == 'UPTREND':
         if _macd[0]['MACD'] > 0 and _macd[1]['MACD'] < 0:   # macd just flipped upwards
             sig_type = "MACD_EMA_BUY"
-        elif _macd[0] < 0:
+        elif _macd[0]['MACD'] < 0:
             sig_type = 'NEUTRAL'
 
     elif trend == 'DOWNTREND':
         if _macd[0]['MACD'] < 0 and _macd[1]['MACD'] > 0:   # macd just flipped downwards
             sig_type = 'MACD_EMA_SELL'
-        elif _macd[0] > 0:
+        elif _macd[0]['MACD'] > 0:
             sig_type = 'NEUTRAL'
     
     if sig_type is not None:
