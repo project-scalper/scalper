@@ -89,7 +89,7 @@ async def analyser(symbol:str, exchange:ccxt.Exchange)-> None:
         tv_analysis = get_analysis(symbol)['RECOMMENDATION']
         if ("BUY" in tv_analysis and "BUY" in sig_type) or ("SELL" in tv_analysis and "SELL" in sig_type):
             candle_analysis = candle_main(ohlcv=ohlcv, signal=sig_type)
-            if candle_analysis:
+            if candle_analysis is True:
                 sig_type = "CS_" + sig_type
             await run_thread(symbol, sig_type)
         
@@ -97,7 +97,7 @@ async def analyser(symbol:str, exchange:ccxt.Exchange)-> None:
 async def main():
     print("Loading markets...")
     exchange.load_markets()
-    symbols = ['BTC/USDT', 'ETH/USDT', 'ADA/USDT', 'SOL/USDT', 'WAVES/USDT', 'ETC/USDT']
+    symbols = ['BTC/USDT:USDT', 'ETH/USDT:USDT', 'ADA/USDT:USDT', 'SOL/USDT', 'WAVES/USDT', 'ETC/USDT']
     tasks = [analyser(symbol, exchange) for symbol in symbols]
     await asyncio.gather(*tasks)
     all_sym = watchlist.get_all()
