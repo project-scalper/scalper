@@ -202,9 +202,17 @@ class Checker():
 
     def calculate_fee(self):
         """Calculates maker fee and taker fee"""
-        maker_fee = self.exchange.fetchTradingFee(self.symbol)['maker'] * self.amount * self.entry_price
-        taker_fee = self.exchange.fetchTradingFee(self.symbol)['taker'] * self.amount * self.tp
-        taker_fee_sl = self.exchange.fetchTradingFee(self.symbol)['taker'] * self.amount * self.sl
+        for i in range(3):
+            try:
+                maker_fee = self.exchange.fetchTradingFee(self.symbol)['maker'] * self.amount * self.entry_price
+                taker_fee = self.exchange.fetchTradingFee(self.symbol)['taker'] * self.amount * self.tp
+                taker_fee_sl = self.exchange.fetchTradingFee(self.symbol)['taker'] * self.amount * self.sl
+                break
+            except Exception as e:
+                if i == 2:
+                    adapter.error(f"Unable to fetch trading fee for {self.symbol}")
+                    return
+
         self.fee = maker_fee + taker_fee
         self.fee_sl = maker_fee + taker_fee_sl
 
