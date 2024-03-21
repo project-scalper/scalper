@@ -53,10 +53,9 @@ class Checker():
 
         # Entry should be one-third way of the previous candle body
         if "BUY" in self.signal:
-            self.entry_price = cls - (0.30 * body_length)
-        else:
             self.entry_price = cls + (0.30 * body_length)
-            # self.entry_price = last_ohlcv[1][-2]
+        else:
+            self.entry_price = cls - (0.30 * body_length)
 
         self.entry_price = float(self.exchange.price_to_precision(self.symbol, self.entry_price))
 
@@ -154,15 +153,15 @@ class Checker():
 
                     self.update_bot(pnl)
                     return
-                # elif ("BUY" in self.signal and ticker['last'] <= self.sl) or ("SELL" in self.signal and ticker['last'] >= self.sl):
-                #     msg = f"#{self.symbol}. {self.signal} - start_time={self.start_time}, entry={self.entry_price}, tp={self.tp}, sl={self.sl}, "
-                #     msg += "*SL hit*"
-                #     trade_logger.info(msg)
-                #     watchlist.trade_counter(self.signal, pnl)
-                #     watchlist.reset(self.symbol)
+                elif ("BUY" in self.signal and ticker['last'] <= self.sl) or ("SELL" in self.signal and ticker['last'] >= self.sl):
+                    msg = f"#{self.symbol}. {self.signal} - start_time={self.start_time}, entry={self.entry_price}, tp={self.tp}, sl={self.sl}, "
+                    msg += "*SL hit*"
+                    trade_logger.info(msg)
+                    watchlist.trade_counter(self.signal, pnl)
+                    watchlist.reset(self.symbol)
 
-                #     self.update_bot(pnl)
-                #     return
+                    self.update_bot(pnl)
+                    return
                 
                 # if hasattr(self, "close_price"):
                 #     if ("BUY" in self.signal and ticker['last'] <= self.close_price) or ("SELL" in self.signal and ticker['last'] >= self.close_price):
@@ -235,7 +234,13 @@ class Checker():
             adapter.warning(f"{symbol}. Could not enter trade, executor is currently active")
             return
         self.symbol = symbol
-        self.signal = signal
+        if reverse is True:
+            if "BUY" in signal:
+                self.signal = signal.replace("BUY", "SELL")
+            elif "SELL" in signal:
+                self.signal = signal.replace("SELL", "BUY")
+        else:
+            self.signal = signal
 
         self.calculate_entry_price()
         self.calculate_tp_sl()  # This method is called to get an estimated tp value without fees
@@ -244,14 +249,14 @@ class Checker():
 
         adapter.info(f"#{self.symbol}. {self.signal} - Entry={self.entry_price}, tp={self.tp}, sl={self.sl}")
 
-        if reverse is True:
-            self.tp, self.sl = self.sl, self.tp
-            # self.risk, self.reward = self.reward, self.risk
-            if "BUY" in self.signal:
-                self.signal = self.signal.replace("BUY", "SELL")
-            elif "SELL" in self.signal:
-                self.signal = self.signal.replace("SELL", "BUY")
-            watchlist.put(self.symbol, self.signal)
+        # if reverse is True:
+        #     self.tp, self.sl = self.sl, self.tp
+        #     # self.risk, self.reward = self.reward, self.risk
+        #     if "BUY" in self.signal:
+        #         self.signal = self.signal.replace("BUY", "SELL")
+        #     elif "SELL" in self.signal:
+        #         self.signal = self.signal.replace("SELL", "BUY")
+        #     watchlist.put(self.symbol, self.signal)
 
         self.enter_trade()
 
