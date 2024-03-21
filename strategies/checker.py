@@ -136,7 +136,10 @@ class Checker():
                     sig = "SHORT"
                     pnl:float = (self.entry_price * self.amount) - (ticker['last'] * self.amount)
 
-                # pnl -= self.fee
+                if pnl > 0:
+                    pnl -= self.fee
+                else:
+                    pnl -= self.fee_sl
 
                 # if pnl >= 0.5 * self.reward:
                 #     self.breakeven_profit = 0.5 * self.reward
@@ -151,46 +154,44 @@ class Checker():
 
                     self.update_bot(pnl)
                     return
-                # elif pnl <= self.risk:
-                elif ("BUY" in self.signal and ticker['last'] <= self.sl) or ("SELL" in self.signal and ticker['last'] >= self.sl):
-                    msg = f"#{self.symbol}. {self.signal} - start_time={self.start_time}, entry={self.entry_price}, tp={self.tp}, sl={self.sl}, "
-                    msg += "*SL hit*"
-                    trade_logger.info(msg)
-                    watchlist.trade_counter(self.signal, pnl)
-                    watchlist.reset(self.symbol)
+                # elif ("BUY" in self.signal and ticker['last'] <= self.sl) or ("SELL" in self.signal and ticker['last'] >= self.sl):
+                #     msg = f"#{self.symbol}. {self.signal} - start_time={self.start_time}, entry={self.entry_price}, tp={self.tp}, sl={self.sl}, "
+                #     msg += "*SL hit*"
+                #     trade_logger.info(msg)
+                #     watchlist.trade_counter(self.signal, pnl)
+                #     watchlist.reset(self.symbol)
 
-                    self.update_bot(pnl)
-                    return
+                #     self.update_bot(pnl)
+                #     return
                 
-                if hasattr(self, "close_price"):
-                    if ("BUY" in self.signal and ticker['last'] <= self.close_price) or ("SELL" in self.signal and ticker['last'] >= self.close_price):
-                        msg = f"#{self.symbol}. {self.signal} - start_time={self.start_time}. Break-even price hit. "
-                        if hasattr(self, 'breakeven_profit'):
-                            watchlist.trade_counter(self.signal, self.breakeven_profit)
-                            msg += f"profit={self.breakeven_profit}"
-                        trade_logger.info(msg)
-                        watchlist.reset(self.symbol)
+                # if hasattr(self, "close_price"):
+                #     if ("BUY" in self.signal and ticker['last'] <= self.close_price) or ("SELL" in self.signal and ticker['last'] >= self.close_price):
+                #         msg = f"#{self.symbol}. {self.signal} - start_time={self.start_time}. Break-even price hit. "
+                #         if hasattr(self, 'breakeven_profit'):
+                #             watchlist.trade_counter(self.signal, self.breakeven_profit)
+                #             msg += f"profit={self.breakeven_profit}"
+                #         trade_logger.info(msg)
+                #         watchlist.reset(self.symbol)
 
-                        self.update_bot(pnl)
-                        return
+                #         self.update_bot(pnl)
+                #         return
                 
                 # Raise warning when indicators changes signal
-                # sig = watchlist.get(self.symbol)
-                # if ("BUY" in self.signal and "BUY" not in sig) or ("SELL" in self.signal and "SELL" not in sig):
-                #     if self.alerted is False:
-                #         self.alerted = True
-                #         if pnl <= 0:
-                #             watchlist.trade_counter(self.signal, pnl)
-                #             watchlist.reset(self.symbol)
-                #             msg = f"#{self.symbol}. {self.signal} - Trade closed. start_time={self.start_time}, entry={self.entry_price}, tp={self.tp}, sl={self.sl} price={ticker['last']} and pnl={pnl:.3f}"
-                #             trade_logger.info(msg)
-
-                #             self.update_bot(pnl)
-                #             return
-                #         else:
-                #             adapter.info(f"#{self.symbol}. {self.signal} - start_time={self.start_time}. Adjusting stop_loss...")
-                #             self.breakeven_profit = 0
-                #             self.close_position()
+                sig = watchlist.get(self.symbol)
+                if ("BUY" in self.signal and "BUY" not in sig) or ("SELL" in self.signal and "SELL" not in sig):
+                    # if self.alerted is False:
+                    #     self.alerted = True
+                    #     if pnl <= 0:
+                        watchlist.trade_counter(self.signal, pnl)
+                        watchlist.reset(self.symbol)
+                        msg = f"#{self.symbol}. {self.signal} - Trade closed. start_time={self.start_time}, entry={self.entry_price}, tp={self.tp}, sl={self.sl} last_price={ticker['last']} and pnl={pnl:.3f}"
+                        trade_logger.info(msg)
+                        self.update_bot(pnl)
+                        return
+                        # else:
+                        #     adapter.info(f"#{self.symbol}. {self.signal} - start_time={self.start_time}. Adjusting stop_loss...")
+                        #     self.breakeven_profit = 0
+                        #     self.close_position()
 
             except ccxt.NetworkError as e:
                 adapter.error("Seems the network connection is unstable.")
@@ -273,10 +274,10 @@ class Checker():
             sig = "SHORT"
 
         # pnl *= -1
-        if pnl > 0:
-            pnl -= self.fee
-        else:
-            pnl -= self.fee_sl
+        # if pnl > 0:
+        #     pnl -= self.fee
+        # else:
+        #     pnl -= self.fee_sl
         # pnl -= max(self.fee_sl, self.fee)
 
         if reverse is True:
