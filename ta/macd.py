@@ -14,6 +14,7 @@ from typing import Literal
 from helper.adapter import adapter
 from helper import watchlist
 from variables import timeframe, exchange
+from model import storage
 import asyncio
 import ccxt
 
@@ -28,9 +29,11 @@ async def run_thread(symbol, sig_type):
     nt.start()
 
 async def new_checker(symbol, sig_type):
-    trade = Checker()
-    await trade.execute(symbol, sig_type)
-    trade.delete()
+    bots = storage.all("Bot")
+    for _, bot in bots.items():
+        cap = int(bot.capital)
+        trade = Checker(exchange, capital=cap, bot_id=bot.id)
+        await trade.execute(symbol, sig_type, reverse=False)
 
 
 async def analyser(symbol:str, exchange:ccxt.Exchange)-> None:
