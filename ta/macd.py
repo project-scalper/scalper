@@ -33,7 +33,7 @@ async def new_checker(symbol, sig_type):
     for _, bot in bots.items():
         cap = int(bot.capital)
         trade = Checker(exchange, capital=cap, bot_id=bot.id)
-        await trade.execute(symbol, sig_type, reverse=False)
+        await trade.execute(symbol, sig_type, reverse=True)
 
 
 async def analyser(symbol:str, exchange:ccxt.Exchange)-> None:
