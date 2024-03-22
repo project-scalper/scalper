@@ -175,22 +175,15 @@ class Checker():
                 #         self.update_bot(pnl)
                 #         return
                 
-                # Raise warning when indicators changes signal
-                sig = watchlist.get(self.symbol)
-                if ("BUY" in self.signal and "BUY" not in sig) or ("SELL" in self.signal and "SELL" not in sig):
-                    # if self.alerted is False:
-                    #     self.alerted = True
-                    #     if pnl <= 0:
-                        watchlist.trade_counter(self.signal, pnl)
-                        watchlist.reset(self.symbol)
-                        msg = f"#{self.symbol}. {self.signal} - Trade closed. start_time={self.start_time}, entry={self.entry_price}, tp={self.tp}, sl={self.sl} last_price={ticker['last']} and pnl={pnl:.3f}"
-                        trade_logger.info(msg)
-                        self.update_bot(pnl)
-                        return
-                        # else:
-                        #     adapter.info(f"#{self.symbol}. {self.signal} - start_time={self.start_time}. Adjusting stop_loss...")
-                        #     self.breakeven_profit = 0
-                        #     self.close_position()
+                # close position when indicators changes signal
+                # sig = watchlist.get(self.symbol)
+                # if ("BUY" in self.signal and "BUY" not in sig) or ("SELL" in self.signal and "SELL" not in sig):
+                #         watchlist.trade_counter(self.signal, pnl)
+                #         watchlist.reset(self.symbol)
+                #         msg = f"#{self.symbol}. {self.signal} - Trade closed. start_time={self.start_time}, entry={self.entry_price}, tp={self.tp}, sl={self.sl} last_price={ticker['last']} and pnl={pnl:.3f}"
+                #         trade_logger.info(msg)
+                #         self.update_bot(pnl)
+                #         return
 
             except ccxt.NetworkError as e:
                 adapter.error("Seems the network connection is unstable.")
