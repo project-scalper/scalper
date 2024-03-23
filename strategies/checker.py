@@ -136,9 +136,8 @@ class Checker():
                 else:
                     pnl -= self.fee_sl
 
-                if pnl >= 0.5 * self.reward:
-                    # self.breakeven_profit = 0.5 * self.reward
-                    self.close_position()
+                # if pnl >= 0.5 * self.reward:
+                #     self.close_position()
 
                 if ("BUY" in self.signal and ticker['last'] >= self.tp) or ("SELL" in self.signal and ticker['last'] <= self.tp):
                     msg = f"#{self.symbol}. {self.signal} - start_time={self.start_time}, entry={self.entry_price}, tp={self.tp}, sl={self.sl}, "
