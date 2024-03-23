@@ -1,8 +1,9 @@
 #!/usr/bin/node
 
 $("#signup").on('click', () => {
-    // console.log("Signup has been clicked")
-    $("#loader2").style.display = 'block';
+    var loader = document.getElementById("loader")
+    loader.style.display = 'block'
+
     var username = $("#username").val();
     var password = $("#password").val();
     var email = $("#email").val();
@@ -19,7 +20,14 @@ $("#signup").on('click', () => {
         window.location.href = 'static/start_bot.html';
     })
     .catch((err) => {
-        alert(err.msg)
+        var loader = document.getElementById("loader")
+        loader.style.display = 'none'
+        if (err.responseJSON != undefined) {
+            alert(err.responseJSON)
+        } else {
+            alert("An error was encountered")
+        }
+        console.log(err)
     })
 })
 
