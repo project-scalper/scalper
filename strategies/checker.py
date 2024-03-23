@@ -61,10 +61,11 @@ class Checker():
 
     def calculate_tp_sl(self):
         """Calculates takeProfit and stopLoss prices"""
+        amount = (self.capital * self.leverage) / self.entry_price
+        amount = float(self.exchange.amount_to_precision(self.symbol, amount))
+        cost = amount * self.entry_price
+
         if "BUY" in self.signal:
-            amount = (self.capital * self.leverage) / self.entry_price
-            amount = float(self.exchange.amount_to_precision(self.symbol, amount))
-            cost = amount * self.entry_price
             if hasattr(self, "fee"):
                 # cost += self.fee
                 tp = (cost + self.fee + self.reward) / amount
@@ -73,10 +74,7 @@ class Checker():
                 tp = (cost + self.reward) / amount
                 sl = (cost - self.risk) / amount
 
-        if "SELL" in self.signal:
-            amount = (self.capital * self.leverage) / self.entry_price
-            amount = float(self.exchange.amount_to_precision(self.symbol, amount))
-            cost = amount * self.entry_price
+        elif "SELL" in self.signal:
             if hasattr(self, "fee"):
                 # cost -= self.fee
                 tp = (cost - self.fee - self.reward) / amount
@@ -129,10 +127,8 @@ class Checker():
             try:
                 ticker = self.exchange.fetch_ticker(self.symbol)
                 if "BUY" in self.signal:
-                    sig = "LONG"
                     pnl:float = (ticker['last'] * self.amount) - (self.entry_price * self.amount)
                 elif "SELL" in self.signal:
-                    sig = "SHORT"
                     pnl:float = (self.entry_price * self.amount) - (ticker['last'] * self.amount)
 
                 if pnl > 0:
@@ -140,9 +136,9 @@ class Checker():
                 else:
                     pnl -= self.fee_sl
 
-                # if pnl >= 0.5 * self.reward:
-                #     self.breakeven_profit = 0.5 * self.reward
-                #     self.adjust_sl()
+                if pnl >= 0.5 * self.reward:
+                    # self.breakeven_profit = 0.5 * self.reward
+                    self.close_position()
 
                 if ("BUY" in self.signal and ticker['last'] >= self.tp) or ("SELL" in self.signal and ticker['last'] <= self.tp):
                     msg = f"#{self.symbol}. {self.signal} - start_time={self.start_time}, entry={self.entry_price}, tp={self.tp}, sl={self.sl}, "
@@ -163,17 +159,16 @@ class Checker():
                     self.update_bot(pnl)
                     return
                 
-                # if hasattr(self, "close_price"):
-                #     if ("BUY" in self.signal and ticker['last'] <= self.close_price) or ("SELL" in self.signal and ticker['last'] >= self.close_price):
-                #         msg = f"#{self.symbol}. {self.signal} - start_time={self.start_time}. Break-even price hit. "
-                #         if hasattr(self, 'breakeven_profit'):
-                #             watchlist.trade_counter(self.signal, self.breakeven_profit)
-                #             msg += f"profit={self.breakeven_profit}"
-                #         trade_logger.info(msg)
-                #         watchlist.reset(self.symbol)
-
-                #         self.update_bot(pnl)
-                #         return
+                if hasattr(self, "close_price"):
+                    if ("BUY" in self.signal and ticker['last'] <= self.close_price) or ("SELL" in self.signal and ticker['last'] >= self.close_price):
+                        msg = f"#{self.symbol}. {self.signal} - start_time={self.start_time}. Break-even price hit. "
+                        if hasattr(self, 'breakeven_profit'):
+                            watchlist.trade_counter(self.signal, self.breakeven_profit)
+                            msg += f"profit={self.breakeven_profit}"
+                        trade_logger.info(msg)
+                        watchlist.reset(self.symbol)
+                        self.update_bot(pnl)
+                        return
                 
                 # close position when indicators changes signal
                 # sig = watchlist.get(self.symbol)
@@ -205,18 +200,16 @@ class Checker():
                     adapter.error(f"Unable to fetch trading fee for {self.symbol}")
                     return
 
-        self.fee = maker_fee + taker_fee
-        self.fee_sl = maker_fee + taker_fee_sl
+        self.fee:float = maker_fee + taker_fee
+        self.fee_sl:float = maker_fee + taker_fee_sl
 
     def close_position(self):
         cost = self.amount * self.entry_price
         
-        self.calculate_fee()
-        profit = self.min_profit + self.fee
         if "BUY" in self.signal:
-            self.close_price = (cost + profit) / self.amount
+            self.close_price = (cost + self.fee_sl) / self.amount
         elif "SELL" in self.signal:
-            self.close_price = (cost - profit) / self.amount
+            self.close_price = (cost - self.fee_sl) / self.amount
 
     def delete(self):
         del self
@@ -241,15 +234,6 @@ class Checker():
         self.calculate_tp_sl()  # This method is called again to account for fees
 
         adapter.info(f"#{self.symbol}. {self.signal} - Entry={self.entry_price}, tp={self.tp}, sl={self.sl}")
-
-        # if reverse is True:
-        #     self.tp, self.sl = self.sl, self.tp
-        #     # self.risk, self.reward = self.reward, self.risk
-        #     if "BUY" in self.signal:
-        #         self.signal = self.signal.replace("BUY", "SELL")
-        #     elif "SELL" in self.signal:
-        #         self.signal = self.signal.replace("SELL", "BUY")
-        #     watchlist.put(self.symbol, self.signal)
 
         self.enter_trade()
 
