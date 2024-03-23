@@ -10,6 +10,9 @@ $(function getProfile() {
 })
 
 $("#create-bot").on('click', () => {
+    var loader = document.getElementById("loader")
+    loader.style.display = 'block'
+
     var capital = $("#capital").val()
     var apiKey = $("#apiKey").val()
     var secret = $("#secretKey").val()
@@ -21,14 +24,14 @@ $("#create-bot").on('click', () => {
         keys: {apiKey, secret}
     })
     request.put('/user/me', payload)
-    .then((res) => {
+    .then(() => {
         request.get('/create_bot')
         .then(() => {
             alert("Your bot has been created successfully")
             window.location.href = "main.html"
         })
         .catch(() => {
-            $("#loader").addClass('disappear')
+            // $("#loader").addClass('disappear')
             var loader = document.getElementById("loader")
             loader.style.display = 'none'
             alert("An error occured while creating your bot"), 400
