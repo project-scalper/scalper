@@ -122,7 +122,7 @@ class Checker():
     def monitor(self):
         self.start_time = datetime.now()
         self.alerted = False
-        watch_till = datetime.now() + timedelta(minutes=5)
+        watch_till = datetime.now() + timedelta(minutes=10)
 
         while True:
             try:
