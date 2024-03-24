@@ -122,6 +122,7 @@ class Checker():
     def monitor(self):
         self.start_time = datetime.now()
         self.alerted = False
+        watch_till = datetime.now() + timedelta(minutes=5)
 
         while True:
             try:
@@ -138,6 +139,8 @@ class Checker():
 
                 # if pnl >= 0.5 * self.reward:
                 #     self.close_position()
+                if datetime.now() > watch_till:
+                    self.close_position()
 
                 if ("BUY" in self.signal and ticker['last'] >= self.tp) or ("SELL" in self.signal and ticker['last'] <= self.tp):
                     msg = f"#{self.symbol}. {self.signal} - start_time={self.start_time}, entry={self.entry_price}, tp={self.tp}, sl={self.sl}, "
@@ -145,16 +148,15 @@ class Checker():
                     trade_logger.info(msg)
                     watchlist.trade_counter(self.signal, pnl)
                     watchlist.reset(self.symbol)
-
                     self.update_bot(pnl)
                     return
+                
                 elif ("BUY" in self.signal and ticker['last'] <= self.sl) or ("SELL" in self.signal and ticker['last'] >= self.sl):
                     msg = f"#{self.symbol}. {self.signal} - start_time={self.start_time}, entry={self.entry_price}, tp={self.tp}, sl={self.sl}, "
                     msg += "*SL hit*"
                     trade_logger.info(msg)
                     watchlist.trade_counter(self.signal, pnl)
                     watchlist.reset(self.symbol)
-
                     self.update_bot(pnl)
                     return
                 
@@ -163,7 +165,7 @@ class Checker():
                         msg = f"#{self.symbol}. {self.signal} - start_time={self.start_time}. Break-even price hit. "
                         if hasattr(self, 'breakeven_profit'):
                             watchlist.trade_counter(self.signal, self.breakeven_profit)
-                            msg += f"profit={self.breakeven_profit}"
+                            msg += f"profit={pnl}"
                         trade_logger.info(msg)
                         watchlist.reset(self.symbol)
                         self.update_bot(pnl)
