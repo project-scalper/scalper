@@ -66,22 +66,24 @@ class Checker():
         cost = amount * self.entry_price
 
         if "BUY" in self.signal:
-            if hasattr(self, "fee"):
-                # cost += self.fee
-                tp = (cost + self.fee + self.reward) / amount
-                sl = (cost + self.fee_sl - self.risk) / amount
-            else:
-                tp = (cost + self.reward) / amount
-                sl = (cost - self.risk) / amount
+            # if hasattr(self, "fee"):
+            #     # cost += self.fee
+            #     tp = (cost + self.fee + self.reward) / amount
+            #     sl = (cost + self.fee_sl - self.risk) / amount
+            #     # sl = (cost - self.fee_sl - self.risk) / amount
+            # elif:
+            tp = (cost + self.reward) / amount
+            sl = (cost - self.risk) / amount
 
         elif "SELL" in self.signal:
-            if hasattr(self, "fee"):
-                # cost -= self.fee
-                tp = (cost - self.fee - self.reward) / amount
-                sl = (cost - self.fee_sl + self.risk) / amount
-            else:
-                tp = (cost - self.reward) / amount
-                sl = (cost + self.risk) / amount
+            # if hasattr(self, "fee"):
+            #     # cost -= self.fee
+            #     tp = (cost - self.fee - self.reward) / amount
+            #     sl = (cost - self.fee_sl + self.risk) / amount
+            #     # sl = (cost + self.fee_sl + self.risk) / amount
+            # else:
+            tp = (cost - self.reward) / amount
+            sl = (cost + self.risk) / amount
 
         self.tp = float(self.exchange.price_to_precision(self.symbol, tp))
         self.sl = float(self.exchange.price_to_precision(self.symbol, sl))

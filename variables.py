@@ -3,7 +3,7 @@
 capital = 100
 risk = 0.0075       # % of the capital
 reward = 0.0075     # % of the capital
-leverage = 5
+leverage = 10
 timeframe = '5m'
 confirmation_timeframe = '15m'
 
