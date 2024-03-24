@@ -3,7 +3,7 @@
 from helper.adapter import adapter, trade_logger
 from datetime import datetime, timedelta
 from variables import risk, reward, capital, leverage, timeframe
-from strategies.rsi_strategy import active
+from strategies.macd_2 import active
 import time
 import ccxt
 import model
