@@ -66,24 +66,24 @@ class Checker():
         cost = amount * self.entry_price
 
         if "BUY" in self.signal:
-            # if hasattr(self, "fee"):
-            #     # cost += self.fee
-            #     tp = (cost + self.fee + self.reward) / amount
-            #     sl = (cost + self.fee_sl - self.risk) / amount
-            #     # sl = (cost - self.fee_sl - self.risk) / amount
-            # elif:
-            tp = (cost + self.reward) / amount
-            sl = (cost - self.risk) / amount
+            if hasattr(self, "fee"):
+                # cost += self.fee
+                tp = (cost + self.fee + self.reward) / amount
+                sl = (cost + self.fee_sl - self.risk) / amount
+                # sl = (cost - self.fee_sl - self.risk) / amount
+            else:
+                tp = (cost + self.reward) / amount
+                sl = (cost - self.risk) / amount
 
         elif "SELL" in self.signal:
-            # if hasattr(self, "fee"):
-            #     # cost -= self.fee
-            #     tp = (cost - self.fee - self.reward) / amount
-            #     sl = (cost - self.fee_sl + self.risk) / amount
-            #     # sl = (cost + self.fee_sl + self.risk) / amount
-            # else:
-            tp = (cost - self.reward) / amount
-            sl = (cost + self.risk) / amount
+            if hasattr(self, "fee"):
+                # cost -= self.fee
+                tp = (cost - self.fee - self.reward) / amount
+                sl = (cost - self.fee_sl + self.risk) / amount
+                # sl = (cost + self.fee_sl + self.risk) / amount
+            else:
+                tp = (cost - self.reward) / amount
+                sl = (cost + self.risk) / amount
 
         self.tp = float(self.exchange.price_to_precision(self.symbol, tp))
         self.sl = float(self.exchange.price_to_precision(self.symbol, sl))
@@ -124,7 +124,7 @@ class Checker():
     def monitor(self):
         self.start_time = datetime.now()
         self.alerted = False
-        watch_till = datetime.now() + timedelta(minutes=10)
+        watch_till = datetime.now() + timedelta(minutes=40)
 
         while True:
             try:
@@ -153,14 +153,14 @@ class Checker():
                     self.update_bot(pnl)
                     return
                 
-                elif ("BUY" in self.signal and ticker['last'] <= self.sl) or ("SELL" in self.signal and ticker['last'] >= self.sl):
-                    msg = f"#{self.symbol}. {self.signal} - start_time={self.start_time}, entry={self.entry_price}, tp={self.tp}, sl={self.sl}, "
-                    msg += "*SL hit*"
-                    trade_logger.info(msg)
-                    watchlist.trade_counter(self.signal, pnl)
-                    watchlist.reset(self.symbol)
-                    self.update_bot(pnl)
-                    return
+                # elif ("BUY" in self.signal and ticker['last'] <= self.sl) or ("SELL" in self.signal and ticker['last'] >= self.sl):
+                #     msg = f"#{self.symbol}. {self.signal} - start_time={self.start_time}, entry={self.entry_price}, tp={self.tp}, sl={self.sl}, "
+                #     msg += "*SL hit*"
+                #     trade_logger.info(msg)
+                #     watchlist.trade_counter(self.signal, pnl)
+                #     watchlist.reset(self.symbol)
+                #     self.update_bot(pnl)
+                #     return
                 
                 if hasattr(self, "close_price"):
                     if ("BUY" in self.signal and ticker['last'] <= self.close_price) or ("SELL" in self.signal and ticker['last'] >= self.close_price):

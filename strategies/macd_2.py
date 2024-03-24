@@ -12,7 +12,7 @@ import asyncio
 import ccxt
 from model import storage
 from utils.tradingview import get_analysis
-from strategies.checker import Checker
+from executor.checker import Checker
 
 active = False
 
@@ -71,33 +71,31 @@ async def analyser(symbol:str, exchange:ccxt.Exchange)-> None:
     sig_type = None
 
     # check EMA values to get trend
-    if (ema_50[0]['EMA'] > ema_100[0]['EMA']) and (ohlcv[-1][-2] > ema_50[0]['EMA']):
-        # if ohlcv[-1][-2] > ema_50[0]['EMA']:
+    if (ema_50[0]['EMA'] > ema_100[0]['EMA']):
+    # if (ema_50[0]['EMA'] > ema_100[0]['EMA']) and (ohlcv[-1][-2] > ema_50[0]['EMA']):
         trend = "UPTREND"
-    elif (ema_50[0]['EMA'] < ema_100[0]['EMA']) and (ohlcv[-1][-2] < ema_50[0]['EMA']):
-        # if ohlcv[-1][-2] < ema_50[0]['EMA']:
+    elif (ema_50[0]['EMA'] < ema_100[0]['EMA']):
+    # elif (ema_50[0]['EMA'] < ema_100[0]['EMA']) and (ohlcv[-1][-2] < ema_50[0]['EMA']):
         trend = "DOWNTREND"
 
     # Confirm with MACD value
     signal = watchlist.get(symbol)
-    if "RSI" not in signal and 'MACD' not in signal:
+    # if "RSI" not in signal and 'MACD' not in signal:
         # if trend == 'UPTREND' and _macd[0]['MACD'] < 0:
-        if trend == 'UPTREND':
-            if _macd[1]['MACD'] < _macd[0]['MACD']:     # macd is -ve and starts increasing
-            #     if (_macd[2]['MACD'] < _macd[1]['MACD']) and (_macd[3]['MACD'] > _macd[2]['MACD']):
-                if (_macd[2]['MACD'] > _macd[1]['MACD']):
-                    sig_type = 'MACD_EMA_2_BUY'
-            else:
-                sig_type = 'NEUTRAL'
+    if trend == 'UPTREND':
+        if (_macd[1]['MACD'] < _macd[0]['MACD']) and (_macd[2]['MACD'] > _macd[1]['MACD']):     # macd starts increasing
+        #     if (_macd[2]['MACD'] < _macd[1]['MACD']) and (_macd[3]['MACD'] > _macd[2]['MACD']):
+            sig_type = 'MACD_EMA_2_BUY'
+        else:
+            sig_type = 'NEUTRAL'
 
         # elif trend == 'DOWNTREND' and _macd[0]['MACD'] > 0:
-        elif trend == 'DOWNTREND':
-            if _macd[1]['MACD'] > _macd[0]['MACD']:     # macd is +ve and starts decreasing
-                # if (_macd[2]['MACD'] > _macd[1]['MACD']) and (_macd[3]['MACD'] < _macd[2]['MACD']):
-                if (_macd[2]['MACD'] < _macd[1]['MACD']):
-                    sig_type = 'MACD_EMA_2_SELL'
-            else:
-                sig_type = 'NEUTRAL'
+    elif trend == 'DOWNTREND':
+        if (_macd[1]['MACD'] > _macd[0]['MACD']) and (_macd[2]['MACD'] < _macd[1]['MACD']):     # macd starts decreasing
+            # if (_macd[2]['MACD'] > _macd[1]['MACD']) and (_macd[3]['MACD'] < _macd[2]['MACD']):
+                sig_type = 'MACD_EMA_2_SELL'
+        else:
+            sig_type = 'NEUTRAL'
 
     # Return signal type to NEUTRAL if macd changes
     if "MACD" in signal and "BUY" in signal:
@@ -156,11 +154,11 @@ async def analyser(symbol:str, exchange:ccxt.Exchange)-> None:
                 
         watchlist.put(symbol, sig_type)
 
-        candle_analysis = candle_main(ohlcv=ohlcv, signal=sig_type)
-        tv_analysis = get_analysis(symbol)['RECOMMENDATION']
-        if ("BUY" in sig_type and "BUY" not in tv_analysis) or ("SELL" in sig_type and 'SELL' not in tv_analysis):
-            watchlist.reset(symbol)
-            return
-        if sig_type != 'NEUTRAL' and candle_analysis is True:
-            await run_thread(symbol, sig_type, exchange)
+        # candle_analysis = candle_main(ohlcv=ohlcv, signal=sig_type)
+        tv_analysis = get_analysis(symbol)
+        if ("BUY" in sig_type and "BUY" in tv_analysis) or ("SELL" in sig_type and 'SELL' in tv_analysis):
+            if sig_type != "NEUTRAL":
+                await run_thread(symbol, sig_type, exchange)
+                # watchlist.reset(symbol)
+                return
         

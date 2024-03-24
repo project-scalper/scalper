@@ -6,7 +6,7 @@ from utils.rsi_calculator import rsi
 from utils.tradingview import get_analysis
 # from utils import get_indicators
 # from exchange import bybit as exchange
-from strategies.checker import Checker
+from executor.checker import Checker
 from utils.candle_patterns import candle_main
 import threading
 # from typing import Dict, List
@@ -89,7 +89,7 @@ async def analyser(symbol:str, exchange:ccxt.Exchange)-> None:
         watchlist.reset(symbol)
 
     if sig_type and sig_type != 'NEUTRAL' and watchlist.get(symbol) != "NEUTRAL":
-        tv_analysis = get_analysis(symbol)['RECOMMENDATION']
+        tv_analysis = get_analysis(symbol)
         if ("BUY" in tv_analysis and "BUY" in sig_type) or ("SELL" in tv_analysis and "SELL" in sig_type):
             candle_analysis = candle_main(ohlcv=ohlcv, signal=sig_type)
             if candle_analysis is True:

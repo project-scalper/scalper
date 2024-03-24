@@ -3,10 +3,11 @@
 from tradingview_ta import Interval, TA_Handler
 from datetime import datetime, timedelta
 from helper.adapter import adapter
+from typing import Literal
 # from variables import timeframe
 
 
-def get_analysis(symbol):
+def get_analysis(symbol) -> Literal["BUY", "SELL", "STRONG_BUY", "STRONG_SELL"]:
     symbol = symbol.split("/")[0]
     symbol += "USDT"
 
@@ -19,7 +20,7 @@ def get_analysis(symbol):
     )
 
     analysis = handler.get_analysis().oscillators
-    return analysis
+    return analysis['RECOMMENDATION']
 
 
 def main():

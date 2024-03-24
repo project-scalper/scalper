@@ -1,8 +1,8 @@
 #!/usr/bin/python3
 
-from ta.macd import analyser
+# from strategies.macd import analyser
 # from strategies.rsi_strategy import analyser
-# from ta.macd_2 import analyser
+from strategies.macd_2 import analyser
 from datetime import datetime, timedelta
 from helper.adapter import adapter
 from exchange import bybit as exchange

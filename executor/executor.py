@@ -1,6 +1,6 @@
 #!/usr/bin/python3
 
-from strategies.checker import Checker
+from executor.checker import Checker
 from helper.adapter import adapter
 from helper import watchlist
 import ccxt

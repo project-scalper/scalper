@@ -8,6 +8,7 @@ import threading
 from helper.adapter import adapter
 from helper import watchlist
 from variables import timeframe
+from executor.checker import Checker
 import asyncio
 import ccxt
 
@@ -24,7 +25,6 @@ async def run_thread(symbol, sig_type, exchange):
     nt.start()
 
 async def new_checker(symbol, sig_type, exchange):
-    from strategies.checker import Checker
     trade = Checker(exchange)
     await trade.execute(symbol, signal=sig_type)
 
