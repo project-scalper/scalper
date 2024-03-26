@@ -47,7 +47,7 @@ async def new_checker(symbol, sig_type:str, exchange):
         #         sig_type = sig_type.replace("SELL", "BUY")
         #     watchlist.put(symbol, sig_type)
             
-        await trade.execute(symbol, signal=sig_type, reverse=False)
+        await trade.execute(symbol, signal=sig_type, reverse=True)
 
 
 async def analyser(symbol:str, exchange:ccxt.Exchange)-> None:
