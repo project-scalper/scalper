@@ -27,7 +27,7 @@ async def run_thread(symbol, sig_type, exchange):
 
 async def new_checker(symbol, sig_type:str, exchange):
     from executor.checker import Checker
-    
+
     bots = storage.all("Bot")
     for _, bot in bots.items():
         # if bot.balance < bot.capital * 0.9:
@@ -159,6 +159,8 @@ async def analyser(symbol:str, exchange:ccxt.Exchange)-> None:
         tv_analysis = get_analysis(symbol)
         if ("BUY" in sig_type and "BUY" in tv_analysis) or ("SELL" in sig_type and 'SELL' in tv_analysis):
             if sig_type != "NEUTRAL":
+                if candle_main(ohlcv=ohlcv, signal=signal) is True:
+                    sig_type += "CS_"
                 await run_thread(symbol, sig_type, exchange)
                 # watchlist.reset(symbol)
                 return
