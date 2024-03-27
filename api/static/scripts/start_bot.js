@@ -38,6 +38,12 @@ $("#create-bot").on('click', () => {
         })
     })
     .catch((err) => {
-        alert(err.responseJSON)
+        var loader = document.getElementById("loader")
+        loader.style.display = 'none'
+        try {
+            alert(err.responseJSON)
+        } catch {
+            alert("An error occured")
+        }
     })
 })

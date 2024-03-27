@@ -29,7 +29,7 @@ async function loadBot(bot_id) {
         if (loader != null) {
             loader.style.display = "none";
         }
-        if (err.statusCode === 401) {
+        if (err.status === 401) {
             alert("Your session has expired, please sign in again")
             window.location.href = "login.html"
         } else {
@@ -48,7 +48,7 @@ function getProfile() {
         return loadBot(res.bot_id)
     })
     .catch((err) => {
-        if (err.statusCode === 401) {
+        if (err.status === 401) {
             alert("Your session has expired, please log in again to continue");
             window.location.href = 'login2.html'
         } else {
