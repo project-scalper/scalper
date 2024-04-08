@@ -223,12 +223,12 @@ class Checker():
         """Calculates maker fee and taker fee"""
         for i in range(3):
             try:
-                # maker_fee = self.exchange.fetchTradingFee(self.symbol)['maker'] * self.amount * self.entry_price
-                # taker_fee = self.exchange.fetchTradingFee(self.symbol)['taker'] * self.amount * self.tp
-                # taker_fee_sl = self.exchange.fetchTradingFee(self.symbol)['taker'] * self.amount * self.sl
-                maker_fee = self.exchange.markets[self.symbol]['maker'] * self.amount * self.entry_price
-                taker_fee = self.exchange.markets[self.symbol]['taker'] * self.amount * self.tp
-                taker_fee_sl = self.exchange.markets[self.symbol]['taker'] * self.amount * self.sl
+                maker_fee = self.exchange.fetchTradingFee(self.symbol)['maker'] * self.amount * self.entry_price
+                taker_fee = self.exchange.fetchTradingFee(self.symbol)['taker'] * self.amount * self.tp
+                taker_fee_sl = self.exchange.fetchTradingFee(self.symbol)['taker'] * self.amount * self.sl
+                # maker_fee = self.exchange.markets[self.symbol]['maker'] * self.amount * self.entry_price
+                # taker_fee = self.exchange.markets[self.symbol]['taker'] * self.amount * self.tp
+                # taker_fee_sl = self.exchange.markets[self.symbol]['taker'] * self.amount * self.sl
                 break
             except Exception as e:
                 if i == 2:

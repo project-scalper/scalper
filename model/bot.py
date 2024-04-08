@@ -29,7 +29,7 @@ class Bot(BaseModel):
             self.balance = 0
         if 'pnl_history' not in kwargs:
             self.pnl_history = []
-        # self.update_balance()
+        self.update_balance()
 
     def get_exchange(self) -> ccxt.Exchange:
         user = model.storage.get("User", self.user_id)
@@ -42,12 +42,6 @@ class Bot(BaseModel):
 
     def update_balance(self):
         exchange = self.get_exchange()
-        # user = model.storage.get("User", self.user_id)
-        # exchange = getattr(ccxt, user.exchange)()
-        # # exchange.options['defaultType'] = 'future'
-        # exchange.apiKey = user.keys.get("apiKey")
-        # exchange.secret = user.keys.get("secret")
-        # exchange.nonce = ccxt.Exchange.milliseconds
         bal = exchange.fetch_balance()['free']
         if "USDT" in bal:
             bal = bal['USDT']
@@ -55,17 +49,9 @@ class Bot(BaseModel):
             bal = 0
 
         self.balance = bal
-        # self.balance = 0
-        # self.save()
 
     def verify_capital(self):
         exchange = self.get_exchange()
-        # user = model.storage.get("User", self.user_id)
-        # exchange:ccxt.Exchange = getattr(ccxt, user.exchange)()
-        # # exchange.options['defaultType'] = 'future'
-        # exchange.apiKey = user.keys.get("apiKey")
-        # exchange.secret = user.keys.get("secret")
-        # exchange.none = ccxt.Exchange.milliseconds
 
         bal = exchange.fetch_balance()['free']
         bal = bal.get("USDT", 0)
