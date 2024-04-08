@@ -9,6 +9,7 @@ class WatchList:
     def __init__(self):
         self.fileName = 'watchlist.json'
         self.counterName = "counter.json"
+        self.psar_name = "psar.json"
         try:
             with open(self.fileName) as f:
                 self.watchlist = json.load(f)
@@ -20,8 +21,14 @@ class WatchList:
                 self.counter = json.load(f)
         except FileNotFoundError:
             self.counter = {'total': {'tp': 0, 'sl': 0, 'close_neg': 0}}
-        except Exception as e:
+        except:
             self.counter = {}
+
+        try:
+            with open(self.psar_name) as f:
+                self._psar = json.load(f)
+        except FileNotFoundError:
+            self._psar = {}
 
     def get(self, symbol:str)->str:
         if symbol in self.watchlist:
@@ -85,11 +92,20 @@ class WatchList:
             else:
                 self.counter[signal]['close_neg'] += result
             self.counter['total']['close_neg'] += result
-        self.counter_save()
+        self.__counter_save()
 
-    def counter_save(self):
+    def __counter_save(self):
         with open(self.counterName, 'w', encoding='utf-8') as fp:
             json.dump(self.counter, fp)
     
+    def psar_get(self, symbol:str) -> float:
+        return self._psar.get(symbol, None)
     
+    def psar_put(self, symbol:str, value:float):
+        self._psar[symbol] = value
+        self.__psar_save()
+
+    def __psar_save(self):
+        with open(self.psar_name, 'w', encoding='utf-8') as f:
+            json.dump(self._psar, f)
 # watchlist = WatchList()

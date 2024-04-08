@@ -26,6 +26,7 @@ async def rsi(exchange:ccxt.Exchange, symbol:str, timeframe:str='5m', rsi_length
             resp = df.tail(5).to_dict(orient='records')
             for item in resp:
                 item['datetime'] = datetime.fromtimestamp(item['time'] / 1000)
+                item['RSI'] = item[f"RSI_{rsi_length}"]
 
             resp.reverse()
             last_close = datetime.now() - timedelta(minutes=5)

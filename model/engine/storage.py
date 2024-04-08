@@ -1,6 +1,7 @@
 #!/usr/bin/python3
 
 import json
+from json import JSONDecodeError
 from model.user import User
 from model.usersession import UserSession
 from model.bot import Bot
@@ -63,6 +64,8 @@ class Storage:
                     model = classes[cls](**obj)
                     model.save()
         except FileNotFoundError:
+            pass
+        except JSONDecodeError:
             pass
 
     def search(self, cls, *args, **kwargs):

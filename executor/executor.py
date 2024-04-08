@@ -74,10 +74,6 @@ class Executor(Checker):
         watchlist.reset(self.symbol)
 
     def place_order(self):
-        self.calculate_entry_price()
-        self.calculate_tp_sl()
-        self.calculate_fee()
-
         # place order
         self.set_leverage(self.symbol, self.leverage)
         params = {
@@ -163,14 +159,22 @@ class Executor(Checker):
             except Exception as e:
                 adapter.error(f"{type(e).__name__} - {str(e)}")
             finally:
+                if hasattr(self, "psar"):
+                    new_sl = watchlist.psar_get(self.symbol)
+                    if new_sl != self.sl_order['price']:
+                        self.adjust_sl(new_sl)
                 time.sleep(1)
 
-    def close_position(self):
-        new_price = self.exchange.fetch_ticker(self.symbol)['last']
+    def adjust_sl(self, new_price:float=None):
+        if not new_price:
+            new_price = self.exchange.fetch_ticker(self.symbol)['last']
+            order_type = 'market'
+        else:
+            order_type = 'limit'
 
         for n in range(3):
             try:
-                self.exchange.edit_order(self.sl_order['id'], self.symbol, 'market',
+                self.exchange.edit_order(self.sl_order['id'], self.symbol, order_type,
                                         self.sl_order['side'], self.amount, new_price,
                                         params={"triggerPrice": new_price})
                 break
@@ -200,6 +204,8 @@ class Executor(Checker):
         try:
             start_balance = self.exchange.fetch_balance()['free'].get("USDT", 0)
             self.calculate_entry_price()
+            self.calculate_leverage()
+            self.set_leverage(self.symbol, self.leverage)
             self.calculate_tp_sl()
             self.calculate_fee()
             self.calculate_tp_sl()

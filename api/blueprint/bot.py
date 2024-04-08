@@ -4,7 +4,8 @@ from flask import jsonify
 from main import main
 import asyncio
 import threading
-from exchange import bybit as exchange
+# from exchange import huo as exchange
+from variables import exchange
 from model.bot import Bot
 from model import storage
 from helper import watchlist

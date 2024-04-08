@@ -42,8 +42,8 @@ async def macd(exchange:ccxt.Exchange, symbol:str, timeframe:str='5m', limit:int
 
 
 async def main():
-   # from exchange import bybit as exchange
-   exchange = ccxt.binance()
+   from exchange import huobi as exchange
+   # exchange = ccxt.binance()
    timeframe = '5m'
    limit = 50
    resp = await macd(exchange, "SOL/USDT", timeframe, limit)

@@ -2,10 +2,11 @@
 
 # from strategies.macd import analyser
 # from strategies.rsi_strategy import analyser
-from strategies.macd_2 import analyser
+# from strategies.macd_2 import analyser
+from strategies.psar import analyser
 from datetime import datetime, timedelta
 from helper.adapter import adapter
-from exchange import bybit as exchange
+from variables import exchange
 from datetime import datetime, timedelta
 
 import asyncio

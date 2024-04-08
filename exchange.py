@@ -24,4 +24,16 @@ binance = ccxt.binance({
     }
 })
 
+huobi = ccxt.huobi({
+    'apiKey': handleEnv("huobi_apiKey"),
+    'secret': handleEnv("huobi_secret"),
+    'nonce': ccxt.Exchange.milliseconds,
+    'enableRateLimit': True
+})
+
+gate = ccxt.gate({
+    'nonce': ccxt.Exchange.milliseconds,
+    'enableRateLimit': True
+})
+
 # mkt = bybit.load_markets()
