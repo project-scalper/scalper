@@ -74,11 +74,13 @@ async def analyser(symbol:str, exchange:ccxt.Exchange)-> None:
         if (_psar[0]['PSAR'] < ohlcv[-2][-2]) and (_psar[1]['PSAR'] < ohlcv[-3][-2]):
             if (_psar[2]['PSAR'] < ohlcv[-4][-2]) and (_psar[3]['PSAR'] > ohlcv[-5][-2]):
                 sig_type = 'PSAR_EMA_BUY'
+                watchlist.put(symbol, sig_type)
 
     elif trend == 'DOWNTREND':
-        if (_psar[0]['PSAR'] > ohlcv[-1][-2]) and (_psar[1]['PSAR'] > ohlcv[-2][-2]):
-            if (_psar[2]['PSAR'] > ohlcv[-3][-2]) and (_psar[3]['PSAR'] < ohlcv[-2][-2]):
+        if (_psar[0]['PSAR'] > ohlcv[-2][-2]) and (_psar[1]['PSAR'] > ohlcv[-3][-2]):
+            if (_psar[2]['PSAR'] > ohlcv[-4][-2]) and (_psar[3]['PSAR'] < ohlcv[-5][-2]):
                 sig_type = 'PSAR_EMA_SELL'
+                watchlist.put(symbol, sig_type)
 
     # Check if the indicators has reversed for existing signal
     signal = watchlist.get(symbol)
@@ -87,19 +89,21 @@ async def analyser(symbol:str, exchange:ccxt.Exchange)-> None:
         #     watchlist.reset(symbol)
         if _psar[0]['PSAR'] > ohlcv[-2][-2]:
             watchlist.reset(symbol)
-        if _rsi[0]['RSI'] < 70:
-            sig_type = "RSI_" + sig_type
     elif "SELL" in signal:
         # if trend != 'DOWNTREND':
         #     watchlist.reset(symbol)
         if _psar[0]['PSAR'] < ohlcv[-2][-2]:
             watchlist.reset(symbol)
+    
+    # confirm the signal with rsi value
+    if "BUY" in sig_type:
+        if _rsi[0]['RSI'] < 70:
+            sig_type = "RSI_" + sig_type
+    if "SELL" in sig_type:
         if _rsi[0]['RSI'] > 30:
             sig_type = "RSI_" + sig_type
 
     if "BUY" in sig_type or "SELL" in sig_type:
-        # adapter.info(f"#{symbol} - found")
-        watchlist.put(symbol, sig_type)
         await run_thread(symbol, sig_type, _psar=_psar[0]['PSAR'])
         
 
