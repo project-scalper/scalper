@@ -177,6 +177,7 @@ class Checker():
                 pnl = self.calculate_pnl(ticker['last'])
 
                 if ("BUY" in self.signal and ticker['last'] >= self.tp) or ("SELL" in self.signal and ticker['last'] <= self.tp):
+                    pnl = self.calculate_pnl(self.tp)
                     msg = f"#{self.symbol}. {self.signal} - start_time={self.start_time}, entry={self.entry_price}, tp={self.tp}, pnl={pnl}"
                     trade_logger.info(msg)
                     watchlist.trade_counter(self.signal, pnl)
@@ -185,6 +186,7 @@ class Checker():
                     return
                 
                 elif ("BUY" in self.signal and ticker['last'] <= self.sl) or ("SELL" in self.signal and ticker['last'] >= self.sl):
+                    pnl = self.calculate_pnl(self.sl)
                     msg = f"#{self.symbol}. {self.signal} - start_time={self.start_time}, entry={self.entry_price}, tp={self.tp}, pnl={pnl}, "
                     trade_logger.info(msg)
                     watchlist.trade_counter(self.signal, pnl)
@@ -192,13 +194,13 @@ class Checker():
                     self.update_bot(pnl)
                     return
                 
-                if hasattr(self, "close_price"):
-                    if ("BUY" in self.signal and ticker['last'] <= self.close_price) or ("SELL" in self.signal and ticker['last'] >= self.close_price):
-                        msg = f"#{self.symbol}. {self.signal} - start_time={self.start_time}. Trade closed. pnl={pnl}. "
-                        trade_logger.info(msg)
-                        watchlist.reset(self.symbol)
-                        self.update_bot(pnl)
-                        return
+                # if hasattr(self, "close_price"):
+                #     if ("BUY" in self.signal and ticker['last'] <= self.close_price) or ("SELL" in self.signal and ticker['last'] >= self.close_price):
+                #         msg = f"#{self.symbol}. {self.signal} - start_time={self.start_time}. Trade closed. pnl={pnl}. "
+                #         trade_logger.info(msg)
+                #         watchlist.reset(self.symbol)
+                #         self.update_bot(pnl)
+                #         return
                 
                 # close position when indicators changes signal
                 sig = watchlist.get(self.symbol)
