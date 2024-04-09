@@ -238,13 +238,13 @@ class Checker():
         self.fee:float = maker_fee + taker_fee
         self.fee_sl:float = maker_fee + taker_fee_sl
 
-    def adjust_sl(self):
-        cost = self.amount * self.entry_price
+    # def adjust_sl(self):
+    #     cost = self.amount * self.entry_price
         
-        if "BUY" in self.signal:
-            self.close_price = (cost + self.fee_sl) / self.amount
-        elif "SELL" in self.signal:
-            self.close_price = (cost - self.fee_sl) / self.amount
+    #     if "BUY" in self.signal:
+    #         self.close_price = (cost + self.fee_sl) / self.amount
+    #     elif "SELL" in self.signal:
+    #         self.close_price = (cost - self.fee_sl) / self.amount
 
     def adjust_sl(self):
         psar = watchlist.psar_get(self.symbol)
