@@ -15,6 +15,7 @@ class Bot(BaseModel):
     balance = 0     # contains the actual usdt balance in the user wallet
     pnl_history = []
     active = True
+    available = True
 
     def __init__(self, *args, **kwargs):
         self.user_id = None
@@ -25,6 +26,7 @@ class Bot(BaseModel):
         self.balance = 0     # contains the actual usdt balance in the user wallet
         self.pnl_history = []
         self.active = True
+        self.available = True
         
         super().__init__(*args, **kwargs)
         if "user_id" not in kwargs:

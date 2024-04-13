@@ -11,7 +11,7 @@ from variables import exchange
 from datetime import datetime, timedelta
 from model import storage
 import threading
-import ccxt
+# import ccxt
 from executor.checker import Checker
 
 import asyncio
@@ -51,8 +51,6 @@ async def main():
                     sig = signals[i % len(signals)]
                     await run_thread(sig['symbol'], sig['signal'], bot_id=bot.id)
                     # result[item] = signals[i % len(signals)]
-            # for _, bot in bots.items():
-            #     pass
             adapter.info("Analysis completed.")
         except Exception as e:
             msg = f"{type(e).__name__} - {str(e)}"

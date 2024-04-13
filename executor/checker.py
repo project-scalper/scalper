@@ -16,8 +16,8 @@ safety_factor = 0.5     # this is the reward / risk fraction
 
 
 class Checker():
-    capital:int = capital
-    leverage:int = leverage
+    # capital:int = capital
+    # leverage:int = leverage
     bot_id = None
 
     def __init__(self, exchange:ccxt.Exchange, *args, **kwargs):
@@ -134,25 +134,29 @@ class Checker():
                 ticker = self.exchange.fetch_ticker(self.symbol)
                 if ("BUY" in self.signal and ticker['last'] <= self.entry_price) or ("SELL" in self.signal and ticker['last'] >= self.entry_price):
                     self.entry_price = ticker['last']
-                    if active is True:
-                        break
+                    # if active is True:
+                    #     break
+                    if self.bot.available is False:
+                        adapter.info(f"Bot {self.bot.id} already in another trade")
+                        return
 
                     adapter.info(f"#{self.symbol}. {self.signal}. trade entered at {self.entry_price}, tp={self.tp}, sl={self.sl}, leverage={self.leverage}")
-                    active = True
+                    # active = True
+                    self.bot.available = False
                     self.monitor()
-                    active = False
+                    # active = False
                     return
             except Exception as e:
                 adapter.error(f"{type(e).__name__} - {str(e)}")
             finally:
                 time.sleep(1)
 
-        if active is True:
-            adapter.info(f"#{self.symbol}. Could not enter trade. Executor already active")
-            watchlist.reset(self.symbol)
-        else:
-            adapter.info(f"#{self.symbol}. {self.signal} - Unable to enter trade in time.")
-            watchlist.reset(self.symbol)
+        # if active is True:
+        #     adapter.info(f"#{self.symbol}. Could not enter trade. Executor already active")
+        #     watchlist.reset(self.symbol)
+        # else:
+        adapter.info(f"#{self.symbol}. {self.signal} - Unable to enter trade in time.")
+        watchlist.reset(self.symbol)
 
     def calculate_pnl(self, price:float) -> float:
         if "BUY" in self.signal:
@@ -324,5 +328,6 @@ class Checker():
         self.bot.daily_pnl[-1]['msg'] += pnl
         self.bot.pnl_history.append(pnl)
         self.bot.pnl_history = self.bot.pnl_history[-5:]
+        self.bot.available = True
         # self.bot.update_balance()
         self.bot.save()
