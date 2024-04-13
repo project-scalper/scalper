@@ -1,6 +1,6 @@
 #!/usr/bin/python3
 
-from flask import jsonify
+from flask import jsonify, request
 from main import main
 import asyncio
 import threading
@@ -73,6 +73,19 @@ def get_bot(bot_id):
         return jsonify("You have no active bot"), 404
     return jsonify(bot.to_dict()), 200
 
-
+@app_views.route('/bot', methods=['PUT'], strict_slashes=False)
+@auth.login_required
+def update_bot():
+    user = auth.current_user()
+    bot = storage.get("Bot", user.bot_id)
+    if not bot:
+        return jsonify("Bot not found"), 404
+    if not request.json:
+        return jsonify("Not a valid json"), 400
+    data = request.get_json()
+    for key, val in data.items():
+        setattr(bot, key, val)
+    bot.save()
+    return jsonify("Bot updated successfully"), 200
 # if __name__ == '__main__':
 #     app.run(host='0.0.0.0', port=8002, debug=False)

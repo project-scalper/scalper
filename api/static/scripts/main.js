@@ -69,6 +69,37 @@ function refreshPage() {
     })
 }
 
+function suspendBot() {
+    $("#suspend").on('click', () => {
+        if ($("#suspend").text === "Suspend bot") {
+            var payload = JSON.stringify({
+                'active': false
+            })
+            var new_text = "Resume bot";
+        } else if ($("#suspend").text === 'Resume bot') {
+            var payload = JSON.stringify({
+                'active' : true
+            })
+            var new_text = 'Suspend bot'
+        }
+        request.put('/bot', payload)
+        .then(() => {
+            alert("Your bot has been temporarily suspended")
+            $("#suspend").text(new_text)
+        })
+        .catch((err) => {
+            if (err.responseJSON) {
+                alert(err.responseJSON)
+            } else if (err.status === 401) {
+                alert("Your session has expired, please log in again")
+                window.location.href = 'login2.html'
+            } else {
+                alert("An error has occured please try again later")
+            }
+        })
+    })
+}
+
 Promise.all([getProfile(), refreshPage()])
 .then(() => {
     var loader = document.getElementById('preloader');

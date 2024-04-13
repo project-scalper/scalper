@@ -88,3 +88,6 @@ button:hover {
 #loader2 {
     display: none;
 }
+#suspend {
+    background-color: red;
+}

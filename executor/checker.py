@@ -272,8 +272,8 @@ class Checker():
             self.signal = signal
 
         self.calculate_entry_price()
-        # self.calculate_leverage()
-        self.leverage = 10
+        self.calculate_leverage()
+        # self.leverage = 10
         self.calculate_tp_sl()  # This method is called to get an estimated tp value without fees
         self.calculate_fee()
         self.calculate_tp_sl()  # This method is called again to account for fees
