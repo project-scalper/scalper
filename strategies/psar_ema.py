@@ -104,7 +104,10 @@ async def analyser(symbol:str, exchange:ccxt.Exchange)-> None:
             sig_type = "RSI_" + sig_type
 
     if "BUY" in sig_type or "SELL" in sig_type:
-        await run_thread(symbol, sig_type, _psar=_psar[0]['PSAR'])
+        return {'symbol': symbol, 'signal': sig_type}
+    else:
+        return None
+        # await run_thread(symbol, sig_type, _psar=_psar[0]['PSAR'])
         
 
 async def main():

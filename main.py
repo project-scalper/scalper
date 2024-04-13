@@ -3,13 +3,32 @@
 # from strategies.macd import analyser
 # from strategies.rsi_strategy import analyser
 # from strategies.macd_2 import analyser
-from strategies.psar import analyser
+# from strategies.psar_ema import analyser
+from strategies.adx_psar import analyser
 from datetime import datetime, timedelta
 from helper.adapter import adapter
 from variables import exchange
 from datetime import datetime, timedelta
+from model import storage
+import threading
+import ccxt
+from executor.checker import Checker
 
 import asyncio
+
+
+async def run_thread(symbol, sig_type, bot_id):
+    nt = threading.Thread(target=set_event, args=(symbol, sig_type, bot_id))
+    nt.start()
+
+def set_event(symbol, signal, bot_id):
+    loop = asyncio.new_event_loop()
+    asyncio.set_event_loop(loop)
+    loop.run_until_complete(new_checker(symbol, signal, bot_id))
+
+async def new_checker(symbol, sig_type, bot_id):
+    trade = Checker(exchange, bot_id=bot_id)
+    await trade.execute(symbol, sig_type, reverse=False)
 
 
 async def main():
@@ -23,7 +42,17 @@ async def main():
         try:
             tasks = [analyser(symbol, exchange) for symbol in symbols]
             adapter.info("Starting analysis...")
-            await asyncio.gather(*tasks)
+            signals = await asyncio.gather(*tasks)
+            signals = list(filter(lambda x: x is not None, signals))
+            if len(signals) > 0:
+                bots = storage.all("Bot")
+                # result = {}
+                for i, bot in enumerate(list(bots.values())):
+                    sig = signals[i % len(signals)]
+                    await run_thread(sig['symbol'], sig['signal'], bot_id=bot.id)
+                    # result[item] = signals[i % len(signals)]
+            # for _, bot in bots.items():
+            #     pass
             adapter.info("Analysis completed.")
         except Exception as e:
             msg = f"{type(e).__name__} - {str(e)}"

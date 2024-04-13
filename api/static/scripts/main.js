@@ -31,7 +31,7 @@ async function loadBot(bot_id) {
         }
         if (err.status === 401) {
             alert("Your session has expired, please sign in again")
-            window.location.href = "login.html"
+            window.location.href = "login2.html"
         } else {
             alert("Error fetching bot");
         }

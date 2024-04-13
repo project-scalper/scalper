@@ -12,7 +12,7 @@ from helper import watchlist
 
 time_fmt = "%b %d %Y, %I:%M:%S %p"
 date_fmt = "%b %d %Y"
-safety_factor = 0.5     # the lower this value is, the safer the trade
+safety_factor = 0.5     # this is the reward / risk fraction
 
 
 class Checker():
@@ -23,10 +23,10 @@ class Checker():
     def __init__(self, exchange:ccxt.Exchange, *args, **kwargs):
         self.exchange = exchange
         for key, val in kwargs.items():
-            if hasattr(self, key) or key == "psar":
+            if hasattr(self, key):
                 setattr(self, key, val)
 
-        if self.bot_id:
+        if hasattr(self, "bot_id"):
             self.bot:Bot = model.storage.get("Bot", self.bot_id)
             self.capital = int(self.bot.capital)
 
@@ -117,7 +117,7 @@ class Checker():
 
         self.tp = float(self.exchange.price_to_precision(self.symbol, tp))
         if hasattr(self, "psar"):
-            self.sl = self.psar
+            self.sl = float(self.exchange.price_to_precision(self.symbol, self.psar))
         else:
             self.sl = float(self.exchange.price_to_precision(self.symbol, sl))
         self.amount = amount
@@ -125,10 +125,11 @@ class Checker():
     def enter_trade(self):
         if not self.entry_price:
             return
-        global active
+        # global active
 
-        valid_till = datetime.now() + timedelta(seconds=300)
-        while datetime.now() <= valid_till and active is False:
+        valid_till = datetime.now() + timedelta(minutes=10)
+        # while datetime.now() <= valid_till and active is False:
+        while datetime.now() <= valid_till:
             try:
                 ticker = self.exchange.fetch_ticker(self.symbol)
                 if ("BUY" in self.signal and ticker['last'] <= self.entry_price) or ("SELL" in self.signal and ticker['last'] >= self.entry_price):
@@ -136,7 +137,6 @@ class Checker():
                     if active is True:
                         break
 
-                    self.calculate_tp_sl()
                     adapter.info(f"#{self.symbol}. {self.signal}. trade entered at {self.entry_price}, tp={self.tp}, sl={self.sl}, leverage={self.leverage}")
                     active = True
                     self.monitor()
@@ -240,27 +240,25 @@ class Checker():
         self.fee:float = maker_fee + taker_fee
         self.fee_sl:float = maker_fee + taker_fee_sl
 
-    # def adjust_sl(self):
-    #     cost = self.amount * self.entry_price
-        
-    #     if "BUY" in self.signal:
-    #         self.close_price = (cost + self.fee_sl) / self.amount
-    #     elif "SELL" in self.signal:
-    #         self.close_price = (cost - self.fee_sl) / self.amount
-
     def adjust_sl(self):
         psar = watchlist.psar_get(self.symbol)
-        self.sl = psar
+        if self.reverse is True:
+            self.tp = psar
+        else:
+            self.sl = psar
 
     def delete(self):
         del self
 
     async def execute(self, symbol:str, signal:str, reverse:bool=False):
-        global active
-        if active is True:
-            adapter.warning(f"{symbol}. Could not enter trade, executor is currently active")
-            return
+        # global active
+        # if active is True:
+        #     adapter.warning(f"{symbol}. Could not enter trade, executor is currently active")
+        #     return
         self.symbol = symbol
+        self.reverse = reverse
+        self.psar = watchlist.psar_get(self.symbol)
+
         if reverse is True:
             if "BUY" in signal:
                 self.signal = signal.replace("BUY", "SELL")
@@ -270,7 +268,8 @@ class Checker():
             self.signal = signal
 
         self.calculate_entry_price()
-        self.calculate_leverage()
+        # self.calculate_leverage()
+        self.leverage = 10
         self.calculate_tp_sl()  # This method is called to get an estimated tp value without fees
         self.calculate_fee()
         self.calculate_tp_sl()  # This method is called again to account for fees

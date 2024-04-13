@@ -5,31 +5,34 @@ import ccxt
 from model.base_model import BaseModel
 
 class Bot(BaseModel):
-    user_id = ""
+    __tablename__ = 'bots'
+    
+    user_id = None
     trades = []     # contains all the trades taken in the current day
     today_pnl = 0   # contains the pnl for the current day
     daily_pnl = []  # contains the pnl for each of the last 30 days
     capital = 0     # contains the user's intended capital to start the bot
     balance = 0     # contains the actual usdt balance in the user wallet
     pnl_history = []
+    active = True
 
     def __init__(self, *args, **kwargs):
+        self.user_id = None
+        self.trades = []     # contains all the trades taken in the current day
+        self.today_pnl = 0   # contains the pnl for the current day
+        self.daily_pnl = []  # contains the pnl for each of the last 30 days
+        self.capital = 0     # contains the user's intended capital to start the bot
+        self.balance = 0     # contains the actual usdt balance in the user wallet
+        self.pnl_history = []
+        self.active = True
+        
         super().__init__(*args, **kwargs)
         if "user_id" not in kwargs:
-            raise Exception("Bot must include a user id")
-        if 'trades' not in kwargs:
-            self.trades = []
-        if 'today_pnl' not in kwargs:
-            self.today_pnl = 0
-        if 'daily_pnl' not in kwargs:
-            self.daily_pnl = []
-        if 'capital' not in kwargs:
-            self.capital = 0
-        if 'balance' not in kwargs:
-            self.balance = 0
-        if 'pnl_history' not in kwargs:
-            self.pnl_history = []
+            raise Exception("Please include a user id")
         self.update_balance()
+        if not hasattr(self, "capital"):
+            owner = model.storage.get("User", self.user_id)
+            self.capital = float(owner.capital)
 
     def get_exchange(self) -> ccxt.Exchange:
         user = model.storage.get("User", self.user_id)

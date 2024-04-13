@@ -3,6 +3,8 @@
 from model.base_model import BaseModel
 
 class User(BaseModel):
+    __tablename__ = 'users'
+    
     username = ""
     email = ""
     password = ""
