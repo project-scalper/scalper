@@ -42,7 +42,7 @@ async def psar(exchange:ccxt.Exchange, symbol:str, timeframe:str='5m', ohlcv:Lis
                 elif not math.isnan(item[key2]):
                     item["PSAR"] = item[key2]
             resp.reverse()
-            if datetime.now() - timedelta(minutes=5) > item[0]['datetime']:
+            if datetime.now() - timedelta(minutes=5) > resp[0]['datetime']:
                 return resp
             resp.pop(0)
             return resp

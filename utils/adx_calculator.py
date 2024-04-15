@@ -44,7 +44,7 @@ async def adx(exchange:ccxt.Exchange, symbol:str, timeframe:str='5m', ohlcv:List
                 item['DMP'] = item[f'DMP_{length}']
                 item['DMN'] = item[f'DMN_{length}']
             resp.reverse()
-            if datetime.now() - timedelta(minutes=5) > item[0]['datetime']:
+            if datetime.now() - timedelta(minutes=5) > resp[0]['datetime']:
                 return resp
             resp.pop(0)
             return resp
