@@ -7,6 +7,7 @@ import asyncio
 import math
 from datetime import datetime
 from typing import List
+from datetime import datetime, timedelta
 
 
 import ccxt  # noqa: E402
@@ -43,6 +44,8 @@ async def adx(exchange:ccxt.Exchange, symbol:str, timeframe:str='5m', ohlcv:List
                 item['DMP'] = item[f'DMP_{length}']
                 item['DMN'] = item[f'DMN_{length}']
             resp.reverse()
+            if datetime.now() - timedelta(minutes=5) > item[0]['datetime']:
+                return resp
             resp.pop(0)
             return resp
     except Exception as e:

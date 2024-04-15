@@ -13,6 +13,7 @@ from helper.adapter import adapter
 from helper import watchlist
 from variables import timeframe, exchange
 from model import storage
+from datetime import datetime, timedelta
 import asyncio
 import ccxt
 
@@ -66,6 +67,10 @@ async def analyser(symbol:str, exchange:ccxt.Exchange)-> Union[Dict | None]:
     else:
         trend = "NEUTRAL"
 
+    last_dt_on_ohlcv = datetime.fromtimestamp(ohlcv[-1][0] / 1000)
+    if datetime.now() - timedelta(minutes=5) > last_dt_on_ohlcv:
+        ohlcv.append([])
+
     # Confirm with PSAR value
     sig_type = ""
     if trend == 'UPTREND':
@@ -89,9 +94,13 @@ async def analyser(symbol:str, exchange:ccxt.Exchange)-> Union[Dict | None]:
     # Check if the indicators has reversed for existing signal
     signal = watchlist.get(symbol)
     if "BUY" in signal:
+        if trend != 'UPTREND':
+            watchlist.reset(symbol)
         if _psar[0]['PSAR'] > ohlcv[-2][-2]:
             watchlist.reset(symbol)
     elif "SELL" in signal:
+        if trend != 'DOWNTREND':
+            watchlist.reset(symbol)
         if _psar[0]['PSAR'] < ohlcv[-2][-2]:
             watchlist.reset(symbol)
 

@@ -6,6 +6,11 @@ async function loadBot(bot_id) {
         $("#daily-pnl").text(bot.today_pnl.toFixed(2))
         $("#current-balance").text("$" + bot.balance.toFixed(2))
         $("#performance-list").html('')
+        if (bot.active === true) {
+            $("#suspend").html('<i class="fa fa-spinner fa-spin" id="loader2"></i>Suspend bot')
+        } else if (bot.active === false) {
+            $("#suspend").html('<i class="fa fa-spinner fa-spin" id="loader2"></i>Resume bot')
+        }
         for (var item of bot.daily_pnl) {
             $("#performance-list").prepend(
                 `<li>${item.date}: ${item.msg.toFixed(2)}\n</li>`
@@ -71,23 +76,35 @@ function refreshPage() {
 
 function suspendBot() {
     $("#suspend").on('click', () => {
-        if ($("#suspend").text === "Suspend bot") {
+        var loader = document.getElementById("loader2")
+        loader.style.display = 'block'
+        if ($("#suspend").text() === "Suspend bot") {
             var payload = JSON.stringify({
                 'active': false
             })
             var new_text = "Resume bot";
-        } else if ($("#suspend").text === 'Resume bot') {
+            var alert_msg = "Your bot has been temporarily suspended"
+        } else if ($("#suspend").text() === 'Resume bot') {
             var payload = JSON.stringify({
                 'active' : true
             })
             var new_text = 'Suspend bot'
+            var alert_msg = "Your bot has been restored"
         }
         request.put('/bot', payload)
         .then(() => {
-            alert("Your bot has been temporarily suspended")
-            $("#suspend").text(new_text)
+            var loader = document.getElementById('loader2');
+            if (loader != null) {
+                loader.style.display = "none";
+            }
+            alert(alert_msg)
+            $("#suspend").html('<i class="fa fa-spinner fa-spin" id="loader2"></i>' + new_text)
         })
         .catch((err) => {
+            var loader = document.getElementById('loader2');
+            if (loader != null) {
+                loader.style.display = "none";
+            }
             if (err.responseJSON) {
                 alert(err.responseJSON)
             } else if (err.status === 401) {
@@ -100,7 +117,7 @@ function suspendBot() {
     })
 }
 
-Promise.all([getProfile(), refreshPage()])
+Promise.all([getProfile(), refreshPage(), suspendBot()])
 .then(() => {
     var loader = document.getElementById('preloader');
 	if (loader != null) {

@@ -6,6 +6,7 @@ from model.user import User
 from model.usersession import UserSession
 from model.bot import Bot
 from datetime import datetime, timedelta
+from typing import Union, Dict, List
 # from model.engine import 
 
 classes = {"Bot": Bot, "User": User, "UserSession": UserSession}
@@ -17,7 +18,7 @@ class Storage:
     def __init__(self) -> None:
         self.__objects = {}
         
-    def all(self, cls=None):
+    def all(self, cls=None) -> Dict:
         """returns the dictionary __objects"""
         if cls is not None:
             new_dict = {}
@@ -29,7 +30,7 @@ class Storage:
             return new_dict
         return self.__objects
     
-    def get(self, cls:str, id:str):
+    def get(self, cls:str, id:str) -> Union[Bot | User | UserSession]:
         key = f"{cls}.{id}"
         obj = self.__objects.get(key, None)
         if obj and cls == "UserSession":
@@ -68,7 +69,7 @@ class Storage:
         except JSONDecodeError:
             pass
 
-    def search(self, cls, *args, **kwargs):
+    def search(self, cls, *args, **kwargs) -> List:
         matched_obj = []
         for key, obj in self.all(cls).items():
             flag = 1

@@ -49,6 +49,8 @@ async def main():
                 # result = {}
                 for i, bot in enumerate(list(bots.values())):
                     sig = signals[i % len(signals)]
+                    if bot.available is False:
+                        continue
                     await run_thread(sig['symbol'], sig['signal'], bot_id=bot.id)
                     # result[item] = signals[i % len(signals)]
             adapter.info("Analysis completed.")

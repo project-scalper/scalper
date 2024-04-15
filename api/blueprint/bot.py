@@ -87,5 +87,7 @@ def update_bot():
         setattr(bot, key, val)
     bot.save()
     return jsonify("Bot updated successfully"), 200
+
+
 # if __name__ == '__main__':
 #     app.run(host='0.0.0.0', port=8002, debug=False)
