@@ -12,7 +12,7 @@ from helper import watchlist
 
 time_fmt = "%b %d %Y, %I:%M:%S %p"
 date_fmt = "%b %d %Y"
-safety_factor = 0.5     # this is the reward / risk fraction
+safety_factor = 1     # this is the reward / risk fraction
 
 
 class Checker():
