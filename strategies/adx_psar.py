@@ -94,13 +94,13 @@ async def analyser(symbol:str, exchange:ccxt.Exchange)-> Union[Dict | None]:
     # Check if the indicators has reversed for existing signal
     signal = watchlist.get(symbol)
     if "BUY" in signal:
-        if trend != 'UPTREND':
-            watchlist.reset(symbol)
+        # if trend != 'UPTREND':
+            # watchlist.reset(symbol)
         if _psar[0]['PSAR'] > ohlcv[-2][-2]:
             watchlist.reset(symbol)
     elif "SELL" in signal:
-        if trend != 'DOWNTREND':
-            watchlist.reset(symbol)
+        # if trend != 'DOWNTREND':
+            # watchlist.reset(symbol)
         if _psar[0]['PSAR'] < ohlcv[-2][-2]:
             watchlist.reset(symbol)
 
