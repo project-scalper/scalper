@@ -2,7 +2,7 @@
 
 from helper.adapter import adapter, trade_logger
 from datetime import datetime, timedelta
-from variables import risk, reward, capital, leverage, timeframe
+from variables import risk, reward, capital, leverage, timeframe, safety_factor
 from strategies.macd_2 import active
 import time
 import ccxt
@@ -12,7 +12,7 @@ from helper import watchlist
 
 time_fmt = "%b %d %Y, %I:%M:%S %p"
 date_fmt = "%b %d %Y"
-safety_factor = 1     # this is the reward / risk fraction
+# safety_factor = 1     # this is the reward / risk fraction
 
 
 class Checker():
