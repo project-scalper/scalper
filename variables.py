@@ -6,7 +6,7 @@ reward = 0.025     # % of the capital
 leverage = 10
 timeframe = '5m'
 confirmation_timeframe = '15m'
-safety_factor = 0.2
+safety_factor = 0.35
 
 from exchange import bybit as exchange
 exchange = exchange
