@@ -13,6 +13,7 @@ from model import storage
 import threading
 # import ccxt
 from executor.checker import Checker
+from itertools import cycle
 
 import asyncio
 
@@ -44,14 +45,17 @@ async def main():
             adapter.info("Starting analysis...")
             signals = await asyncio.gather(*tasks)
             signals = list(filter(lambda x: x is not None, signals))
+            cycled_signal = cycle(signals)
             if len(signals) > 0:
-                bots = storage.all("Bot")
+                bots = storage.search("Bot", active=True, available=True)
                 # result = {}
-                for i, bot in enumerate(list(bots.values())):
-                    sig = signals[i % len(signals)]
-                    if bot.available is False:
-                        continue
+                for _, bot in bots.items():
                     await run_thread(sig['symbol'], sig['signal'], bot_id=bot.id)
+                # for i, bot in enumerate(list(bots.values())):
+                    # sig = signals[i % len(signals)]
+                    # if bot.available is False:
+                        # continue
+                    # await run_thread(sig['symbol'], sig['signal'], bot_id=bot.id)
                     # result[item] = signals[i % len(signals)]
             adapter.info("Analysis completed.")
         except Exception as e:
