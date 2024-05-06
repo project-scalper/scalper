@@ -49,7 +49,7 @@ async def main():
             if len(signals) > 0:
                 bots = storage.search("Bot", active=True, available=True)
                 # result = {}
-                for _, bot in bots.items():
+                for bot in bots:
                     await run_thread(sig['symbol'], sig['signal'], bot_id=bot.id)
                 # for i, bot in enumerate(list(bots.values())):
                     # sig = signals[i % len(signals)]
