@@ -50,6 +50,7 @@ async def main():
                 bots = storage.search("Bot", active=True, available=True)
                 # result = {}
                 for bot in bots:
+                    sig = next(cycled_signal)
                     await run_thread(sig['symbol'], sig['signal'], bot_id=bot.id)
                 # for i, bot in enumerate(list(bots.values())):
                     # sig = signals[i % len(signals)]
