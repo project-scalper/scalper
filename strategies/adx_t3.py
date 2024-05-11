@@ -70,11 +70,11 @@ async def analyser(symbol:str, exchange:ccxt.Exchange)-> Union[Dict | None]:
     if trend == 'UPTREND':
         if (_t3[0]['FAST_T3'] > _t3[0]['SLOW_T3']) and (_t3[1]['FAST_T3'] <= _t3[1]['SLOW_T3']):
             if ohlcv[-1][4] > _t3[0]['SLOW_T3']:
-                sig_type = "ADX_T3_BUY"
+                sig_type = "ADX_T3_CROSS_BUY"
                 stop_loss = _t3[0]['SLOW_T3']
                 watchlist.put(symbol, sig_type)
         elif (_t3[0]['FAST_T3'] > _t3[0]['SLOW_T3']) and (_t3[1]['FAST_T3'] > ohlcv[-2][4]) and (ohlcv[-1][4] > _t3[0]['FAST_T3']):
-            sig_type = "ADX_T3_BUY"
+            sig_type = "ADX_T3_BREAKOUT_BUY"
             stop_loss = _t3[0]['SLOW_T3']
             watchlist.put(symbol, sig_type)
     elif trend == 'DOWNTREND':
