@@ -2,11 +2,13 @@
 
 from datetime import datetime, timedelta
 from variables import exchange
-from strategies.executor import Executor
+from executor.executor import Executor
 import time
 import asyncio
 from model import storage
 from tradingview_ta import Exchange, Interval, TA_Handler
+import pandas as pd
+import pandas_ta as ta
 
 
 flag = False
@@ -125,6 +127,9 @@ async def test_signal(symbol, signal):
     trade = Executor(exchange, user)
 
     await trade.execute(symbol, signal)
+
+def test_t3(symbol):
+    df = pd.DataFrame()
 
 
 if __name__ == '__main__':

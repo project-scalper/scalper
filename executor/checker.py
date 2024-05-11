@@ -28,7 +28,7 @@ class Checker():
 
         if hasattr(self, "bot_id"):
             self.bot:Bot = model.storage.get("Bot", self.bot_id)
-            self.capital = int(self.bot.capital)
+            self.capital = int(self.bot.capital)    # change this to bot.balance before production
 
         self.risk = self.capital * risk
         self.reward = self.capital * reward
@@ -79,6 +79,19 @@ class Checker():
                 leverage = (amount * self.entry_price) / self.capital
                 self.leverage = int(leverage) + 1
             # self.tp = tp
+        elif hasattr(self, "stop_loss"):
+            if "BUY" in self.signal:
+                dist:float = (self.entry_price - self.stop_loss) * self.safety_factor
+                tp = self.entry_price + dist
+                amount = self.reward / (tp - self.entry_price)
+                leverage = (amount * self.entry_price) / self.capital
+                self.leverage = int(leverage) + 1
+            elif "SELL" in self.signal:
+                dist:float = (self.stop_loss - self.entry_price) * self.safety_factor
+                tp = self.entry_price - dist
+                amount = self.reward / (self.entry_price - tp)
+                leverage = (amount * self.entry_price) / self.capital
+                self.leverage = int(leverage) + 1
         else:
             self.leverage = leverage
             leverage = self.leverage
@@ -182,7 +195,7 @@ class Checker():
 
                 if ("BUY" in self.signal and ticker['last'] >= self.tp) or ("SELL" in self.signal and ticker['last'] <= self.tp):
                     pnl = self.calculate_pnl(self.tp)
-                    msg = f"#{self.symbol}. {self.signal} - start_time={self.start_time}, entry={self.entry_price}, tp={self.tp}, pnl={pnl}"
+                    msg = f"#{self.symbol}. {self.signal} - start_time={self.start_time}, entry={self.entry_price}, tp={self.tp}, lev={self.leverage}, pnl={pnl}"
                     trade_logger.info(msg)
                     watchlist.trade_counter(self.signal, pnl)
                     watchlist.reset(self.symbol)
@@ -191,20 +204,12 @@ class Checker():
                 
                 elif ("BUY" in self.signal and ticker['last'] <= self.sl) or ("SELL" in self.signal and ticker['last'] >= self.sl):
                     pnl = self.calculate_pnl(self.sl)
-                    msg = f"#{self.symbol}. {self.signal} - start_time={self.start_time}, entry={self.entry_price}, tp={self.tp}, pnl={pnl}, "
+                    msg = f"#{self.symbol}. {self.signal} - start_time={self.start_time}, entry={self.entry_price}, tp={self.tp}, lev={self.leverage}, pnl={pnl}"
                     trade_logger.info(msg)
                     watchlist.trade_counter(self.signal, pnl)
                     watchlist.reset(self.symbol)
                     self.update_bot(pnl)
                     return
-                
-                # if hasattr(self, "close_price"):
-                #     if ("BUY" in self.signal and ticker['last'] <= self.close_price) or ("SELL" in self.signal and ticker['last'] >= self.close_price):
-                #         msg = f"#{self.symbol}. {self.signal} - start_time={self.start_time}. Trade closed. pnl={pnl}. "
-                #         trade_logger.info(msg)
-                #         watchlist.reset(self.symbol)
-                #         self.update_bot(pnl)
-                #         return
                 
                 # close position when indicators changes signal
                 sig = watchlist.get(self.symbol)
@@ -254,14 +259,17 @@ class Checker():
     def delete(self):
         del self
 
-    async def execute(self, symbol:str, signal:str, reverse:bool=False):
+    async def execute(self, symbol:str, signal:str, reverse:bool=False, stop_loss=None):
         # global active
         # if active is True:
         #     adapter.warning(f"{symbol}. Could not enter trade, executor is currently active")
         #     return
         self.symbol = symbol
         self.reverse = reverse
-        self.psar = watchlist.psar_get(self.symbol)
+        if stop_loss is None:
+            self.psar = watchlist.psar_get(self.symbol)
+        else:
+            self.stop_loss = stop_loss
 
         if reverse is True:
             if "BUY" in signal:
@@ -273,7 +281,6 @@ class Checker():
 
         self.calculate_entry_price()
         self.calculate_leverage()
-        # self.leverage = 10
         self.calculate_tp_sl()  # This method is called to get an estimated tp value without fees
         self.calculate_fee()
         self.calculate_tp_sl()  # This method is called again to account for fees

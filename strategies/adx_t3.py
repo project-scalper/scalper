@@ -1,12 +1,8 @@
 #!/usr/bin/python3
 
-from utils.ema_calculator import ema
-# from utils.rsi_calculator import rsi
+from utils.t3_calculator import t3
 from utils.adx_calculator import adx
-# from utils.tradingview import get_analysis
-from utils.psar_calculator import psar
 from executor.checker import Checker
-# from utils.candle_patterns import candle_main
 import threading
 from typing import Dict, Union
 from helper.adapter import adapter
@@ -50,64 +46,58 @@ async def analyser(symbol:str, exchange:ccxt.Exchange)-> Union[Dict | None]:
                 adapter.warning(f"Unable to fetch ohlcv for {symbol} - {str(e)}")
                 return None
 
-    _adx, _psar, _ema_50, _ema_100 = await asyncio.gather(adx(exchange, symbol, timeframe, ohlcv=ohlcv),
-                                       psar(exchange, symbol, timeframe, ohlcv=ohlcv),
-                                       ema(exchange, symbol, 50, timeframe, ohlcv=ohlcv),
-                                       ema(exchange, symbol, 100, timeframe, ohlcv=ohlcv))
+    _adx, _t3 = await asyncio.gather(adx(exchange, symbol, timeframe, ohlcv=ohlcv),
+                                       t3(exchange, symbol, timeframe, ohlcv=ohlcv))
     
-    if not _adx or not _psar or not _ema_50 or not _ema_100:
+    if not _adx or not _t3:
         adapter.warning(f"One or more indicators are missing for {symbol}")
         return
-    
-    watchlist.psar_put(symbol, _psar[0]['PSAR'])
 
-    # check ADX and EMAs to determine trend
-    if (_adx[0]['DMP'] > _adx[0]['DMN']) and (_ema_50[0]['EMA'] > _ema_100[0]['EMA']):
+    # check DMI and ADX to determine trend
+    if (_adx[0]['DMP'] > _adx[0]['DMN']) and (_adx[0]['ADX'] >= 25):
         trend = 'UPTREND'
-    elif (_adx[0]['DMP'] < _adx[0]['DMN']) and (_ema_50[0]['EMA'] < _ema_100[0]['EMA']):
+    elif (_adx[0]['DMP'] < _adx[0]['DMN']) and (_adx[0]['ADX'] >= 25):
         trend = 'DOWNTREND'
     else:
         trend = "NEUTRAL"
 
-    last_dt_on_ohlcv = datetime.fromtimestamp(ohlcv[-1][0] / 1000)
-    if datetime.now() - timedelta(minutes=5) > last_dt_on_ohlcv:
-        ohlcv.append([])
+    # last_dt_on_ohlcv = datetime.fromtimestamp(ohlcv[-1][0] / 1000)
+    # if datetime.now() - timedelta(minutes=5) > last_dt_on_ohlcv:
+    #     ohlcv.append([])
 
-    # Confirm with PSAR value
+    # Confirm with T3 value
     sig_type = ""
     if trend == 'UPTREND':
-        if (_psar[0]['PSAR'] < ohlcv[-2][-2]) and (_psar[1]['PSAR'] < ohlcv[-3][-2]):
-            if (_psar[2]['PSAR'] < ohlcv[-4][-2]) and (_psar[3]['PSAR'] > ohlcv[-5][-2]):
-                if _adx[0]['ADX'] >= 25:
-                    sig_type = 'PSAR_ADX_BUY'
-                else:
-                    sig_type = 'PSAR_BUY'
+        if (_t3[0]['FAST_T3'] > _t3[0]['SLOW_T3']) and (_t3[1]['FAST_T3'] <= _t3[1]['SLOW_T3']):
+            if ohlcv[-1][4] > _t3[0]['SLOW_T3']:
+                sig_type = "ADX_T3_BUY"
+                stop_loss = _t3[0]['SLOW_T3']
                 watchlist.put(symbol, sig_type)
-
+        elif (_t3[0]['FAST_T3'] > _t3[0]['SLOW_T3']) and (_t3[1]['FAST_T3'] > ohlcv[-2][4]) and (ohlcv[-1][4] > _t3[0]['FAST_T3']):
+            sig_type = "ADX_T3_BUY"
+            stop_loss = _t3[0]['SLOW_T3']
+            watchlist.put(symbol, sig_type)
     elif trend == 'DOWNTREND':
-        if (_psar[0]['PSAR'] > ohlcv[-2][-2]) and (_psar[1]['PSAR'] > ohlcv[-3][-2]):
-            if (_psar[2]['PSAR'] > ohlcv[-4][-2]) and (_psar[3]['PSAR'] < ohlcv[-5][-2]):
-                if _adx[0]['ADX'] >= 25:
-                    sig_type = 'PSAR_ADX_SELL'
-                else:
-                    sig_type = 'PSAR_SELL'
-                watchlist.put(symbol, sig_type)
+        if (_t3[0]['SLOW_T3'] > _t3[0]['FAST_T3']) and (_t3[1]['SLOW_T3'] <= _t3[1]['FAST_T3']):
+            sig_type = "ADX_T3_SELL"
+            stop_loss = _t3[0]['SLOW_T3']
+            watchlist.put(symbol, sig_type)
+        elif (_t3[0]['SLOW_T3'] > _t3[0]['FAST_T3']) and (ohlcv[-2][4] > _t3[1]['FAST_T3']) and (_t3[0]['FAST_T3'] > ohlcv[-1][4]):
+            sig_type = "ADX_T3_SELL"
+            stop_loss = _t3[0]['SLOW_T3']
+            watchlist.put(symbol, sig_type)
 
     # Check if the indicators has reversed for existing signal
     signal = watchlist.get(symbol)
     if "BUY" in signal:
-        if trend != 'UPTREND':
+        if (_adx[0]['DMN'] > _adx[0]['DMP']):
             watchlist.reset(symbol)
-        # if _psar[0]['PSAR'] > ohlcv[-2][-2]:
-        #     watchlist.reset(symbol)
     elif "SELL" in signal:
-        if trend != 'DOWNTREND':
+        if (_adx[0]['DMP'] > _adx[0]['DMN']):
             watchlist.reset(symbol)
-        # if _psar[0]['PSAR'] < ohlcv[-2][-2]:
-        #     watchlist.reset(symbol)
 
     if "BUY" in sig_type or "SELL" in sig_type:
-        return {'symbol': symbol, 'signal': sig_type}
+        return {'symbol': symbol, 'signal': sig_type, 'stop_loss': stop_loss}
     return None
         # await run_thread(symbol, sig_type, _psar=_psar[0]['PSAR'])
         

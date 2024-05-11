@@ -79,6 +79,14 @@ function suspendBot() {
         var loader = document.getElementById("loader2")
         loader.style.display = 'block'
         if ($("#suspend").text() === "Suspend bot") {
+            conf = window.confirm("Are you sure you want to suspend the bot?")
+            if (conf == false) {
+                var loader = document.getElementById('loader2');
+                if (loader != null) {
+                    loader.style.display = "none";
+                }
+                return
+            }
             var payload = JSON.stringify({
                 'active': false
             })

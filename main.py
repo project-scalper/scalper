@@ -4,7 +4,8 @@
 # from strategies.rsi_strategy import analyser
 # from strategies.macd_2 import analyser
 # from strategies.psar_ema import analyser
-from strategies.adx_psar import analyser
+# from strategies.adx_psar import analyser
+from strategies.adx_t3 import analyser
 from datetime import datetime, timedelta
 from helper.adapter import adapter
 from variables import exchange
@@ -18,18 +19,18 @@ from itertools import cycle
 import asyncio
 
 
-async def run_thread(symbol, sig_type, bot_id):
-    nt = threading.Thread(target=set_event, args=(symbol, sig_type, bot_id))
+async def run_thread(symbol, sig_type, bot_id, stop_loss=None):
+    nt = threading.Thread(target=set_event, args=(symbol, sig_type, bot_id, stop_loss))
     nt.start()
 
-def set_event(symbol, signal, bot_id):
+def set_event(symbol, signal, bot_id, stop_loss):
     loop = asyncio.new_event_loop()
     asyncio.set_event_loop(loop)
-    loop.run_until_complete(new_checker(symbol, signal, bot_id))
+    loop.run_until_complete(new_checker(symbol, signal, bot_id, stop_loss))
 
-async def new_checker(symbol, sig_type, bot_id):
+async def new_checker(symbol, sig_type, bot_id, stop_loss):
     trade = Checker(exchange, bot_id=bot_id)
-    await trade.execute(symbol, sig_type, reverse=False)
+    await trade.execute(symbol, sig_type, reverse=False, stop_loss=stop_loss)
 
 
 async def main():
@@ -48,16 +49,9 @@ async def main():
             cycled_signal = cycle(signals)
             if len(signals) > 0:
                 bots = storage.search("Bot", active=True, available=True)
-                # result = {}
                 for bot in bots:
                     sig = next(cycled_signal)
-                    await run_thread(sig['symbol'], sig['signal'], bot_id=bot.id)
-                # for i, bot in enumerate(list(bots.values())):
-                    # sig = signals[i % len(signals)]
-                    # if bot.available is False:
-                        # continue
-                    # await run_thread(sig['symbol'], sig['signal'], bot_id=bot.id)
-                    # result[item] = signals[i % len(signals)]
+                    await run_thread(sig['symbol'], sig['signal'], bot_id=bot.id, stop_loss=sig['stop_loss'])
             adapter.info("Analysis completed.")
         except Exception as e:
             msg = f"{type(e).__name__} - {str(e)}"
