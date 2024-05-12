@@ -71,30 +71,40 @@ async def analyser(symbol:str, exchange:ccxt.Exchange)-> Union[Dict | None]:
         if (_t3[0]['FAST_T3'] > _t3[0]['SLOW_T3']) and (_t3[1]['FAST_T3'] <= _t3[1]['SLOW_T3']):
             if ohlcv[-1][4] > _t3[0]['SLOW_T3']:
                 sig_type = "ADX_T3_CROSS_BUY"
-                stop_loss = _t3[0]['SLOW_T3']
+                stop_loss = min(_t3[0]['FAST_T3'], _t3[0]['SLOW_T3'])
                 watchlist.put(symbol, sig_type)
-        elif (_t3[0]['FAST_T3'] > _t3[0]['SLOW_T3']) and (_t3[1]['FAST_T3'] > ohlcv[-2][4]) and (ohlcv[-1][4] > _t3[0]['FAST_T3']):
-            sig_type = "ADX_T3_BREAKOUT_BUY"
-            stop_loss = _t3[0]['SLOW_T3']
-            watchlist.put(symbol, sig_type)
+        # elif (_t3[0]['FAST_T3'] > _t3[0]['SLOW_T3']) and (_t3[1]['FAST_T3'] > ohlcv[-2][4]) and (ohlcv[-1][4] > _t3[0]['FAST_T3']):
+        elif (max(_t3[1]['SLOW_T3'], _t3[1]['FAST_T3']) > min(ohlcv[-2][4], ohlcv[-2][1])): # breakout candle
+            if (min(ohlcv[-1][1], ohlcv[-1][4]) > max(_t3[0]['FAST_T3'], _t3[0]['SLOW_T3'])):   # confirmation candle
+                sig_type = "ADX_T3_BREAKOUT_BUY"
+                stop_loss = min(_t3[0]['FAST_T3'], _t3[0]['SLOW_T3'])
+                watchlist.put(symbol, sig_type)
+
     elif trend == 'DOWNTREND':
         if (_t3[0]['SLOW_T3'] > _t3[0]['FAST_T3']) and (_t3[1]['SLOW_T3'] <= _t3[1]['FAST_T3']):
-            sig_type = "ADX_T3_SELL"
-            stop_loss = _t3[0]['SLOW_T3']
-            watchlist.put(symbol, sig_type)
-        elif (_t3[0]['SLOW_T3'] > _t3[0]['FAST_T3']) and (ohlcv[-2][4] > _t3[1]['FAST_T3']) and (_t3[0]['FAST_T3'] > ohlcv[-1][4]):
-            sig_type = "ADX_T3_SELL"
-            stop_loss = _t3[0]['SLOW_T3']
-            watchlist.put(symbol, sig_type)
+            if ohlcv[-1][4] > _t3[0]['FAST_T3']:
+                sig_type = "ADX_T3_CROSS_SELL"
+                stop_loss = max(_t3[0]['FAST_T3'], _t3[0]['SLOW_T3'])
+                watchlist.put(symbol, sig_type)
+        # elif (_t3[0]['SLOW_T3'] > _t3[0]['FAST_T3']) and (ohlcv[-2][4] > _t3[1]['FAST_T3']) and (_t3[0]['FAST_T3'] > ohlcv[-1][4]):
+        elif (max(ohlcv[-2][1], ohlcv[-2][4]) > min(_t3[1]['FAST_T3'], _t3[1]['SLOW_T3'])):
+            if (min(_t3[0]['FAST_T3'], _t3[0]['SLOW_T3']) > max(ohlcv[-1][1], ohlcv[-1][4])):
+                sig_type = "ADX_T3_BREAKOUT_SELL"
+                stop_loss = max(_t3[0]['FAST_T3'], _t3[0]['SLOW_T3'])
+                watchlist.put(symbol, sig_type)
 
     # Check if the indicators has reversed for existing signal
     signal = watchlist.get(symbol)
     if "BUY" in signal:
-        if (_adx[0]['DMN'] > _adx[0]['DMP']):
+        if _adx[0]['DMN'] > _adx[0]['DMP']:
             watchlist.reset(symbol)
+        # if _t3[0]['FAST_T3'] > ohlcv[-1][4]:
+        #     watchlist.reset(symbol)
     elif "SELL" in signal:
-        if (_adx[0]['DMP'] > _adx[0]['DMN']):
+        if _adx[0]['DMP'] > _adx[0]['DMN']:
             watchlist.reset(symbol)
+        # if ohlcv[-1][4] > _t3[0]['FAST_T3']:
+        #     watchlist.reset(symbol)
 
     if "BUY" in sig_type or "SELL" in sig_type:
         return {'symbol': symbol, 'signal': sig_type, 'stop_loss': stop_loss}
