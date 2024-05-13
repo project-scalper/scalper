@@ -94,8 +94,8 @@ class Checker():
                 # amount = self.reward / (self.entry_price - tp)
                 # leverage = (amount * self.entry_price) / self.capital
                 self.leverage = round(leverage)
-            self.tp = self.exchange.price_to_precision(self.symbol, tp)
-            self.sl = self.exchange.price_to_precision(self.symbol, self.stop_loss)
+            self.tp = float(self.exchange.price_to_precision(self.symbol, tp))
+            self.sl = float(self.exchange.price_to_precision(self.symbol, self.stop_loss))
         else:
             self.leverage = leverage
             leverage = self.leverage
@@ -245,8 +245,8 @@ class Checker():
         for i in range(3):
             try:
                 maker_fee = self.exchange.fetchTradingFee(self.symbol)['maker'] * self.amount * self.entry_price
-                taker_fee = self.exchange.fetchTradingFee(self.symbol)['taker'] * self.amount * self.tp
-                taker_fee_rate = float(taker_fee / self.tp)
+                taker_fee_rate = self.exchange.fetchTradingFee(self.symbol)['taker'] * self.amount
+                taker_fee = taker_fee_rate * self.tp
                 taker_fee_sl = taker_fee_rate * self.sl
                 break
             except Exception as e:
