@@ -187,11 +187,9 @@ class Checker():
             pnl:float = (price * self.amount) - (self.entry_price * self.amount)
         elif "SELL" in self.signal:
             pnl:float = (self.entry_price * self.amount) - (price * self.amount)
-        # if pnl > 0:
-        #     pnl -= self.fee
-        # else:
-        #     pnl -= self.fee_sl
-        pnl = self.taker_fee_rate * price
+            
+        fee = self.taker_fee_rate * price
+        pnl -= fee
         self.pnl = pnl
         return pnl
 
@@ -250,9 +248,6 @@ class Checker():
                 taker_fee_rate = self.exchange.fetchTradingFee(self.symbol)['taker'] * self.amount
                 taker_fee = taker_fee_rate * self.tp
                 taker_fee_sl = taker_fee_rate * self.sl
-                # maker_fee = self.exchange.markets[self.symbol]['maker'] * self.amount * self.entry_price
-                # taker_fee = self.exchange.markets[self.symbol]['taker'] * self.amount * self.tp
-                # taker_fee_sl = self.exchange.markets[self.symbol]['taker'] * self.amount * self.sl
                 break
             except Exception as e:
                 if i == 2:
@@ -260,7 +255,7 @@ class Checker():
                     return
 
         self.fee:float = maker_fee + taker_fee
-        self.taker_fee_rate = taker_fee_rate
+        self.taker_fee_rate = float(taker_fee_rate)
         self.fee_sl:float = maker_fee + taker_fee_sl
 
     def adjust_sl(self):
@@ -298,13 +293,14 @@ class Checker():
 
         self.calculate_entry_price()
         self.calculate_leverage()
+        self.calculate_fee()
 
-        if not hasattr(self, "tp"):
-            self.calculate_tp_sl()  # This method is called to get an estimated tp value without fees
-            self.calculate_fee()
-            self.calculate_tp_sl()  # This method is called again to account for fees
-        else:
-            self.calculate_fee()
+        # if not hasattr(self, "tp"):
+        #     self.calculate_tp_sl()  # This method is called to get an estimated tp value without fees
+        #     self.calculate_fee()
+        #     self.calculate_tp_sl()  # This method is called again to account for fees
+        # else:
+        #     self.calculate_fee()
 
         adapter.info(f"#{self.symbol}. {self.signal} - Entry={self.entry_price}, tp={self.tp}, sl={self.sl}, leverage={self.leverage}")
 
