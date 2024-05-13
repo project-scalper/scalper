@@ -52,7 +52,7 @@ def log_errors(response):
 
 @app.teardown_appcontext
 def close(exception):
-    storage.close()
+    storage.reload()
 
 @app.route("/")
 def entry():
