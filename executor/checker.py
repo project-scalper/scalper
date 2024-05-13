@@ -101,6 +101,13 @@ class Checker():
             leverage = self.leverage
         if self.leverage > 20:
             self.leverage = 20
+            
+        amount = (self.capital * self.leverage) / self.entry_price
+        try:
+            amount = float(self.exchange.amoumt_to_precision(self.symbol, amount))
+        except Exception as e:
+            raise e
+        self.amount = amount
 
         # if self.leverage < 5:
         #     self.leverage *= 2
