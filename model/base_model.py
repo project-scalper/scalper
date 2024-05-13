@@ -51,7 +51,7 @@ class BaseModel:
         """This save the object to storage"""
         self.updated_at = datetime.utcnow()
         model.storage.new(self)
-        model.storage.save()
+        model.storage.save(self)
 
     def update(self, **kwargs):
         """This updates some attribute in storage"""

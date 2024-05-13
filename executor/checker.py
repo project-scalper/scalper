@@ -84,7 +84,6 @@ class Checker():
                 leverage = reward / initial_x_change
                 # amount = self.reward / (tp - self.entry_price)
                 # leverage = (amount * self.entry_price) / self.capital
-                self.leverage = round(leverage)
                 # self.leverage = int(leverage) + 1
             elif "SELL" in self.signal:
                 dist:float = (self.stop_loss - self.entry_price) * self.safety_factor
@@ -93,7 +92,9 @@ class Checker():
                 leverage = reward / initial_x_change
                 # amount = self.reward / (self.entry_price - tp)
                 # leverage = (amount * self.entry_price) / self.capital
-                self.leverage = round(leverage)
+            if 'CROSS' in self.signal:
+                leverage /= 3
+            self.leverage = round(leverage)
             self.tp = float(self.exchange.price_to_precision(self.symbol, tp))
             self.sl = float(self.exchange.price_to_precision(self.symbol, self.stop_loss))
         else:
