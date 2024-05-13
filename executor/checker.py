@@ -168,6 +168,7 @@ class Checker():
                     adapter.info(f"#{self.symbol}. {self.signal}. trade entered at {self.entry_price}, tp={self.tp}, sl={self.sl}, leverage={self.leverage}")
                     # active = True
                     self.bot.available = False
+                    self.bot.save()
                     self.monitor()
                     # active = False
                     return
@@ -270,10 +271,6 @@ class Checker():
         del self
 
     async def execute(self, symbol:str, signal:str, reverse:bool=False, stop_loss=None):
-        # global active
-        # if active is True:
-        #     adapter.warning(f"{symbol}. Could not enter trade, executor is currently active")
-        #     return
         self.symbol = symbol
         self.reverse = reverse
         if stop_loss is None:

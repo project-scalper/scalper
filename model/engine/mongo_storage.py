@@ -6,6 +6,7 @@ from os import getenv
 from helper.loadenv import handleEnv
 from model.bot import Bot
 from model.user import User
+from bson import ObjectId
 from model.usersession import UserSession
 
 classes = {"users": "User", "bots": "Bot", 'usersessions': "UserSession"}
@@ -53,7 +54,10 @@ class Database:
         if not model:
             return
         query = {'id': model.id}
-        new_attrs = {"$set": model.to_dict()}
+        vals = model.to_dict()
+        if '_id' in vals and isinstance(vals['_id'], str):
+            vals['_id'] = ObjectId(vals['_id'])
+        new_attrs = {"$set": vals}
         self.db[model.__tablename__].update_one(query, new_attrs, upsert=True)
         print("Document updated successfully")
 

@@ -38,9 +38,10 @@ class BaseModel:
             dictionary['created_at'] = self.created_at.strftime(time)
         if 'updated_at' in dictionary:
             dictionary['updated_at'] = self.updated_at.strftime(time)
-        if '_id' in dictionary:
-            dictionary['_id'] = str(dictionary['_id'])
+        # if '_id' in dictionary:
+        #     dictionary['_id'] = str(dictionary['_id'])
         dictionary.pop('_sa_instance_state', None)
+        dictionary.pop('_id', None)
         dictionary['__class__'] = self.__class__.__name__
         return dictionary
 

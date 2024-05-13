@@ -47,7 +47,7 @@ class Bot(BaseModel):
 
     def update_balance(self):
         exchange = self.get_exchange()
-        bal = exchange.fetch_balance()['free']
+        bal = exchange.fetch_balance()['total']
         if "USDT" in bal:
             bal = bal['USDT']
         else:
