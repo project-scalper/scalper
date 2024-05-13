@@ -18,7 +18,7 @@ class Database:
     def __init__(self):
         # db_name = getenv('DB_NAME', 'scalperdb')
         # url = getenv("HOST", 'localhost')
-        url = handleEnv("HOST")
+        url = handleEnv("DB_HOST")
         db_name = handleEnv("DB_NAME")
         # port = getenv("PORT", 27017)
         try:
