@@ -104,7 +104,7 @@ class Checker():
             
         amount = (self.capital * self.leverage) / self.entry_price
         try:
-            amount = float(self.exchange.amoumt_to_precision(self.symbol, amount))
+            amount = float(self.exchange.amount_to_precision(self.symbol, amount))
         except Exception as e:
             raise e
         self.amount = amount
