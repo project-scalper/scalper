@@ -245,13 +245,13 @@ class Checker():
         for i in range(3):
             try:
                 maker_fee = self.exchange.fetchTradingFee(self.symbol)['maker'] * self.amount * self.entry_price
-                taker_fee_rate = float(self.exchange.fetchTradingFee(self.symbol)['taker']) * self.amount
-                taker_fee = taker_fee_rate * self.tp
+                taker_fee = self.exchange.fetchTradingFee(self.symbol)['taker'] * self.amount * self.tp
+                taker_fee_rate = float(taker_fee / self.tp)
                 taker_fee_sl = taker_fee_rate * self.sl
                 break
             except Exception as e:
                 if i == 2:
-                    adapter.error(f"Unable to fetch trading fee for {self.symbol} - {str(e)}")
+                    adapter.error(f"Unable to fetch trading fee for {self.symbol} - {str(e)}. line: {e.__traceback__.tb_lineno}")
                     return
 
         self.fee:float = maker_fee + taker_fee
