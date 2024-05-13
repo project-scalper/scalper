@@ -187,7 +187,7 @@ class Checker():
             pnl:float = (price * self.amount) - (self.entry_price * self.amount)
         elif "SELL" in self.signal:
             pnl:float = (self.entry_price * self.amount) - (price * self.amount)
-            
+
         fee = self.taker_fee_rate * price
         pnl -= fee
         self.pnl = pnl
@@ -245,7 +245,7 @@ class Checker():
         for i in range(3):
             try:
                 maker_fee = self.exchange.fetchTradingFee(self.symbol)['maker'] * self.amount * self.entry_price
-                taker_fee_rate = self.exchange.fetchTradingFee(self.symbol)['taker'] * self.amount
+                taker_fee_rate = float(self.exchange.fetchTradingFee(self.symbol)['taker'] * self.amount)
                 taker_fee = taker_fee_rate * self.tp
                 taker_fee_sl = taker_fee_rate * self.sl
                 break
