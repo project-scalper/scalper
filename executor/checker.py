@@ -2,7 +2,7 @@
 
 from helper.adapter import adapter, trade_logger
 from datetime import datetime, timedelta
-from variables import risk, reward, timeframe, reward_risk
+from variables import risk, reward, timeframe, reward_risk, lev
 from strategies.macd_2 import active
 import time
 import ccxt
@@ -90,8 +90,6 @@ class Checker():
                 tp = self.entry_price - dist
                 initial_x_change = (self.entry_price - tp) / self.entry_price
                 leverage = reward / initial_x_change
-                # amount = self.reward / (self.entry_price - tp)
-                # leverage = (amount * self.entry_price) / self.capital
             if 'CROSS' in self.signal:
                 leverage /= 3
             self.leverage = round(leverage)
@@ -102,17 +100,30 @@ class Checker():
             leverage = self.leverage
         if self.leverage > 20:
             self.leverage = 20
-            
+        
         amount = (self.capital * self.leverage) / self.entry_price
         try:
             amount = float(self.exchange.amount_to_precision(self.symbol, amount))
         except Exception as e:
             raise e
         self.amount = amount
+        
+        if self.use_rr is False:
+            self.leverage = lev
+            amount = (self.capital * self.leverage) / self.entry_price
+            try:
+                self.amount = float(self.exchange.amount_to_precision(self.symbol, amount))
+            except Exception as e:
+                raise e
+            
+            self.calculate_fee()
+            fee = self.maker_fee + (self.taker_fee_rate * self.tp)
+            cost = self.amount * self.entry_price
+            if "BUY" in self.signal:
+                tp = (cost + self.reward + fee) / self.amount
+            elif "SELL" in self.signal:
+                tp = (cost - fee - reward) / self.amount
 
-        # if self.leverage < 5:
-        #     self.leverage *= 2
-        #     self.reward = reward * 2
         return leverage
 
     def calculate_tp_sl(self):
@@ -152,7 +163,7 @@ class Checker():
             return
         # global active
 
-        valid_till = datetime.now() + timedelta(minutes=10)
+        valid_till = datetime.now() + timedelta(minutes=15)
         # while datetime.now() <= valid_till and active is False:
         while datetime.now() <= valid_till:
             try:
@@ -246,19 +257,20 @@ class Checker():
         """Calculates maker fee and taker fee"""
         for i in range(3):
             try:
-                maker_fee = self.exchange.fetchTradingFee(self.symbol)['maker'] * self.amount * self.entry_price
-                taker_fee_rate = self.exchange.fetchTradingFee(self.symbol)['taker'] * self.amount
-                taker_fee = taker_fee_rate * self.tp
-                taker_fee_sl = taker_fee_rate * self.sl
+                maker_fee:float = self.exchange.fetchTradingFee(self.symbol)['maker'] * self.amount * self.entry_price
+                taker_fee_rate:float = self.exchange.fetchTradingFee(self.symbol)['taker'] * self.amount
+                # taker_fee = taker_fee_rate * self.tp
+                # taker_fee_sl = taker_fee_rate * self.sl
                 break
             except Exception as e:
                 if i == 2:
                     adapter.error(f"Unable to fetch trading fee for {self.symbol} - {str(e)}. line: {e.__traceback__.tb_lineno}")
                     return
 
-        self.fee:float = maker_fee + taker_fee
+        # self.fee:float = maker_fee + taker_fee
         self.taker_fee_rate = float(taker_fee_rate)
-        self.fee_sl:float = maker_fee + taker_fee_sl
+        self.maker_fee = maker_fee
+        # self.fee_sl:float = maker_fee + taker_fee_sl
 
     def adjust_sl(self):
         psar = watchlist.psar_get(self.symbol)
@@ -270,13 +282,14 @@ class Checker():
     def delete(self):
         del self
 
-    async def execute(self, symbol:str, signal:str, reverse:bool=False, stop_loss=None):
+    async def execute(self, symbol:str, signal:str, reverse:bool=False, stop_loss:float=None, use_rr:bool=True):
         self.symbol = symbol
         self.reverse = reverse
         if stop_loss is None:
             self.psar = watchlist.psar_get(self.symbol)
         else:
             self.stop_loss = stop_loss
+        self.use_rr = use_rr
 
         if reverse is True:
             if "BUY" in signal:
@@ -351,5 +364,6 @@ class Checker():
         self.bot.pnl_history.append(pnl)
         self.bot.pnl_history = self.bot.pnl_history[-5:]
         self.bot.available = True
+        self.bot.balance += pnl
         # self.bot.update_balance()
         self.bot.save()

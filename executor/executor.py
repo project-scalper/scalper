@@ -143,12 +143,12 @@ class Executor(Checker):
                 tp_ord = self.exchange.fetch_open_order(tp_order['id'], self.symbol)
                 sl_ord = self.exchange.fetch_open_order(sl_order['id'], self.symbol)
 
-                # sig = watchlist.get(self.symbol)
-                # if ("BUY" in self.signal and "BUY" not in sig) or ("SELL" in self.signal and "SELL" not in sig):
-                #     if alert is False:
-                #         alert = True
-                #         self.close_position()
-                #         return
+                sig = watchlist.get(self.symbol)
+                if ("BUY" in self.signal and "BUY" not in sig) or ("SELL" in self.signal and "SELL" not in sig):
+                    if alert is False:
+                        alert = True
+                        self.adjust_sl()
+                        return
 
                 if tp_ord['status'] == 'closed':
                     adapter.info(f"#{self.symbol}. {self.signal} - *TP hit*")
@@ -165,9 +165,16 @@ class Executor(Checker):
                         self.adjust_sl(new_sl)
                 time.sleep(1)
 
+    def close_position(self):
+        pass
+
     def adjust_sl(self, new_price:float=None):
+        """This closes the position or adjusts the stoploss order
+        If new_price is given"""
+
         if not new_price:
             new_price = self.exchange.fetch_ticker(self.symbol)['last']
+            # new_price = None
             order_type = 'market'
         else:
             order_type = 'limit'
@@ -178,9 +185,9 @@ class Executor(Checker):
                                         self.sl_order['side'], self.amount, new_price,
                                         params={"triggerPrice": new_price})
                 break
-            except:
+            except Exception as e:
                 if n == 2:
-                    adapter.error(f"#{self.symbol}. Unable to close position")
+                    adapter.error(f"#{self.symbol}. Unable to close position: {e}")
                     return
                 else:
                     time.sleep(1)
@@ -197,24 +204,59 @@ class Executor(Checker):
         #         else:
         #             continue
 
-    async def execute(self, symbol, signal):
+    async def execute(self, symbol, signal, stop_loss=None, reverse:bool=False):
         self.symbol = symbol
-        self.signal = signal
+        # self.signal = signal
+
+        self.reverse = reverse
+        if stop_loss is None:
+            self.psar = watchlist.psar_get(self.symbol)
+        else:
+            self.stop_loss = stop_loss
+
+        if reverse is True:
+            if "BUY" in signal:
+                self.signal = signal.replace("BUY", "SELL")
+            elif "SELL" in signal:
+                self.signal = signal.replace("SELL", "BUY")
+        else:
+            self.signal = signal
+        
+        if "CROSS" in self.signal:
+            self.safety_factor = self.safety_factor / 3
 
         try:
-            start_balance = self.exchange.fetch_balance()['free'].get("USDT", 0)
             self.calculate_entry_price()
             self.calculate_leverage()
-            self.set_leverage(self.symbol, self.leverage)
-            self.calculate_tp_sl()
             self.calculate_fee()
-            self.calculate_tp_sl()
+            start_balance = self.exchange.fetch_balance()['free'].get("USDT", 0)
+            self.set_leverage(self.symbol, self.leverage)
+
+            adapter.info(f"#{self.symbol}. {self.signal} - Entry={self.entry_price}, tp={self.tp}, sl={self.sl}, leverage={self.leverage}")
+
             self.enter_trade()
             watchlist.reset(self.symbol)
             end_balance = self.exchange.fetch_balance()['free'].get("USDT", 0)
             pnl = end_balance - start_balance
             self.update_bot(pnl)
-            return
         except Exception as e:
-            adapter.error(f"{type(e)} - {str(e)}")
+            adapter.error(f"{type(e).__name__} - {str(e)}, line {e.__traceback__.tb_lineno}")
+        return
+
+        # try:
+        #     start_balance = self.exchange.fetch_balance()['free'].get("USDT", 0)
+        #     self.calculate_entry_price()
+        #     self.calculate_leverage()
+            # self.set_leverage(self.symbol, self.leverage)
+        #     self.calculate_tp_sl()
+        #     self.calculate_fee()
+        #     self.calculate_tp_sl()
+        #     self.enter_trade()
+        #     watchlist.reset(self.symbol)
+            # end_balance = self.exchange.fetch_balance()['free'].get("USDT", 0)
+        #     pnl = end_balance - start_balance
+        #     self.update_bot(pnl)
+        #     return
+        # except Exception as e:
+        #     adapter.error(f"{type(e)} - {str(e)}")
 
