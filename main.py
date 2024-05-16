@@ -30,7 +30,7 @@ def set_event(symbol, signal, bot_id, stop_loss):
 
 async def new_checker(symbol, sig_type, bot_id, stop_loss):
     trade = Checker(exchange, bot_id=bot_id)
-    await trade.execute(symbol, sig_type, reverse=False, stop_loss=stop_loss)
+    await trade.execute(symbol, sig_type, reverse=False, stop_loss=stop_loss, use_rr=False)
 
 
 async def main():
