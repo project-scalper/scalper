@@ -123,6 +123,7 @@ class Checker():
                 tp = (cost + self.reward + fee) / self.amount
             elif "SELL" in self.signal:
                 tp = (cost - fee - reward) / self.amount
+            self.tp = float(self.exchange.price_to_precision(self.symbol, tp))
 
         return leverage
 
@@ -154,6 +155,8 @@ class Checker():
         self.tp = float(self.exchange.price_to_precision(self.symbol, tp))
         if hasattr(self, "psar"):
             self.sl = float(self.exchange.price_to_precision(self.symbol, self.psar))
+        elif hasattr(self, "stop_loss"):
+            self.sl = float(self.exchange.price_to_precision(self.symbol, self.stop_loss))
         else:
             self.sl = float(self.exchange.price_to_precision(self.symbol, sl))
         self.amount = amount
