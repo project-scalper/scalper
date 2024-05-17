@@ -262,18 +262,18 @@ class Checker():
             try:
                 maker_fee:float = self.exchange.fetchTradingFee(self.symbol)['maker'] * self.amount * self.entry_price
                 taker_fee_rate:float = self.exchange.fetchTradingFee(self.symbol)['taker'] * self.amount
-                # taker_fee = taker_fee_rate * self.tp
-                # taker_fee_sl = taker_fee_rate * self.sl
+                taker_fee = taker_fee_rate * self.tp
+                taker_fee_sl = taker_fee_rate * self.sl
                 break
             except Exception as e:
                 if i == 2:
                     adapter.error(f"Unable to fetch trading fee for {self.symbol} - {str(e)}. line: {e.__traceback__.tb_lineno}")
                     return
 
-        # self.fee:float = maker_fee + taker_fee
+        self.fee:float = maker_fee + taker_fee
         self.taker_fee_rate = float(taker_fee_rate)
         self.maker_fee = maker_fee
-        # self.fee_sl:float = maker_fee + taker_fee_sl
+        self.fee_sl:float = maker_fee + taker_fee_sl
 
     def adjust_sl(self):
         psar = watchlist.psar_get(self.symbol)
@@ -304,17 +304,19 @@ class Checker():
         
         if "CROSS" in self.signal:
             self.safety_factor = self.safety_factor / 3
+            self.reward /= 3
 
         self.calculate_entry_price()
-        self.calculate_leverage()
-        self.calculate_fee()
+        # self.calculate_leverage()
+        # self.calculate_fee()
+        self.leverage = lev
 
-        # if not hasattr(self, "tp"):
-        #     self.calculate_tp_sl()  # This method is called to get an estimated tp value without fees
-        #     self.calculate_fee()
-        #     self.calculate_tp_sl()  # This method is called again to account for fees
-        # else:
-        #     self.calculate_fee()
+        if not hasattr(self, "tp"):
+            self.calculate_tp_sl()  # This method is called to get an estimated tp value without fees
+            self.calculate_fee()
+            self.calculate_tp_sl()  # This method is called again to account for fees
+        else:
+            self.calculate_fee()
 
         adapter.info(f"#{self.symbol}. {self.signal} - Entry={self.entry_price}, tp={self.tp}, sl={self.sl}, leverage={self.leverage}")
 
