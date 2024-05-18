@@ -14,7 +14,8 @@ from strategies.rsi_strategy import active
 
 class Executor(Checker):
     active = False
-    max_daily_loss = 8
+    max_daily_loss = 15
+    daily_target = 7
 
     def __init__(self, exchange:ccxt.Exchange, user:Dict, *args, **kwargs):
         self.bot_id = user['bot_id']
@@ -223,7 +224,7 @@ class Executor(Checker):
             self.signal = signal
         
         if "CROSS" in self.signal:
-            self.safety_factor = self.safety_factor / 3
+            self.safety_factor /= 3
 
         try:
             self.calculate_entry_price()
@@ -239,24 +240,10 @@ class Executor(Checker):
             end_balance = self.exchange.fetch_balance()['free'].get("USDT", 0)
             pnl = end_balance - start_balance
             self.update_bot(pnl)
+            if self.bot.today_pnl >= self.daily_target:
+                setattr(self.bot, "target_reached", True)
+                setattr(self.bot, "target_date", datetime.now().day)
         except Exception as e:
             adapter.error(f"{type(e).__name__} - {str(e)}, line {e.__traceback__.tb_lineno}")
         return
-
-        # try:
-        #     start_balance = self.exchange.fetch_balance()['free'].get("USDT", 0)
-        #     self.calculate_entry_price()
-        #     self.calculate_leverage()
-            # self.set_leverage(self.symbol, self.leverage)
-        #     self.calculate_tp_sl()
-        #     self.calculate_fee()
-        #     self.calculate_tp_sl()
-        #     self.enter_trade()
-        #     watchlist.reset(self.symbol)
-            # end_balance = self.exchange.fetch_balance()['free'].get("USDT", 0)
-        #     pnl = end_balance - start_balance
-        #     self.update_bot(pnl)
-        #     return
-        # except Exception as e:
-        #     adapter.error(f"{type(e)} - {str(e)}")
 
