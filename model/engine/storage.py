@@ -34,7 +34,7 @@ class Storage:
         key = f"{cls}.{id}"
         obj = self.__objects.get(key, None)
         if obj and cls == "UserSession":
-            if datetime.now() > obj.created_at + timedelta(hours=24):
+            if datetime.now() > obj.created_at + timedelta(hours=72):
                 self.delete(obj)
                 return None
         return obj

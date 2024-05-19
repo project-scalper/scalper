@@ -7,6 +7,7 @@ from helper.loadenv import handleEnv
 from model.bot import Bot
 from model.user import User
 from bson import ObjectId
+from datetime import datetime, timedelta
 from model.usersession import UserSession
 
 classes = {"users": "User", "bots": "Bot", 'usersessions': "UserSession"}
@@ -98,7 +99,12 @@ class Database:
         if cls in classes2.values():
             cls = cls.__class__
         key = f"{cls}.{id}"
+        
         obj = self.__objects.get(key, None)
+        if obj and obj.__class__ == 'UserSession':
+            if datetime.now() > obj.created_at + timedelta(hours=72):
+                self.delete(obj)
+                return
         return obj
 
     def search(self, cls, **kwargs):
