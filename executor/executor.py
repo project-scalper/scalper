@@ -177,8 +177,8 @@ class Executor(Checker):
 
         for n in range(3):
             try:
-                self.exchange.edit_order(self.sl_order['id'], self.symbol, order_type,
-                                        self.sl_order['side'], self.amount, new_price,
+                self.exchange.edit_order(self.sl_ord['id'], self.symbol, order_type,
+                                        self.sl_ord['side'], self.amount, new_price,
                                         params={"triggerPrice": new_price})
                 break
             except Exception as e:
