@@ -8,19 +8,14 @@ from datetime import datetime, timedelta
 from typing import Dict
 import time
 import model
-from strategies.rsi_strategy import active
-# import uuid
 
 
 class Executor(Checker):
-    active = False
     max_daily_loss = 15
     daily_target = 7
 
     def __init__(self, exchange:ccxt.Exchange, user:Dict, *args, **kwargs):
         self.bot_id = user['bot_id']
-        # self.exchange = exchange
-        # self.exchange = self.get_exchange(user)
         super().__init__(exchange, *args, **kwargs)
         self.bot = model.storage.get("Bot", self.bot_id)
 
@@ -34,21 +29,20 @@ class Executor(Checker):
     def enter_trade(self):
         if not self.entry_price:
             return
-        valid_till = datetime.now() + timedelta(seconds=150)
+        valid_till = datetime.now() + timedelta(minutes=15)
         adapter.info(f"#{self.symbol}. {self.signal} - New trade found. entry={self.entry_price}, tp={self.tp}, sl={self.sl}")
-        # self.place_order()
-        global active
         while datetime.now() <= valid_till:
             try:
                 ticker = self.exchange.fetch_ticker(self.symbol)
                 if ("BUY" in self.signal and ticker['last'] <= self.entry_price) or ("SELL" in self.signal and ticker['last'] >= self.entry_price):
                     self.entry_price = ticker['last']
-                    if self.active is True:
+                    if self.bot.available is False:
                         break
 
                     self.calculate_tp_sl()
                     self.place_order()
-                    active = True
+                    self.bot.available = False
+                    self.bot.save()
                     while True:
                         order = self.exchange.fetch_open_order(self.order['id'], self.symbol)
                         if order['status'] == 'closed':
@@ -61,15 +55,15 @@ class Executor(Checker):
                         else:
                             time.sleep(1)
                     
-                    active = False
+                    self.bot.available = True
                     return
             except Exception as e:
                 adapter.error(f"{type(e).__name__} - {str(e)}")
             finally:
                 time.sleep(1)
 
-        if active is True:
-            adapter.info(f"#{self.symbol}. Could not enter trade. Executor already active")
+        if self.bot.available is True:
+            adapter.info(f"#{self.symbol}. Could not enter trade. Bot {self.bot.id} already in a trade")
         else:
             adapter.info(f"#{self.symbol}. {self.signal} - Unable to enter trade in time.")
         watchlist.reset(self.symbol)
@@ -80,12 +74,12 @@ class Executor(Checker):
         params = {
             "takeProfit": {
                 'type': 'limit',
-                'triggerPrice': self.tp,
+                'triggerPrice': self.entry_price,
                 'price': self.tp
             },
             'stopLoss': {
                 'type': 'limit',
-                'triggerPrice': self.sl,
+                'triggerPrice': self.entry_price,
                 'price': self.sl
             }
         }
@@ -138,7 +132,6 @@ class Executor(Checker):
                 time.sleep(1)
 
         # monitor both the tp and sl orders
-        # alert = False
         while True:
             try:
                 tp_ord = self.exchange.fetch_open_order(tp_order['id'], self.symbol)
@@ -146,10 +139,8 @@ class Executor(Checker):
 
                 sig = watchlist.get(self.symbol)
                 if ("BUY" in self.signal and "BUY" not in sig) or ("SELL" in self.signal and "SELL" not in sig):
-                    if alert is False:
-                        alert = True
-                        self.adjust_sl()
-                        return
+                    self.adjust_sl()
+                    return
 
                 if tp_ord['status'] == 'closed':
                     adapter.info(f"#{self.symbol}. {self.signal} - *TP hit*")
@@ -157,17 +148,20 @@ class Executor(Checker):
                 elif sl_ord['status'] == 'closed':
                     adapter.info(f"#{self.symbol}. {self.signal} - *SL hit*")
                     return
+                elif tp_ord['status'] == 'canceled' or tp_ord['status'] == 'rejected':
+                    adapter.warning(f"#{self.symbol}. TP order has been {tp_ord['status']}")
+                    return
+                elif sl_ord['status'] == 'canceled' or sl_ord['status'] == 'rejected':
+                    adapter.warning(f"#{self.symbol}. SL order has been {sl_ord['status']}")
+                    return
             except Exception as e:
-                adapter.error(f"{type(e).__name__} - {str(e)}")
+                adapter.error(f"{type(e).__name__} - {str(e)}. Line {e.__traceback__.tb_lineno}")
             finally:
                 if hasattr(self, "psar"):
                     new_sl = watchlist.psar_get(self.symbol)
                     if new_sl != self.sl_order['price']:
                         self.adjust_sl(new_sl)
                 time.sleep(1)
-
-    def close_position(self):
-        pass
 
     def adjust_sl(self, new_price:float=None):
         """This closes the position or adjusts the stoploss order
@@ -243,6 +237,11 @@ class Executor(Checker):
             if self.bot.today_pnl >= self.daily_target:
                 setattr(self.bot, "target_reached", True)
                 setattr(self.bot, "target_date", datetime.now().day)
+                self.bot.save()
+            if self.bot.today_pnl <= self.max_daily_loss:
+                setattr(self.bot, "sl_reached", True)
+                setattr(self.bot, "sl_date", datetime.now().day)
+                self.bot.save()
         except Exception as e:
             adapter.error(f"{type(e).__name__} - {str(e)}, line {e.__traceback__.tb_lineno}")
         return

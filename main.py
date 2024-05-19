@@ -50,6 +50,13 @@ async def main():
             if len(signals) > 0:
                 bots = storage.search("Bot", active=True, available=True)
                 for bot in bots:
+                    today_day = datetime.now().day
+
+                    if getattr(bot, 'target_reached', False) is True and getattr(bot, 'target_date', None) == today_day:
+                        continue
+                    elif getattr(bot, 'sl_reached', False) is True and getattr(bot, 'sl_date', None) == today_day:
+                        continue
+                    
                     sig = next(cycled_signal)
                     await run_thread(sig['symbol'], sig['signal'], bot_id=bot.id, stop_loss=sig['stop_loss'])
             adapter.info("Analysis completed.")
