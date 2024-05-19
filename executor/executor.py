@@ -113,7 +113,11 @@ class Executor(Checker):
         # obtain the  tp and sl orders
         while True:
             try:
-                orders = self.exchange.fetch_open_orders(self.symbol, limit=3)
+                since = int(self.start_time.timestamp())
+                orders = self.exchange.fetch_open_orders(self.symbol, limit=3, since=since)
+                if len(orders) < 2:
+                    continue
+
                 for order in orders:
                     if order['id'] != self.order['id']:
                         if order['stopLossPrice']:
@@ -128,7 +132,7 @@ class Executor(Checker):
                     time.sleep(1)
                     continue
             except Exception as e:
-                adapter.warning(f"#{self.symbol}. Unable to fetch trade - {str(e)}")
+                adapter.warning(f"#{self.symbol}. Unable to fetch trade - {str(e)} line {e.__traceback__.tb_lineno}")
             finally:
                 time.sleep(1)
 

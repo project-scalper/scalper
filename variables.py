@@ -7,6 +7,7 @@ lev = 20
 timeframe = '5m'
 confirmation_timeframe = '15m'
 reward_risk = 1.5
+daily_target = 0.1
 
 from exchange import bybit as exchange
 exchange = exchange
