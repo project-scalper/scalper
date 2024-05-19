@@ -25,7 +25,7 @@ class Checker():
 
         if hasattr(self, "bot_id"):
             self.bot:Bot = model.storage.get("Bot", self.bot_id)
-            self.capital = int(self.bot.capital)    # change this to bot.balance before production
+            self.capital = int(self.bot.balance)    # change this to bot.balance before production
 
         self.risk = self.capital * risk
         self.reward = self.capital * reward
@@ -363,5 +363,5 @@ class Checker():
         self.bot.pnl_history = self.bot.pnl_history[-5:]
         self.bot.available = True
         self.bot.balance += pnl
-        # self.bot.update_balance()
+        self.bot.update_balance()
         self.bot.save()

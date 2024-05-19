@@ -5,6 +5,7 @@ from helper.adapter import adapter
 from helper import watchlist
 import ccxt
 from datetime import datetime, timedelta
+from variables import daily_target
 from typing import Dict
 import time
 import model
@@ -12,12 +13,12 @@ import model
 
 class Executor(Checker):
     max_daily_loss = 15
-    daily_target = 7
 
     def __init__(self, exchange:ccxt.Exchange, user:Dict, *args, **kwargs):
         self.bot_id = user['bot_id']
         super().__init__(exchange, *args, **kwargs)
         self.bot = model.storage.get("Bot", self.bot_id)
+        self.daily_target = self.capital * daily_target
 
     def set_leverage(self, symbol:str, value:int):
         try:
