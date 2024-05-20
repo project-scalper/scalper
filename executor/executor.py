@@ -74,14 +74,14 @@ class Executor(Checker):
         self.set_leverage(self.symbol, self.leverage)
         params = {
             "takeProfit": {
-                'type': 'limit',
-                'triggerPrice': self.entry_price,
-                'price': self.tp
+                'type': 'market',
+                'triggerPrice': self.tp,
+                # 'price': self.tp
             },
             'stopLoss': {
-                'type': 'limit',
-                'triggerPrice': self.entry_price,
-                'price': self.sl
+                'type': 'market',
+                'triggerPrice': self.sl,
+                # 'price': self.sl
             }
         }
 
@@ -183,7 +183,7 @@ class Executor(Checker):
             try:
                 self.exchange.edit_order(self.sl_ord['id'], self.symbol, order_type,
                                         self.sl_ord['side'], self.amount, new_price,
-                                        params={"triggerPrice": new_price})
+                                        params={"triggerPrice": new_price, 'type': 'market'})
                 break
             except Exception as e:
                 if n == 2:
