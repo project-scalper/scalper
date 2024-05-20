@@ -12,17 +12,21 @@ import model
 
 
 class Executor(Checker):
-    max_daily_loss = 15
 
-    def __init__(self, exchange:ccxt.Exchange, user:Dict, *args, **kwargs):
-        self.bot_id = user['bot_id']
+    def __init__(self, exchange:ccxt.Exchange, bot_id=None, *args, **kwargs):
+        self.bot_id = bot_id
         super().__init__(exchange, *args, **kwargs)
         self.bot = model.storage.get("Bot", self.bot_id)
         self.daily_target = self.capital * daily_target
+        self.max_daily_loss = 0.3 * self.bot.capital
 
     def set_leverage(self, symbol:str, value:int):
         try:
             self.exchange.set_leverage(value, symbol)
+        except:
+            pass
+
+        try:
             self.exchange.set_margin_mode("isolated", self.symbol)
         except:
             pass
@@ -126,7 +130,7 @@ class Executor(Checker):
                         elif order['takeProfitPrice']:
                             tp_order = order
                 if sl_order and tp_order:
-                    adapter.info("TP and SL orders fetched!")
+                    # adapter.info("TP and SL orders fetched!")
                     self.sl_order = sl_order
                     self.tp_order = tp_order
                     break
@@ -147,7 +151,7 @@ class Executor(Checker):
                 sig = watchlist.get(self.symbol)
                 if self.signal != sig:
                 # if ("BUY" in self.signal and "BUY" not in sig) or ("SELL" in self.signal and "SELL" not in sig):
-                    adapter.info("Signal changed!!!")
+                    # adapter.info("Signal changed!!!")
                     self.adjust_sl()
                     return
 
@@ -176,51 +180,29 @@ class Executor(Checker):
         """This closes the position or adjusts the stoploss order
         If new_price is given"""
 
-        params = {
-            "takeProfit": {
-                'type': 'market',
-                'triggerPrice': self.tp,
-                # 'price': self.tp
-            },
-            'stopLoss': {
-                'type': 'market',
-                'triggerPrice': new_price,
-                # 'price': self.sl
-            }
-        }
+        # cancel the existing sl order
+        try:
+            self.exchange.cancel_order(self.sl_order['id'], self.symbol)
+        except Exception as e:
+            adapter.warning(f"Unable to close order for bot {self.bot.id}")
+            return
 
-        if new_price is None:
-            # new_price = self.exchange.fetch_ticker(self.symbol)['last']
-            new_price = None
-            # new_price = None
-            order_type = 'market'
-        else:
-            order_type = 'limit'
-
-        for n in range(3):
-            try:
-                self.exchange.edit_order(self.order['id'], self.symbol, self.order['type'],
-                                        self.order['side'], self.amount, new_price,
-                                        params=params)
-                break
-            except Exception as e:
-                if n == 2:
-                    adapter.error(f"#{self.symbol}. Unable to close position: {e}")
-                    return
-                else:
-                    time.sleep(1)
-        
-        # for n in range(3):
-        #     try:
-        #         self.exchange.edit_order(self.sl_order['id'], self.symbol, 'limit',
-        #                                     self.sl_order['side'], self.sl_order['amount'],
-        #                                     new_price)
-        #         break
-        #     except Exception as e:
-        #         if n == 2:
-        #             adapter.error(f"{type(e).__name__} - {str(e)}")
-        #         else:
-        #             continue
+        # create a new limit order
+        try:
+            new_order = self.exchange.create_order(self.symbol, type='market', side=self.sl_order['side'],
+                                       amount=self.amount)
+        except Exception as e:
+            adapter.warning(f'Unable to create new sl order for bot {self.bot.id}')
+            return
+        while True:
+            sl_order = self.exchange.fetch_open_order(new_order['id'], self.symbol)
+            if sl_order['status'] == 'closed':
+                return
+            elif sl_order['status'] == 'canceled' or sl_order['status'] == 'rejected':
+                adapter.warning(f"New sl order was {sl_order['status']} for bot {self.bot.id}")
+                return
+            else:
+                time.sleep(1)
 
     async def execute(self, symbol, signal, stop_loss=None, reverse:bool=False):
         self.symbol = symbol
