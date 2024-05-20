@@ -17,7 +17,7 @@ class Executor(Checker):
         self.bot_id = bot_id
         super().__init__(exchange, *args, **kwargs)
         self.bot = model.storage.get("Bot", self.bot_id)
-        self.daily_target = self.capital * daily_target
+        self.daily_target = self.bot.capital * daily_target
         self.max_daily_loss = 0.3 * self.bot.capital
 
     def set_leverage(self, symbol:str, value:int):
