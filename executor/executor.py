@@ -30,7 +30,8 @@ class Executor(Checker):
     def enter_trade(self):
         if not self.entry_price:
             return
-        valid_till = datetime.now() + timedelta(minutes=15)
+        self.start_time = datetime.now()
+        valid_till = self.start_time + timedelta(minutes=15)
         adapter.info(f"#{self.symbol}. {self.signal} - New trade found. entry={self.entry_price}, tp={self.tp}, sl={self.sl}")
         while datetime.now() <= valid_till:
             try:
@@ -125,6 +126,7 @@ class Executor(Checker):
                         elif order['takeProfitPrice']:
                             tp_order = order
                 if sl_order and tp_order:
+                    adapter.info("TP and SL orders fetched!")
                     self.sl_order = sl_order
                     self.tp_order = tp_order
                     break
@@ -143,7 +145,9 @@ class Executor(Checker):
                 sl_ord = self.exchange.fetch_open_order(sl_order['id'], self.symbol)
 
                 sig = watchlist.get(self.symbol)
-                if ("BUY" in self.signal and "BUY" not in sig) or ("SELL" in self.signal and "SELL" not in sig):
+                if self.signal != sig:
+                # if ("BUY" in self.signal and "BUY" not in sig) or ("SELL" in self.signal and "SELL" not in sig):
+                    adapter.info("Signal changed!!!")
                     self.adjust_sl()
                     return
 
@@ -172,8 +176,22 @@ class Executor(Checker):
         """This closes the position or adjusts the stoploss order
         If new_price is given"""
 
-        if not new_price:
-            new_price = self.exchange.fetch_ticker(self.symbol)['last']
+        params = {
+            "takeProfit": {
+                'type': 'market',
+                'triggerPrice': self.tp,
+                # 'price': self.tp
+            },
+            'stopLoss': {
+                'type': 'market',
+                'triggerPrice': new_price,
+                # 'price': self.sl
+            }
+        }
+
+        if new_price is None:
+            # new_price = self.exchange.fetch_ticker(self.symbol)['last']
+            new_price = None
             # new_price = None
             order_type = 'market'
         else:
@@ -181,9 +199,9 @@ class Executor(Checker):
 
         for n in range(3):
             try:
-                self.exchange.edit_order(self.sl_ord['id'], self.symbol, order_type,
-                                        self.sl_ord['side'], self.amount, new_price,
-                                        params={"triggerPrice": new_price, 'type': 'market'})
+                self.exchange.edit_order(self.order['id'], self.symbol, self.order['type'],
+                                        self.order['side'], self.amount, new_price,
+                                        params=params)
                 break
             except Exception as e:
                 if n == 2:
