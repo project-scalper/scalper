@@ -11,9 +11,11 @@ from helper.adapter import adapter
 from variables import exchange
 from datetime import datetime, timedelta
 from model import storage
+from model.bot import Bot
 import threading
 # import ccxt
 from executor.checker import Checker
+from executor.executor import Executor
 from itertools import cycle
 
 import asyncio
@@ -29,7 +31,9 @@ def set_event(symbol, signal, bot_id, stop_loss):
     loop.run_until_complete(new_checker(symbol, signal, bot_id, stop_loss))
 
 async def new_checker(symbol, sig_type, bot_id, stop_loss):
-    trade = Checker(exchange, bot_id=bot_id)
+    bot:Bot = storage.get(Bot, bot_id)
+    exc = bot.get_exchange()
+    trade = Executor(exc, bot_id=bot_id)
     await trade.execute(symbol, sig_type, reverse=False, stop_loss=stop_loss, use_rr=False)
 
 
