@@ -31,10 +31,13 @@ def set_event(symbol, signal, bot_id, stop_loss):
     loop.run_until_complete(new_checker(symbol, signal, bot_id, stop_loss))
 
 async def new_checker(symbol, sig_type, bot_id, stop_loss):
-    bot:Bot = storage.get(Bot, bot_id)
-    exc = bot.get_exchange()
-    trade = Executor(exc, bot_id=bot_id)
-    await trade.execute(symbol, sig_type, reverse=False, stop_loss=stop_loss, use_rr=False)
+    bot:Bot = storage.get("Bot", bot_id)
+    if bot:
+        exc = bot.get_exchange()
+        trade = Executor(exc, bot_id=bot_id)
+        await trade.execute(symbol, sig_type, reverse=False, stop_loss=stop_loss, use_rr=False)
+    else:
+        adapter.info(f"Bot {bot_id} not found")
 
 
 async def main():
@@ -44,6 +47,7 @@ async def main():
                'APE/USDT:USDT', 'LINK/USDT:USDT', 'NEAR/USDT:USDT']
     # run_to = datetime.now() + timedelta(hours=24)
     mkt = exchange.load_markets()
+    current_day = datetime.now().day
     while True:
         try:
             tasks = [analyser(symbol, exchange) for symbol in symbols]
@@ -53,8 +57,18 @@ async def main():
             cycled_signal = cycle(signals)
             if len(signals) > 0:
                 bots = storage.search("Bot", active=True, available=True)
+                today_day = datetime.now().day
+                if today_day != current_day:
+                    flag = True
+                    current_day = today_day
+                else:
+                    flag = False
                 for bot in bots:
-                    today_day = datetime.now().day
+                    # today_day = datetime.now().day
+                    
+                    if flag is True:
+                        bot.today_pnl = 0
+                        current_day = today_day
 
                     if getattr(bot, 'target_reached', False) is True and getattr(bot, 'target_date', None) == today_day:
                         continue

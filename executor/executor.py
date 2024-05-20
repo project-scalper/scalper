@@ -13,7 +13,7 @@ import model
 
 class Executor(Checker):
 
-    def __init__(self, exchange:ccxt.Exchange, bot_id=None, *args, **kwargs):
+    def __init__(self, exchange:ccxt.Exchange, bot_id:str=None, *args, **kwargs):
         self.bot_id = bot_id
         super().__init__(exchange, *args, **kwargs)
         self.bot = model.storage.get("Bot", self.bot_id)
@@ -204,7 +204,7 @@ class Executor(Checker):
             else:
                 time.sleep(1)
 
-    async def execute(self, symbol, signal, stop_loss=None, reverse:bool=False):
+    async def execute(self, symbol, signal, stop_loss=None, reverse:bool=False, use_rr:bool=True):
         self.symbol = symbol
         # self.signal = signal
 
@@ -213,6 +213,8 @@ class Executor(Checker):
             self.psar = watchlist.psar_get(self.symbol)
         else:
             self.stop_loss = stop_loss
+
+        self.use_rr = use_rr
 
         if reverse is True:
             if "BUY" in signal:

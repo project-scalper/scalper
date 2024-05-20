@@ -16,6 +16,8 @@ class Bot(BaseModel):
     pnl_history = []
     active = True
     available = True
+    target_reached = False
+    sl_reached = False
 
     def __init__(self, *args, **kwargs):
         self.user_id = None
