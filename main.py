@@ -68,6 +68,8 @@ async def main():
                     
                     if flag is True:
                         bot.today_pnl = 0
+                        bot.trades = []
+                        bot.save()
                         current_day = today_day
 
                     if getattr(bot, 'target_reached', False) is True and getattr(bot, 'target_date', None) == today_day:
