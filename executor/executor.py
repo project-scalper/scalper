@@ -245,7 +245,7 @@ class Executor(Checker):
                 setattr(self.bot, "target_reached", True)
                 setattr(self.bot, "target_date", datetime.now().day)
                 self.bot.save()
-            if self.bot.today_pnl <= self.max_daily_loss:
+            if self.bot.today_pnl <= self.max_daily_loss * -1:
                 setattr(self.bot, "sl_reached", True)
                 setattr(self.bot, "sl_date", datetime.now().day)
                 self.bot.save()
