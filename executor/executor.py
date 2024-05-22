@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 
 from executor.checker import Checker
-from helper.adapter import adapter
+from helper.adapter import adapter, trade_logger
 from helper import watchlist
 import ccxt
 from datetime import datetime, timedelta
@@ -49,19 +49,29 @@ class Executor(Checker):
                     self.place_order()
                     self.bot.available = False
                     self.bot.save()
-                    while True:
+                    while datetime.now() < valid_till:
                         order = self.exchange.fetch_open_order(self.order['id'], self.symbol)
                         if order['status'] == 'closed':
                             adapter.info(f"#{self.symbol}. {self.signal}. trade entered at {self.entry_price}, tp={self.tp}, sl={self.sl}")
                             self.monitor()
-                            break
+                            self.bot.available = True
+                            self.bot.save()
+                            return
                         elif order['status'] == 'canceled' or order['status'] == 'rejected':
                             adapter.warning(f"#{self.symbol} - Entry order {order['status']}")
-                            break
+                            self.bot.available = True
+                            self.bot.save()
+                            return
                         else:
                             time.sleep(1)
                     
-                    self.bot.available = True
+                    try:
+                        self.exchange.cancel_order(order['id'], self.symbol)
+                        self.bot.available = True
+                        self.bot.save()
+                    except Exception as e:
+                        adapter.warning(f"Unable to close order for bot {self.bot.id}")
+                        return
                     return
             except Exception as e:
                 adapter.error(f"{type(e).__name__} - {str(e)}")
@@ -152,14 +162,15 @@ class Executor(Checker):
                 if self.signal != sig:
                 # if ("BUY" in self.signal and "BUY" not in sig) or ("SELL" in self.signal and "SELL" not in sig):
                     # adapter.info("Signal changed!!!")
+                    trade_logger.info(f"{self.symbol}. {self.signal} - Trade closed. start_time={self.start_time}")
                     self.adjust_sl()
                     return
 
                 if tp_ord['status'] == 'closed':
-                    adapter.info(f"#{self.symbol}. {self.signal} - *TP hit*")
+                    trade_logger.info(f"#{self.symbol}. {self.signal} - *TP hit*")
                     return
                 elif sl_ord['status'] == 'closed':
-                    adapter.info(f"#{self.symbol}. {self.signal} - *SL hit*")
+                    trade_logger.info(f"#{self.symbol}. {self.signal} - *SL hit*")
                     return
                 elif tp_ord['status'] == 'canceled' or tp_ord['status'] == 'rejected':
                     adapter.warning(f"#{self.symbol}. TP order has been {tp_ord['status']}")
@@ -245,11 +256,10 @@ class Executor(Checker):
                 setattr(self.bot, "target_reached", True)
                 setattr(self.bot, "target_date", datetime.now().day)
                 self.bot.save()
-            if self.bot.today_pnl <= self.max_daily_loss:
+            if self.bot.today_pnl <= self.max_daily_loss * -1:
                 setattr(self.bot, "sl_reached", True)
                 setattr(self.bot, "sl_date", datetime.now().day)
                 self.bot.save()
         except Exception as e:
             adapter.error(f"{type(e).__name__} - {str(e)}, line {e.__traceback__.tb_lineno}")
         return
-
