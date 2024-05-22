@@ -26,6 +26,8 @@ def get_user(user_id):
         data = request.get_json()
         
         for key, val in data.items():
+            if key == 'capital':
+                val = int(val)
             setattr(user, key, val)
         user.save()
         return jsonify("User updated successfully")

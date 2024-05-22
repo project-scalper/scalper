@@ -2,22 +2,23 @@
 
 import model
 import ccxt
+from typing import List
 from model.base_model import BaseModel
 
 class Bot(BaseModel):
     __tablename__ = 'bots'
     
-    user_id = None
-    trades = []     # contains all the trades taken in the current day
-    today_pnl = 0   # contains the pnl for the current day
-    daily_pnl = []  # contains the pnl for each of the last 30 days
-    capital = 0     # contains the user's intended capital to start the bot
-    balance = 0     # contains the actual usdt balance in the user wallet
-    pnl_history = []
-    active = True
-    available = True
-    target_reached = False
-    sl_reached = False
+    user_id:str = None
+    trades:List = []     # contains all the trades taken in the current day
+    today_pnl:float = 0   # contains the pnl for the current day
+    daily_pnl:List = []  # contains the pnl for each of the last 30 days
+    capital:int = 0     # contains the user's intended capital to start the bot
+    balance:float = 0     # contains the actual usdt balance in the user wallet
+    pnl_history:List = []
+    active:bool = True
+    available:bool = True
+    target_reached:bool = False
+    sl_reached:bool = False
 
     def __init__(self, *args, **kwargs):
         self.user_id = None
@@ -62,7 +63,7 @@ class Bot(BaseModel):
 
         bal = exchange.fetch_balance()['free']
         bal = bal.get("USDT", 0)
-        if bal < self.capital:
+        if bal < int(self.capital):
             raise Exception("Insufficient balance in wallet.")
         else:
             return True

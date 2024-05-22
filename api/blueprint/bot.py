@@ -48,7 +48,7 @@ def start_checker():
 @auth.login_required
 def create_bot():
     user = auth.current_user()
-    bot = Bot(user_id=user.id, capital=user.capital)
+    bot = Bot(user_id=user.id, capital=int(user.capital))
     try:
         bot.verify_capital()
     except Exception as e:

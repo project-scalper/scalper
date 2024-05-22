@@ -1,7 +1,7 @@
 #!/usr/bin/node
 
 $("#signup").on('click', () => {
-    var loader = document.getElementById("loader")
+    var loader = document.getElementById("loader2")
     loader.style.display = 'block'
 
     var username = $("#username").val();
