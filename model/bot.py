@@ -64,6 +64,6 @@ class Bot(BaseModel):
         bal = exchange.fetch_balance()['free']
         bal = bal.get("USDT", 0)
         if bal < int(self.capital):
-            raise Exception("Insufficient balance in wallet.")
+            raise Exception(f"Insufficient balance. Available balance: {bal}")
         else:
             return True
