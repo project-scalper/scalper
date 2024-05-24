@@ -52,7 +52,7 @@ def create_bot():
     try:
         bot.verify_capital()
     except Exception as e:
-        return jsonify(e), 400
+        return jsonify(f"Insuffucient Balance in wallet"), 400
     bot.save()
     setattr(user, "has_bot", True)
     setattr(user, 'bot_id', bot.id)

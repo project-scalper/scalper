@@ -20,6 +20,8 @@ from itertools import cycle
 
 import asyncio
 
+user_exchanges = {}
+
 
 async def run_thread(symbol, sig_type, bot_id, stop_loss=None):
     nt = threading.Thread(target=set_event, args=(symbol, sig_type, bot_id, stop_loss))
@@ -31,13 +33,14 @@ def set_event(symbol, signal, bot_id, stop_loss):
     loop.run_until_complete(new_checker(symbol, signal, bot_id, stop_loss))
 
 async def new_checker(symbol, sig_type, bot_id, stop_loss):
-    bot:Bot = storage.get("Bot", bot_id)
-    if bot:
-        exc = bot.get_exchange()
-        trade = Executor(exc, bot_id=bot_id)
-        await trade.execute(symbol, sig_type, reverse=False, stop_loss=stop_loss, use_rr=False)
-    else:
-        adapter.info(f"Bot {bot_id} not found")
+    # bot:Bot = storage.get("Bot", bot_id)
+    # if bot:
+        # exc = bot.get_exchange()
+    exc = user_exchanges.get(bot_id)
+    trade = Executor(exc, bot_id=bot_id)
+    await trade.execute(symbol, sig_type, reverse=False, stop_loss=stop_loss, use_rr=False)
+    # else:
+    #     adapter.info(f"Bot {bot_id} not found")
 
 
 async def main():
@@ -47,6 +50,9 @@ async def main():
                'APE/USDT:USDT', 'LINK/USDT:USDT', 'NEAR/USDT:USDT']
     # run_to = datetime.now() + timedelta(hours=24)
     mkt = exchange.load_markets()
+    for _, bot in storage.all(Bot).items():
+        user_exchanges[bot.id] = bot.get_exchange()
+
     current_day = datetime.now().day
     while True:
         try:
@@ -64,7 +70,8 @@ async def main():
                 else:
                     flag = False
                 for bot in bots:
-                    # today_day = datetime.now().day
+                    if bot.id not in user_exchanges:
+                        user_exchanges[bot.id] = bot.get_exchange()
                     
                     if flag is True:
                         bot.today_pnl = 0

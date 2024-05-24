@@ -11,3 +11,5 @@ daily_target = 0.1
 
 from exchange import bybit as exchange
 exchange = exchange
+
+user_exchanges = []

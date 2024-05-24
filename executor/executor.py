@@ -251,7 +251,8 @@ class Executor(Checker):
             watchlist.reset(self.symbol)
             end_balance = self.exchange.fetch_balance()['free'].get("USDT", 0)
             pnl = end_balance - start_balance
-            self.update_bot(pnl)
+            if pnl != 0:
+                self.update_bot(pnl)
             if self.bot.today_pnl >= self.daily_target:
                 setattr(self.bot, "target_reached", True)
                 setattr(self.bot, "target_date", datetime.now().day)
