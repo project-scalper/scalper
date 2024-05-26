@@ -248,7 +248,7 @@ class Executor(Checker):
             adapter.info(f"#{self.symbol}. {self.signal} - Entry={self.entry_price}, tp={self.tp}, sl={self.sl}, leverage={self.leverage}")
 
             self.enter_trade()
-            watchlist.reset(self.symbol)
+            # watchlist.reset(self.symbol)
             end_balance = self.exchange.fetch_balance()['free'].get("USDT", 0)
             pnl = end_balance - start_balance
             if pnl != 0:
