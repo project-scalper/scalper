@@ -365,6 +365,6 @@ class Checker():
         self.bot.pnl_history.append(pnl)
         self.bot.pnl_history = self.bot.pnl_history[-5:]
         self.bot.available = True
-        self.bot.balance += pnl
+        # self.bot.balance += pnl
         self.bot.update_balance()
         self.bot.save()
