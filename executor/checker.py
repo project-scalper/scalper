@@ -227,7 +227,7 @@ class Checker():
                     msg = f"#{self.symbol}. {self.signal} - start_time={self.start_time}, entry={self.entry_price}, tp={self.tp}, lev={self.leverage}, pnl={pnl}"
                     trade_logger.info(msg)
                     watchlist.trade_counter(self.signal, pnl)
-                    watchlist.reset(self.symbol)
+                    # watchlist.reset(self.symbol)
                     self.update_bot(pnl)
                     return
                 
@@ -236,7 +236,7 @@ class Checker():
                     msg = f"#{self.symbol}. {self.signal} - start_time={self.start_time}, entry={self.entry_price}, tp={self.tp}, lev={self.leverage}, pnl={pnl}"
                     trade_logger.info(msg)
                     watchlist.trade_counter(self.signal, pnl)
-                    watchlist.reset(self.symbol)
+                    # watchlist.reset(self.symbol)
                     self.update_bot(pnl)
                     return
                 
@@ -244,7 +244,7 @@ class Checker():
                 sig = watchlist.get(self.symbol)
                 if ("BUY" in self.signal and "BUY" not in sig) or ("SELL" in self.signal and "SELL" not in sig):
                         watchlist.trade_counter(self.signal, pnl)
-                        watchlist.reset(self.symbol)
+                        # watchlist.reset(self.symbol)
                         msg = f"#{self.symbol}. {self.signal} - Trade closed. start_time={self.start_time}, entry={self.entry_price}, tp={self.tp}, last_price={ticker['last']}, leverage={self.leverage} and pnl={pnl:.3f}"
                         trade_logger.info(msg)
                         self.update_bot(pnl)
@@ -365,6 +365,6 @@ class Checker():
         self.bot.pnl_history.append(pnl)
         self.bot.pnl_history = self.bot.pnl_history[-5:]
         self.bot.available = True
-        self.bot.balance += pnl
+        # self.bot.balance += pnl
         self.bot.update_balance()
         self.bot.save()

@@ -82,7 +82,7 @@ class Executor(Checker):
             adapter.info(f"#{self.symbol}. Could not enter trade. Bot {self.bot.id} already in a trade")
         else:
             adapter.info(f"#{self.symbol}. {self.signal} - Unable to enter trade in time.")
-        watchlist.reset(self.symbol)
+        # watchlist.reset(self.symbol)
 
     def place_order(self):
         # place order
@@ -242,14 +242,31 @@ class Executor(Checker):
             self.calculate_entry_price()
             self.calculate_leverage()
             self.calculate_fee()
-            start_balance = self.exchange.fetch_balance()['free'].get("USDT", 0)
+
+            # fetch start balance
+            for i in range(3):
+                start_balance = self.exchange.fetch_balance()['free'].get("USDT", 0)
+                if start_balance != 0:
+                    break
+                if i == 2:
+                    adapter.info(f"Unable to fetch start balance for bot {self.bot.id}")
+                    start_balance = self.bot.balance
+                else:
+                    time.sleep(0.5)
+
             self.set_leverage(self.symbol, self.leverage)
 
             adapter.info(f"#{self.symbol}. {self.signal} - Entry={self.entry_price}, tp={self.tp}, sl={self.sl}, leverage={self.leverage}")
 
             self.enter_trade()
-            watchlist.reset(self.symbol)
-            end_balance = self.exchange.fetch_balance()['free'].get("USDT", 0)
+
+            # fetch end balance
+            for i in range(3):
+                end_balance = self.exchange.fetch_balance()['free'].get("USDT", 0)
+                if end_balance != 0:
+                    break
+                if i == 2:
+                    adapter.info(f"Unable to fetch end balance for ")
             pnl = end_balance - start_balance
             if pnl != 0:
                 self.update_bot(pnl)

@@ -14,7 +14,7 @@ from model import storage
 from model.bot import Bot
 import threading
 # import ccxt
-from executor.checker import Checker
+# from executor.checker import Checker
 from executor.executor import Executor
 from itertools import cycle
 
@@ -44,9 +44,9 @@ async def new_checker(symbol, sig_type, bot_id, stop_loss):
 
 
 async def main():
-    symbols = ['BTC/USDT:USDT', 'ETH/USDT:USDT', 'ADA/USDT:USDT', 'SOL/USDT:USDT',
-               'DOGE/USDT:USDT', 'BNB/USDT:USDT', 'DOT/USDT:USDT', 'XRP/USDT:USDT',
-               'MATIC/USDT:USDT', 'SAND/USDT:USDT', 'GALA/USDT:USDT', 'AVAX/USDT:USDT',
+    symbols = ['ADA/USDT:USDT', 'SOL/USDT:USDT', 'DOGE/USDT:USDT', 
+               'DOT/USDT:USDT', 'XRP/USDT:USDT', 'MATIC/USDT:USDT',
+               'SAND/USDT:USDT', 'GALA/USDT:USDT', 'AVAX/USDT:USDT',
                'APE/USDT:USDT', 'LINK/USDT:USDT', 'NEAR/USDT:USDT']
     # run_to = datetime.now() + timedelta(hours=24)
     mkt = exchange.load_markets()

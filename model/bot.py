@@ -34,7 +34,7 @@ class Bot(BaseModel):
         super().__init__(*args, **kwargs)
         if "user_id" not in kwargs:
             raise Exception("Please include a user id")
-        self.update_balance()
+        # self.update_balance()
         if not hasattr(self, "capital"):
             owner = model.storage.get("User", self.user_id)
             self.capital = float(owner.capital)
