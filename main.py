@@ -60,6 +60,8 @@ async def main():
             adapter.info("Starting analysis...")
             signals = await asyncio.gather(*tasks)
             signals = list(filter(lambda x: x is not None, signals))
+            for signal in signals:
+                adapter.info(f"{signal} found.")
             cycled_signal = cycle(signals)
             if len(signals) > 0:
                 bots = storage.search("Bot", active=True, available=True)
