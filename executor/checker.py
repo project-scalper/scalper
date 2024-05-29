@@ -26,10 +26,11 @@ class Checker():
 
         if hasattr(self, "bot_id"):
             self.bot:Bot = model.storage.get("Bot", self.bot_id)
-            if self.bot.balance > self.bot.capital:
-                self.capital = int(self.bot.capital)
-            else:
-                self.capital = int(self.bot.balance)
+            # if self.bot.balance > self.bot.capital:
+            #     self.capital = int(self.bot.capital)
+            # else:
+            #     self.capital = int(self.bot.balance)
+            self.capital = self.bot.capital
 
         self.risk = self.capital * risk
         self.reward = self.capital * reward
