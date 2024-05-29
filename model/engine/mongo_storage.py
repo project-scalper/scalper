@@ -6,12 +6,15 @@ from os import getenv
 from helper.loadenv import handleEnv
 from model.bot import Bot
 from model.user import User
+from model.signal import Signal
 from bson import ObjectId
 from datetime import datetime, timedelta
 from model.usersession import UserSession
 
-classes = {"users": "User", "bots": "Bot", 'usersessions': "UserSession"}
-classes2 = {"Bot": Bot, "User": User, "UserSession": UserSession}
+classes = {"users": "User", "bots": "Bot", 'usersessions': "UserSession",
+           "signals": "Signal"}
+classes2 = {"Bot": Bot, "User": User, "UserSession": UserSession,
+            "Signal": Signal}
 
 
 class Database:
@@ -33,6 +36,8 @@ class Database:
     def all(self, cls=None):
         if cls and cls in classes:
             cls = classes[cls]
+        # elif cls and cls in classes2:
+        #     cls = classes2[cls]
         if cls:
             new_dict = {key: obj for key, obj in self.__objects.items() if obj.__class__ == cls}
             # for key, obj in self.__objects.items():

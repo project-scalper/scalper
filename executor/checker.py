@@ -8,6 +8,7 @@ import time
 import ccxt
 import model
 from model.bot import Bot
+from model.signal import Signal
 from helper import watchlist
 
 time_fmt = "%b %d %Y, %I:%M:%S %p"
@@ -85,9 +86,6 @@ class Checker():
                 tp = self.entry_price + dist
                 initial_x_change = (tp - self.entry_price) / self.entry_price
                 leverage = reward / initial_x_change
-                # amount = self.reward / (tp - self.entry_price)
-                # leverage = (amount * self.entry_price) / self.capital
-                # self.leverage = int(leverage) + 1
             elif "SELL" in self.signal:
                 dist:float = (self.stop_loss - self.entry_price) * self.safety_factor
                 tp = self.entry_price - dist
@@ -306,13 +304,15 @@ class Checker():
             self.signal = signal
         
         if "CROSS" in self.signal:
-            self.safety_factor = self.safety_factor / 3
+            self.safety_factor /= 3
             self.reward /= 3
 
         self.calculate_entry_price()
-        # self.calculate_leverage()
+        if self.use_rr is True:
+            self.calculate_leverage()
+        else:
         # self.calculate_fee()
-        self.leverage = lev
+            self.leverage = lev
 
         if not hasattr(self, "tp"):
             self.calculate_tp_sl()  # This method is called to get an estimated tp value without fees
@@ -367,4 +367,6 @@ class Checker():
         self.bot.available = True
         # self.bot.balance += pnl
         self.bot.update_balance()
+        signal = Signal(symbol=self.symbol, signal=self.signal, pnl=pnl)
+        signal.save()
         self.bot.save()

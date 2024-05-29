@@ -14,8 +14,8 @@ from model import storage
 from model.bot import Bot
 import threading
 # import ccxt
-# from executor.checker import Checker
-from executor.executor import Executor
+from executor.checker import Checker
+# from executor.executor import Executor
 from itertools import cycle
 
 import asyncio
@@ -37,8 +37,9 @@ async def new_checker(symbol, sig_type, bot_id, stop_loss):
     # if bot:
         # exc = bot.get_exchange()
     exc = user_exchanges.get(bot_id)
-    trade = Executor(exc, bot_id=bot_id)
-    await trade.execute(symbol, sig_type, reverse=False, stop_loss=stop_loss, use_rr=False)
+    # trade = Executor(exc, bot_id=bot_id)
+    trade = Checker(exc, bot_id)
+    await trade.execute(symbol, sig_type, reverse=False, stop_loss=stop_loss, use_rr=True)
     # else:
     #     adapter.info(f"Bot {bot_id} not found")
 
