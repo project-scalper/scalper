@@ -38,7 +38,7 @@ async def new_checker(symbol, sig_type, bot_id, stop_loss):
         # exc = bot.get_exchange()
     exc = user_exchanges.get(bot_id)
     # trade = Executor(exc, bot_id=bot_id)
-    trade = Checker(exc, bot_id)
+    trade = Checker(exc, bot_id=bot_id)
     await trade.execute(symbol, sig_type, reverse=False, stop_loss=stop_loss, use_rr=True)
     # else:
     #     adapter.info(f"Bot {bot_id} not found")
