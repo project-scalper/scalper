@@ -95,6 +95,10 @@ async def analyser(symbol:str, exchange:ccxt.Exchange)-> Union[Dict | None]:
                 stop_loss = max(_t3[0]['FAST_T3'], _t3[0]['SLOW_T3'])
                 watchlist.put(symbol, sig_type)
 
+    if "BUY" in sig_type or "SELL" in sig_type:
+        sig_type = sig_type +  "_" + str(_adx[0]['ADX'])
+        watchlist.put(symbol, sig_type)
+
     # Check if the indicators has reversed for existing signal
     signal = watchlist.get(symbol)
     if "BUY" in signal:

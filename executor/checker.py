@@ -368,6 +368,6 @@ class Checker():
         self.bot.available = True
         # self.bot.balance += pnl
         self.bot.update_balance()
-        signal = Signal(symbol=self.symbol, signal=self.signal, pnl=pnl)
+        signal = Signal(symbol=self.symbol, signal=self.signal, pnl=pnl, leverage=self.leverage)
         signal.save()
         self.bot.save()
