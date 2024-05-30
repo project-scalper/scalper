@@ -166,37 +166,29 @@ class Checker():
     def enter_trade(self):
         if not self.entry_price:
             return
-        # global active
 
         valid_till = datetime.now() + timedelta(minutes=15)
-        # while datetime.now() <= valid_till and active is False:
         while datetime.now() <= valid_till:
             try:
                 ticker = self.exchange.fetch_ticker(self.symbol)
+                self.bot:Bot = model.storage.get("Bot", self.bot_id)
                 if ("BUY" in self.signal and ticker['last'] <= self.entry_price) or ("SELL" in self.signal and ticker['last'] >= self.entry_price):
                     self.entry_price = ticker['last']
-                    # if active is True:
-                    #     break
-                    if self.bot.available is False:
-                        adapter.info(f"Bot {self.bot.id} already in another trade")
-                        return
+
+                    # if self.bot.available is False:
+                    #     adapter.info(f"Bot {self.bot.id} already in another trade")
+                    #     return
 
                     adapter.info(f"#{self.symbol}. {self.signal}. trade entered at {self.entry_price}, tp={self.tp}, sl={self.sl}, leverage={self.leverage}")
-                    # active = True
                     self.bot.available = False
                     self.bot.save()
                     self.monitor()
-                    # active = False
                     return
             except Exception as e:
                 adapter.error(f"{type(e).__name__} - {str(e)}")
             finally:
                 time.sleep(1)
 
-        # if active is True:
-        #     adapter.info(f"#{self.symbol}. Could not enter trade. Executor already active")
-        #     watchlist.reset(self.symbol)
-        # else:
         adapter.info(f"#{self.symbol}. {self.signal} - Unable to enter trade in time.")
         watchlist.reset(self.symbol)
 
