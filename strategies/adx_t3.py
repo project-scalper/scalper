@@ -96,7 +96,7 @@ async def analyser(symbol:str, exchange:ccxt.Exchange)-> Union[Dict | None]:
                 watchlist.put(symbol, sig_type)
 
     if "BUY" in sig_type or "SELL" in sig_type:
-        sig_type = sig_type +  "_" + str(_adx[0]['ADX'])
+        sig_type = sig_type +  "_" + str(round(_adx[0]['ADX'], 2))
         watchlist.put(symbol, sig_type)
 
     # Check if the indicators has reversed for existing signal
