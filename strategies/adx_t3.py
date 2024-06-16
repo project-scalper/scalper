@@ -54,11 +54,11 @@ async def analyser(symbol:str, exchange:ccxt.Exchange)-> Union[Dict | None]:
         return
 
     # check DMI and ADX to determine trend
-    # if (_adx[0]['DMP'] > _adx[0]['DMN']) and (_adx[0]['ADX'] >= 25):
-    if (_adx[0]['DMP'] > _adx[0]['DMN']):
+    if (_adx[0]['DMP'] > _adx[0]['DMN']) and (_adx[0]['ADX'] >= 25):
+    # if (_adx[0]['DMP'] > _adx[0]['DMN']):
         trend = 'UPTREND'
-    # elif (_adx[0]['DMP'] < _adx[0]['DMN']) and (_adx[0]['ADX'] >= 25):
-    elif (_adx[0]['DMP'] < _adx[0]['DMN']):
+    elif (_adx[0]['DMP'] < _adx[0]['DMN']) and (_adx[0]['ADX'] >= 25):
+    # elif (_adx[0]['DMP'] < _adx[0]['DMN']):
         trend = 'DOWNTREND'
     else:
         trend = "NEUTRAL"
