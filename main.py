@@ -65,8 +65,8 @@ async def main():
                 adapter.info(f"{signal} found.")
             cycled_signal = cycle(signals)
             if len(signals) > 0:
-                # bots = storage.search("Bot", active=True, available=True)
-                bots = storage.search("Bot", active=True)
+                bots = storage.search("Bot", active=True, available=True)
+                # bots = storage.search("Bot", active=True)
                 today_day = datetime.now().day
                 if today_day != current_day:
                     flag = True

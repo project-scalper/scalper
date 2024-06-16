@@ -65,7 +65,7 @@ class Database:
             vals['_id'] = ObjectId(vals['_id'])
         new_attrs = {"$set": vals}
         self.db[model.__tablename__].update_one(query, new_attrs, upsert=True)
-        print("Document updated successfully")
+        # print("Document updated successfully")
 
     def delete(self, obj=None):
         """
@@ -75,9 +75,8 @@ class Database:
         """
         try:
             key = f"{obj.__class__.__name__}.{obj.id}"
-            result = self.db[obj.__tablename__].delete_one({'id': obj.id})
+            self.db[obj.__tablename__].delete_one({'id': obj.id})
             self.__objects.pop(key)
-            print(result)
         except pymongo.errors.PyMongoError as e:
             print(f'Error deleting document(s): {e}')
 

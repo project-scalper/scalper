@@ -175,9 +175,9 @@ class Checker():
                 if ("BUY" in self.signal and ticker['last'] <= self.entry_price) or ("SELL" in self.signal and ticker['last'] >= self.entry_price):
                     self.entry_price = ticker['last']
 
-                    # if self.bot.available is False:
-                    #     adapter.info(f"Bot {self.bot.id} already in another trade")
-                    #     return
+                    if self.bot.available is False:
+                        adapter.info(f"Bot {self.bot.id} already in another trade")
+                        return
 
                     adapter.info(f"#{self.symbol}. {self.signal}. trade entered at {self.entry_price}, tp={self.tp}, sl={self.sl}, leverage={self.leverage}")
                     self.bot.available = False
