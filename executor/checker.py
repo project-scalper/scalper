@@ -327,6 +327,9 @@ class Checker():
     def update_bot(self, pnl:float, reverse:bool=False):
         current_dt = datetime.now()
         current_dt_str = current_dt.strftime(date_fmt)
+        if not hasattr(self, 'bot'):
+            return
+
         if len(self.bot.daily_pnl) > 0:
             last_dt = int(self.bot.daily_pnl[-1]['date'].split()[1])
         else:
@@ -358,8 +361,8 @@ class Checker():
         self.bot.pnl_history.append(pnl)
         self.bot.pnl_history = self.bot.pnl_history[-5:]
         self.bot.available = True
-        # self.bot.balance += pnl
-        self.bot.update_balance()
+        self.bot.balance += pnl
+        # self.bot.update_balance()
         signal = Signal(symbol=self.symbol, signal=self.signal, pnl=pnl, leverage=self.leverage)
         signal.save()
         self.bot.save()
