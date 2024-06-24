@@ -8,14 +8,14 @@
 from strategies.adx_t3 import analyser
 from datetime import datetime, timedelta
 from helper.adapter import adapter
-from variables import exchange
+from variables import exchange, time_fmt
 from datetime import datetime, timedelta
 from model import storage
 from model.bot import Bot
 import threading
 # import ccxt
 from executor.checker import Checker
-# from executor.executor import Executor
+from executor.executor import Executor
 from itertools import cycle
 
 import asyncio
@@ -37,8 +37,8 @@ async def new_checker(symbol, sig_type, bot_id, stop_loss):
     # if bot:
         # exc = bot.get_exchange()
     exc = user_exchanges.get(bot_id)
-    # trade = Executor(exc, bot_id=bot_id)
-    trade = Checker(exc, bot_id=bot_id)
+    trade = Executor(exc, bot_id=bot_id)
+    # trade = Checker(exc, bot_id=bot_id)
     await trade.execute(symbol, sig_type, reverse=False, stop_loss=stop_loss, use_rr=True)
     # else:
     #     adapter.info(f"Bot {bot_id} not found")
@@ -50,11 +50,11 @@ async def main():
                'SAND/USDT:USDT', 'GALA/USDT:USDT', 'AVAX/USDT:USDT',
                'APE/USDT:USDT', 'LINK/USDT:USDT', 'NEAR/USDT:USDT']
     # run_to = datetime.now() + timedelta(hours=24)
-    mkt = exchange.load_markets()
+    _ = exchange.load_markets()
     for _, bot in storage.all(Bot).items():
         user_exchanges[bot.id] = bot.get_exchange()
 
-    current_day = datetime.now().day
+    # current_day = datetime.now().day
     while True:
         try:
             tasks = [analyser(symbol, exchange) for symbol in symbols]
@@ -66,22 +66,26 @@ async def main():
             cycled_signal = cycle(signals)
             if len(signals) > 0:
                 bots = storage.search("Bot", active=True, available=True)
-                # bots = storage.search("Bot", active=True)
                 today_day = datetime.now().day
-                if today_day != current_day:
-                    flag = True
-                    current_day = today_day
-                else:
-                    flag = False
+                # if today_day != current_day:
+                #     flag = True
+                #     current_day = today_day
+                # else:
+                #     flag = False
+
                 for bot in bots:
                     if bot.id not in user_exchanges:
                         user_exchanges[bot.id] = bot.get_exchange()
-                    
-                    if flag is True:
+
+                    current_dt = datetime.now()
+                    current_dt = current_dt.strftime(time_fmt)
+
+                    if current_dt.split()[0] != bot.updated_at.split()[0]:
+                    # if flag is True:
                         bot.today_pnl = 0
                         bot.trades = []
                         bot.save()
-                        current_day = today_day
+                        # current_day = today_day
 
                     if getattr(bot, 'target_reached', False) is True and getattr(bot, 'target_date', None) == today_day:
                         continue
@@ -95,6 +99,7 @@ async def main():
             msg = f"{type(e).__name__} - {str(e)}"
             adapter.error(msg)
         finally:
+            storage.reload()
             current_dt = datetime.now()
             next_time = current_dt + timedelta(minutes=5)
             if next_time.minute % 5 != 0:

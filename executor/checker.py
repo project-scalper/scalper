@@ -206,7 +206,7 @@ class Checker():
     def monitor(self):
         self.start_time = datetime.now()
         self.alerted = False
-        # watch_till = datetime.now() + timedelta(minutes=25)
+        watch_till = datetime.now() + timedelta(hours=24)
 
         while True:
             try:

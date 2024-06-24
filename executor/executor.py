@@ -5,7 +5,7 @@ from helper.adapter import adapter, trade_logger
 from helper import watchlist
 import ccxt
 from datetime import datetime, timedelta
-from variables import daily_target
+from variables import daily_target, daily_loss
 from typing import Dict
 import time
 import model
@@ -18,7 +18,7 @@ class Executor(Checker):
         super().__init__(exchange, *args, **kwargs)
         self.bot = model.storage.get("Bot", self.bot_id)
         self.daily_target = self.bot.capital * daily_target
-        self.max_daily_loss = 0.3 * self.bot.capital
+        self.max_daily_loss = self.bot.capital * daily_loss
 
     def set_leverage(self, symbol:str, value:int):
         try:
@@ -125,8 +125,10 @@ class Executor(Checker):
                 return True
         
     def monitor(self):
-        # obtain the  tp and sl orders
+        """This monitors the open order"""
+
         while True:
+            # obtain the  tp and sl orders
             try:
                 since = int(self.start_time.timestamp())
                 orders = self.exchange.fetch_open_orders(self.symbol, limit=3, since=since)
@@ -158,13 +160,11 @@ class Executor(Checker):
                 tp_ord = self.exchange.fetch_open_order(tp_order['id'], self.symbol)
                 sl_ord = self.exchange.fetch_open_order(sl_order['id'], self.symbol)
 
-                sig = watchlist.get(self.symbol)
-                if self.signal != sig:
-                # if ("BUY" in self.signal and "BUY" not in sig) or ("SELL" in self.signal and "SELL" not in sig):
-                    # adapter.info("Signal changed!!!")
-                    trade_logger.info(f"{self.symbol}. {self.signal} - Trade closed. start_time={self.start_time}")
-                    self.adjust_sl()
-                    return
+                # sig = watchlist.get(self.symbol)
+                # if self.signal != sig:
+                #     trade_logger.info(f"{self.symbol}. {self.signal} - Trade closed. start_time={self.start_time}")
+                #     self.adjust_sl()
+                #     return
 
                 if tp_ord['status'] == 'closed':
                     trade_logger.info(f"#{self.symbol}. {self.signal} - *TP hit*")
