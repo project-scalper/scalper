@@ -1,11 +1,12 @@
 pandas
-pandas_ta
+pandas_ta==0.3.14b0
 ccxt
 gunicorn
 Flask==2.0.1
 Flask-Cors==3.0.10
 Flask-HTTPAuth==4.7.0
 Jinja2==3.1.2
+numpy==1.26.2
 python-dotenv==0.19.2
 python-dateutil==2.8.2
 python-engineio==4.4.0
