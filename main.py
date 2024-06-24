@@ -79,8 +79,9 @@ async def main():
 
                     current_dt = datetime.now()
                     current_dt = current_dt.strftime(time_fmt)
+                    last_save = bot.updated_at.strftime(time_fmt)
 
-                    if current_dt.split()[0] != bot.updated_at.split()[0]:
+                    if current_dt.split()[0] != last_save.split()[0]:
                     # if flag is True:
                         bot.today_pnl = 0
                         bot.trades = []
