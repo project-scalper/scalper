@@ -125,6 +125,39 @@ function suspendBot() {
     })
 }
 
+function editBot() {
+    $("#edit").on('click', () => {
+        var editForm = document.getElementById('edit-form')
+        editForm.style.display = 'block';
+    })
+    $("#submit-edit-form").on('click', () => {
+        var loader = document.getElementById('edit-loader');
+        loader.style.display = 'block'
+        var payload = JSON.stringify({
+            'capital': parseInt($('#newCapital').val())
+        })
+        request.put('/bot', payload)
+        .then(() => {
+            alert("Your bot capital has been updated successfully")
+            loader.style.display = 'none'
+            var editForm = document.getElementById('edit-form')
+            editForm.style.display = 'none'
+        }).catch((err) => {
+            loader.style.display = 'none'
+            if (err.responseJSON) {
+                alert(err.responseJSON)
+            } else {
+                alert("An error occured, please try again later")
+            }
+        })
+    })
+    $("#cancel-edit-form").on('click', () => {
+        var editForm = document.getElementById('edit-form')
+        editForm.style.display = 'none'
+    })
+}
+
+
 Promise.all([getProfile(), refreshPage(), suspendBot()])
 .then(() => {
     var loader = document.getElementById('preloader');

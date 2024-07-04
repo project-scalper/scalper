@@ -88,6 +88,18 @@ button:hover {
 #loader2 {
     display: none;
 }
+#loader3 {
+    display: none;
+}
 #suspend {
     background-color: red;
+}
+#edit {
+    background-color: blue;
+}
+#edit-form {
+    display: none;
+}
+#edit-loader {
+    display: none;
 }
