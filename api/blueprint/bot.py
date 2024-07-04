@@ -91,6 +91,10 @@ def update_bot():
     bot.save()
     return jsonify("Bot updated successfully"), 200
 
+@app_views.route('/refresh_all_bots', strict_slashes=False)
+def refresh_all_bots():
+    bots = storage.all('Bot')
+
 
 # if __name__ == '__main__':
 #     app.run(host='0.0.0.0', port=8002, debug=False)

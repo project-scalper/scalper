@@ -158,7 +158,7 @@ function editBot() {
 }
 
 
-Promise.all([getProfile(), refreshPage(), suspendBot()])
+Promise.all([getProfile(), refreshPage(), suspendBot(), editBot()])
 .then(() => {
     var loader = document.getElementById('preloader');
 	if (loader != null) {
