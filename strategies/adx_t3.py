@@ -2,6 +2,7 @@
 
 from utils.t3_calculator import t3
 from utils.adx_calculator import adx
+from utils.ema_calculator import ema
 from executor.checker import Checker
 import threading
 from typing import Dict, Union
@@ -46,8 +47,10 @@ async def analyser(symbol:str, exchange:ccxt.Exchange)-> Union[Dict | None]:
                 adapter.warning(f"Unable to fetch ohlcv for {symbol} - {str(e)}")
                 return None
 
-    _adx, _t3 = await asyncio.gather(adx(exchange, symbol, timeframe, ohlcv=ohlcv),
-                                       t3(exchange, symbol, timeframe, ohlcv=ohlcv))
+    _adx, _t3, _ema_50, _ema_100 = await asyncio.gather(adx(exchange, symbol, timeframe, ohlcv=ohlcv),
+                                       t3(exchange, symbol, timeframe, ohlcv=ohlcv),
+                                       ema(exchange, symbol, 50, timeframe, ohlcv=ohlcv),
+                                       ema(exchange, symbol, 100, timeframe, ohlcv=ohlcv))
     
     if not _adx or not _t3:
         adapter.warning(f"One or more indicators are missing for {symbol}")
@@ -55,11 +58,11 @@ async def analyser(symbol:str, exchange:ccxt.Exchange)-> Union[Dict | None]:
 
     # check DMI and ADX to determine trend
     if (_adx[0]['DMP'] > _adx[0]['DMN']) and (_adx[0]['ADX'] >= 25):
-    # if (_adx[0]['DMP'] > _adx[0]['DMN']):
-        trend = 'UPTREND'
+        if _ema_50[0]['EMA'] > _ema_100[0]['EMA']:
+            trend = 'UPTREND'
     elif (_adx[0]['DMP'] < _adx[0]['DMN']) and (_adx[0]['ADX'] >= 25):
-    # elif (_adx[0]['DMP'] < _adx[0]['DMN']):
-        trend = 'DOWNTREND'
+        if _ema_50[0]['EMA'] < _ema_100[0]['EMA']:
+            trend = 'DOWNTREND'
     else:
         trend = "NEUTRAL"
 
@@ -102,15 +105,19 @@ async def analyser(symbol:str, exchange:ccxt.Exchange)-> Union[Dict | None]:
     # Check if the indicators has reversed for existing signal
     signal = watchlist.get(symbol)
     if "BUY" in signal:
-        if _adx[0]['DMN'] > _adx[0]['DMP']:
-            watchlist.reset(symbol)
+        # if _adx[0]['DMN'] > _adx[0]['DMP']:
+        #     watchlist.reset(symbol)
         # if _t3[0]['FAST_T3'] > ohlcv[-1][4]:
         #     watchlist.reset(symbol)
-    elif "SELL" in signal:
-        if _adx[0]['DMP'] > _adx[0]['DMN']:
+        if _ema_50[0]['EMA'] < _ema_100[0]['EMA']:
             watchlist.reset(symbol)
+    elif "SELL" in signal:
+        # if _adx[0]['DMP'] > _adx[0]['DMN']:
+        #     watchlist.reset(symbol)
         # if ohlcv[-1][4] > _t3[0]['FAST_T3']:
         #     watchlist.reset(symbol)
+        if _ema_50[0]['EMA'] > _ema_100[0]['EMA']:
+            watchlist.reset(symbol)
 
     if "BUY" in sig_type or "SELL" in sig_type:
         return {'symbol': symbol, 'signal': sig_type, 'stop_loss': stop_loss}

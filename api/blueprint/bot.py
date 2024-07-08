@@ -95,8 +95,10 @@ def update_bot():
 def refresh_all_bots():
     try:
         refresh_bots()
+        return jsonify("Bots refreshed successfully")
     except Exception as e:
         adapter.error(f"{type(e).__name__} - {str(e)}")
+        return jsonify(f"Error: {e}"), 400
 
 
 # if __name__ == '__main__':
