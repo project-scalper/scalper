@@ -118,7 +118,7 @@ def refresh_bots():
         # await trade.execute(symbol, sig_type, reverse=False, stop_loss=stop_loss, use_rr=True)
 
 
-    bots = storage.all("Bot")
+    bots = storage.all(Bot)
     for _, bot in bots.items():
         if bot.id not in user_exchanges:
             user_exchanges[bot.id] = bot.get_exchange()
