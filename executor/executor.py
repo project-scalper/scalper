@@ -136,11 +136,11 @@ class Executor(Checker):
                     continue
 
                 for order in orders:
-                    # if order['id'] != self.order['id']:
-                    if order['stopLossPrice'] and order['triggerPrice'] == self.sl:
-                        sl_order = order
-                    elif order['takeProfitPrice'] and order['triggerPrice'] == self.sl:
-                        tp_order = order
+                    if order['id'] != self.order['id']:
+                        if order['stopLossPrice'] and order['triggerPrice'] == self.sl:
+                            sl_order = order
+                        elif order['takeProfitPrice'] and order['triggerPrice'] == self.sl:
+                            tp_order = order
                 if sl_order and tp_order:
                     # adapter.info("TP and SL orders fetched!")
                     self.sl_order = sl_order
