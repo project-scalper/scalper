@@ -136,11 +136,11 @@ class Executor(Checker):
                     continue
 
                 for order in orders:
-                    if order['id'] != self.order['id']:
-                        if order['stopLossPrice']:
-                            sl_order = order
-                        elif order['takeProfitPrice']:
-                            tp_order = order
+                    # if order['id'] != self.order['id']:
+                    if order['stopLossPrice'] and order['triggerPrice'] == self.sl:
+                        sl_order = order
+                    elif order['takeProfitPrice'] and order['triggerPrice'] == self.sl:
+                        tp_order = order
                 if sl_order and tp_order:
                     # adapter.info("TP and SL orders fetched!")
                     self.sl_order = sl_order
@@ -168,9 +168,11 @@ class Executor(Checker):
 
                 if tp_ord['status'] == 'closed':
                     trade_logger.info(f"#{self.symbol}. {self.signal} - *TP hit*")
+                    self.pnl = self.calculate_pnl(self.tp)
                     return
                 elif sl_ord['status'] == 'closed':
                     trade_logger.info(f"#{self.symbol}. {self.signal} - *SL hit*")
+                    self.pnl = self.calculate_pnl(self.sl)
                     return
                 elif tp_ord['status'] == 'canceled' or tp_ord['status'] == 'rejected':
                     adapter.warning(f"#{self.symbol}. TP order has been {tp_ord['status']}")
@@ -261,23 +263,23 @@ class Executor(Checker):
             self.enter_trade()
 
             # fetch end balance
-            for i in range(3):
-                end_balance = self.exchange.fetch_balance()['free'].get("USDT", 0)
-                if end_balance != 0:
-                    break
-                if i == 2:
-                    adapter.info(f"Unable to fetch end balance for ")
-            pnl = end_balance - start_balance
-            if pnl != 0:
-                self.update_bot(pnl)
-            if self.bot.today_pnl >= self.daily_target:
-                setattr(self.bot, "target_reached", True)
-                setattr(self.bot, "target_date", datetime.now().day)
-                self.bot.save()
-            if self.bot.today_pnl <= self.max_daily_loss * -1:
-                setattr(self.bot, "sl_reached", True)
-                setattr(self.bot, "sl_date", datetime.now().day)
-                self.bot.save()
+            # for i in range(3):
+            #     end_balance = self.exchange.fetch_balance()['free'].get("USDT", 0)
+            #     if end_balance != 0:
+            #         break
+            #     if i == 2:
+            #         adapter.info(f"{self.symbol} - Unable to fetch end balance for trade")
+            # pnl = end_balance - start_balance
+            if self.pnl != 0:
+                self.update_bot()
+            # if self.bot.today_pnl >= self.daily_target:
+            #     setattr(self.bot, "target_reached", True)
+            #     setattr(self.bot, "target_date", datetime.now().day)
+            #     self.bot.save()
+            # if self.bot.today_pnl <= self.max_daily_loss * -1:
+            #     setattr(self.bot, "sl_reached", True)
+            #     setattr(self.bot, "sl_date", datetime.now().day)
+            #     self.bot.save()
         except Exception as e:
             adapter.error(f"{type(e).__name__} - {str(e)}, line {e.__traceback__.tb_lineno}")
         return

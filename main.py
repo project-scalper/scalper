@@ -33,15 +33,10 @@ def set_event(symbol, signal, bot_id, stop_loss):
     loop.run_until_complete(new_checker(symbol, signal, bot_id, stop_loss))
 
 async def new_checker(symbol, sig_type, bot_id, stop_loss):
-    # bot:Bot = storage.get("Bot", bot_id)
-    # if bot:
-        # exc = bot.get_exchange()
     exc = user_exchanges.get(bot_id)
     trade = Executor(exc, bot_id=bot_id)
     # trade = Checker(exc, bot_id=bot_id)
     await trade.execute(symbol, sig_type, reverse=False, stop_loss=stop_loss, use_rr=True)
-    # else:
-    #     adapter.info(f"Bot {bot_id} not found")
 
 
 async def main():
@@ -111,6 +106,47 @@ async def main():
             while datetime.now() < next_time:
                 pass
 
+async def refresh_bots():
+    def set_event(trade:Executor):
+        loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(loop)
+        loop.run_until_complete(new_checker(trade))
+
+    async def new_checker(trade:Executor):
+        trade.monitor()
+        # trade.update_bot()
+        # await trade.execute(symbol, sig_type, reverse=False, stop_loss=stop_loss, use_rr=True)
+
+
+    bots = storage.all("Bot")
+    for _, bot in bots.items():
+        if bot.id not in user_exchanges:
+            user_exchanges[bot.id] = bot.get_exchange()
+        exchange = user_exchanges.get(bot.id)
+        if bot.available is False:
+            positions = exchange.fetch_positions()
+            if len(positions) == 0:
+                bot.available = True
+            else:
+                trade = Executor(exchange, bot.id)
+                trade.leverage = positions[0]['leverage']
+                trade.entry_price = positions[0]['entryPrice']
+                trade.symbol = positions[0]['symbol']
+                trade.start_time = positions[0]['timestamp']
+                trade.sl = positions[0]['stopLossPrice']
+                trade.tp = positions[0]['takeProfitPrice']
+                trade.bot = bot
+                side = positions[0]['side']
+                if side == 'short':
+                    trade.signal = f"SELL_{trade.leverage}"
+                elif side == 'long':
+                    trade.signal == f'BUY_{trade.leverage}'
+
+                nt = threading.Thread(target=set_event, args=(trade))
+                nt.start()
+
+                # trade.monitor()
+        bot.update_balance()
 
 if __name__ == '__main__':
     current_dt = datetime.now()

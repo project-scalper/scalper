@@ -1,14 +1,14 @@
 #!/usr/bin/python3
 
 from flask import jsonify, request
-from main import main
+from main import main, refresh_bots
 import asyncio
 import threading
 # from exchange import huo as exchange
 from variables import exchange
 from model.bot import Bot
 from model import storage
-from helper import watchlist
+from helper import watchlist, adapter
 from datetime import datetime
 from api.blueprint import app_views, auth
 
@@ -93,7 +93,10 @@ def update_bot():
 
 @app_views.route('/refresh_all_bots', strict_slashes=False)
 def refresh_all_bots():
-    bots = storage.all('Bot')
+    try:
+        refresh_bots()
+    except Exception as e:
+        adapter.error(f"{type(e).__name__} - {str(e)}")
 
 
 # if __name__ == '__main__':

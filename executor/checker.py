@@ -324,7 +324,7 @@ class Checker():
         delattr(self, "symbol")
         delattr(self, "signal")
 
-    def update_bot(self, pnl:float, reverse:bool=False):
+    def update_bot(self, pnl:float=None, reverse:bool=False):
         current_dt = datetime.now()
         current_dt_str = current_dt.strftime(date_fmt)
         if not hasattr(self, 'bot'):
@@ -361,8 +361,18 @@ class Checker():
         self.bot.pnl_history.append(pnl)
         self.bot.pnl_history = self.bot.pnl_history[-5:]
         self.bot.available = True
-        self.bot.balance += pnl
-        # self.bot.update_balance()
+        # self.bot.balance += pnl
+        self.bot.update_balance()
+
+        if self.bot.today_pnl >= self.daily_target:
+            setattr(self.bot, "target_reached", True)
+            setattr(self.bot, "target_date", datetime.now().day)
+            # self.bot.save()
+        if self.bot.today_pnl <= self.max_daily_loss * -1:
+            setattr(self.bot, "sl_reached", True)
+            setattr(self.bot, "sl_date", datetime.now().day)
+            # self.bot.save()
+
         signal = Signal(symbol=self.symbol, signal=self.signal, pnl=pnl, leverage=self.leverage)
         signal.save()
         self.bot.save()
