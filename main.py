@@ -106,7 +106,7 @@ async def main():
             while datetime.now() < next_time:
                 pass
 
-async def refresh_bots():
+def refresh_bots():
     def set_event(trade:Executor):
         loop = asyncio.new_event_loop()
         asyncio.set_event_loop(loop)
