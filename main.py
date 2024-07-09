@@ -114,7 +114,7 @@ def refresh_bots():
 
     async def new_checker(trade:Executor):
         trade.monitor()
-        # trade.update_bot()
+        trade.update_bot()
         # await trade.execute(symbol, sig_type, reverse=False, stop_loss=stop_loss, use_rr=True)
 
 
