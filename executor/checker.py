@@ -330,6 +330,11 @@ class Checker():
         if not hasattr(self, 'bot'):
             return
 
+        if not hasattr(self, 'pnl'):
+            return
+        if pnl == None:
+            pnl = self.pnl
+
         if len(self.bot.daily_pnl) > 0:
             last_dt = int(self.bot.daily_pnl[-1]['date'].split()[1])
         else:
