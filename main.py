@@ -140,7 +140,7 @@ def refresh_bots():
                 if side == 'short':
                     trade.signal = f"SELL_{trade.leverage}"
                 elif side == 'long':
-                    trade.signal == f'BUY_{trade.leverage}'
+                    trade.signal = f'BUY_{trade.leverage}'
 
                 nt = threading.Thread(target=set_event, args=(trade))
                 nt.start()
