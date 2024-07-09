@@ -160,11 +160,11 @@ class Executor(Checker):
                 tp_ord = self.exchange.fetch_open_order(tp_order['id'], self.symbol)
                 sl_ord = self.exchange.fetch_open_order(sl_order['id'], self.symbol)
 
-                sig = watchlist.get(self.symbol)
-                if self.signal != sig:
-                    trade_logger.info(f"{self.symbol}. {self.signal} - Trade closed. start_time={self.start_time}")
-                    self.adjust_sl()
-                    return
+                # sig = watchlist.get(self.symbol)
+                # if self.signal != sig:
+                #     trade_logger.info(f"{self.symbol}. {self.signal} - Trade closed. start_time={self.start_time}")
+                #     self.adjust_sl()
+                #     return
 
                 if tp_ord['status'] == 'closed':
                     trade_logger.info(f"#{self.symbol}. {self.signal} - *TP hit*")
