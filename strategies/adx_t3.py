@@ -56,6 +56,8 @@ async def analyser(symbol:str, exchange:ccxt.Exchange)-> Union[Dict | None]:
         adapter.warning(f"One or more indicators are missing for {symbol}")
         return
 
+    trend = 'NEUTRAL'
+
     # check DMI and ADX to determine trend
     if (_adx[0]['DMP'] > _adx[0]['DMN']) and (_adx[0]['ADX'] >= 25):
         if _ema_50[0]['EMA'] > _ema_100[0]['EMA']:

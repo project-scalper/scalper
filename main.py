@@ -114,11 +114,11 @@ def refresh_bots():
 
     async def new_checker(trade:Executor):
         trade.monitor()
-        # trade.update_bot()
+        trade.update_bot()
         # await trade.execute(symbol, sig_type, reverse=False, stop_loss=stop_loss, use_rr=True)
 
 
-    bots = storage.all("Bot")
+    bots = storage.all(Bot)
     for _, bot in bots.items():
         if bot.id not in user_exchanges:
             user_exchanges[bot.id] = bot.get_exchange()
@@ -132,7 +132,7 @@ def refresh_bots():
                 trade.leverage = positions[0]['leverage']
                 trade.entry_price = positions[0]['entryPrice']
                 trade.symbol = positions[0]['symbol']
-                trade.start_time = positions[0]['timestamp']
+                trade.start_time = datetime.fromtimestamp(positions[0]['timestamp'] / 1000)
                 trade.sl = positions[0]['stopLossPrice']
                 trade.tp = positions[0]['takeProfitPrice']
                 trade.bot = bot
@@ -140,9 +140,9 @@ def refresh_bots():
                 if side == 'short':
                     trade.signal = f"SELL_{trade.leverage}"
                 elif side == 'long':
-                    trade.signal == f'BUY_{trade.leverage}'
+                    trade.signal = f'BUY_{trade.leverage}'
 
-                nt = threading.Thread(target=set_event, args=(trade))
+                nt = threading.Thread(target=set_event, args=(trade, ))
                 nt.start()
 
                 # trade.monitor()
