@@ -332,6 +332,11 @@ class Checker():
 
         if len(self.bot.daily_pnl) > 0:
             last_dt = int(self.bot.daily_pnl[-1]['date'].split()[1])
+            if current_dt_str != self.bot.daily_pnl[-1]['date']:
+                self.bot.daily_pnl.append({'date': current_dt_str, 'msg': 0})
+                self.bot.today_pnl = 0
+                self.bot.trades = []
+                self.bot.save()
         else:
             last_dt = current_dt.day
             self.bot.daily_pnl.append({'date' : current_dt_str, 'msg': 0})
