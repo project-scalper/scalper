@@ -132,6 +132,7 @@ def refresh_bots():
                 trade.leverage = positions[0]['leverage']
                 trade.entry_price = positions[0]['entryPrice']
                 trade.symbol = positions[0]['symbol']
+                trade.amount = positions[0]['contracts']
                 trade.start_time = datetime.fromtimestamp(positions[0]['timestamp'] / 1000)
                 trade.sl = positions[0]['stopLossPrice']
                 trade.tp = positions[0]['takeProfitPrice']
