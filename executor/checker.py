@@ -198,8 +198,11 @@ class Checker():
         elif "SELL" in self.signal:
             pnl:float = (self.entry_price * self.amount) - (price * self.amount)
 
+        if not hasattr(self, 'taker_fee_rate'):
+            self.calculate_fee()
         fee = self.taker_fee_rate * price
         pnl -= fee
+        pnl -= maker_fee
         self.pnl = pnl
         return pnl
 
