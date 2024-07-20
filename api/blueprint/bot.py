@@ -85,7 +85,8 @@ def update_bot():
     data = request.get_json()
     for key, val in data.items():
         if key == 'capital':
-            print(val)
+            print("capital - " + type(val) + " : " + val)
+            print("Balance - " + type(bot.balance) + " : " + bot.balance)
             if int(val) < bot.balance:
                 return jsonify('Insufficient balance in wallet'), 400
         setattr(bot, key, val)
