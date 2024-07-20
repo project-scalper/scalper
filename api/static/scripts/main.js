@@ -6,6 +6,7 @@ async function loadBot(bot_id) {
         $("#daily-pnl").text(bot.today_pnl.toFixed(2))
         $("#current-balance").text("$" + bot.balance.toFixed(2))
         $("#performance-list").html('')
+	$("#capital").text("$" + bot.capital.toFixed(2))
         if (bot.active === true) {
             $("#suspend").html('<i class="fa fa-spinner fa-spin" id="loader2"></i>Suspend bot')
         } else if (bot.active === false) {
