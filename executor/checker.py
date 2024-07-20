@@ -202,7 +202,7 @@ class Checker():
             self.calculate_fee()
         fee = self.taker_fee_rate * price
         pnl -= fee
-        pnl -= maker_fee
+        pnl -= self.maker_fee
         self.pnl = pnl
         return pnl
 
