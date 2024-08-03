@@ -7,7 +7,7 @@ lev = 20
 timeframe = '5m'
 confirmation_timeframe = '15m'
 reward_risk = 1
-daily_target = 0.2
+daily_target = 0.05
 daily_loss = 0.2
 time_fmt = "%b %d %Y, %I:%M:%S %p"
 
