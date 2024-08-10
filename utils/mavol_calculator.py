@@ -28,7 +28,7 @@ async def mavol(exchange:ccxt.Exchange, symbol:str, length:int, timeframe:str='5
         if len(ohlcv):
             df = pd.DataFrame(ohlcv, columns=['timestamp', 'open', 'high', 'low', 'close', 'volume'])
             # df['datetime'] = pd.to_datetime(df['timestamp'], unit='ms')
-            ema = df.ta.sma(df['volume'], length=length)
+            ema = df.ta.sma(length, close=df['volume'])
             df = pd.concat([df, ema], axis=1)
             df = df.tail(5)
             resp = df.to_dict(orient='records')

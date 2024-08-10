@@ -80,7 +80,7 @@ async def analyser(symbol:str, exchange:ccxt.Exchange, ohlcv:List=[])-> Union[Di
             sig = 'CROSS_BUY'
     if trend == 'DOWNTREND':
         if (max(ohlcv[-1][4], ohlcv[-1][1]) < _ema_9[0]['EMA']) and (max(ohlcv[-2][4], ohlcv[-2][1]) > _ema_9[1]['EMA']):
-            sig = 'SELL'
+            sig = 'BREAKOUT_SELL'
         if _ema_9[1]['EMA'] > _ema_21[1]['EMA']:
             sig = 'CROSS_SELL'
 
@@ -104,7 +104,7 @@ async def analyser(symbol:str, exchange:ccxt.Exchange, ohlcv:List=[])-> Union[Di
             bbands_check = True
 
     # confirm with moving average volume indicator
-    if ohlcv[-1][5] >= mavol[0]['MAVOL']:
+    if ohlcv[-1][5] >= _mavol[0]['MAVOL']:
         mavol_check = True
 
     # Check if the indicators has reversed for existing signal

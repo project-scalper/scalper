@@ -4,7 +4,7 @@ from utils.ema_calculator import ema
 from utils.macd_calculator import macd
 from utils.rsi_calculator import rsi
 import threading
-# from typing import Dict, List
+from typing import Dict, List
 from helper.adapter import adapter
 from helper import watchlist
 from variables import timeframe
@@ -29,15 +29,17 @@ async def new_checker(symbol, sig_type, exchange):
     await trade.execute(symbol, signal=sig_type)
 
 
-async def analyser(symbol:str, exchange:ccxt.Exchange)-> None:
-    for n in range(3):
-        try:
-            ohlcv = exchange.fetch_ohlcv(symbol, timeframe, limit=210)
-            break
-        except Exception as e:
-            if n == 2:
-                adapter.warning(f"Unable to fetch ohlcv for {symbol}")
-                return None
+async def analyser(symbol:str, exchange:ccxt.Exchange, ohlcv:List=[])-> None:
+    if len(ohlcv) == 0:
+        for n in range(3):
+            try:
+                ohlcv = exchange.fetch_ohlcv(symbol, timeframe, limit=210)
+                break
+            except Exception as e:
+                if n == 2:
+                    adapter.warning(f"Unable to fetch ohlcv for {symbol}")
+                    return None
+
     ema_50, ema_100, _macd, _rsi = await asyncio.gather(ema(exchange, symbol, 50, timeframe, ohlcv=ohlcv),
                                                         ema(exchange, symbol, 100, timeframe, ohlcv=ohlcv),
                                                         macd(exchange, symbol, timeframe, ohlcv=ohlcv),
@@ -105,7 +107,8 @@ async def analyser(symbol:str, exchange:ccxt.Exchange)-> None:
     if sig_type is not None:
         watchlist.put(symbol, sig_type)
         if sig_type != 'NEUTRAL':
-            await run_thread(symbol, sig_type, exchange)
+            return {'symbol': symbol, 'signal': sig_type}
+            # await run_thread(symbol, sig_type, exchange)
         
 
 # async def main():

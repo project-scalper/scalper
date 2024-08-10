@@ -10,7 +10,7 @@ from executor.checker import Checker
 from utils.candle_patterns import candle_main
 import threading
 # from typing import Dict, List
-from typing import Literal
+from typing import Literal, List
 from helper.adapter import adapter
 from helper import watchlist
 from variables import timeframe, exchange
@@ -36,15 +36,16 @@ async def new_checker(symbol, sig_type):
         await trade.execute(symbol, sig_type, reverse=True)
 
 
-async def analyser(symbol:str, exchange:ccxt.Exchange)-> None:
-    for n in range(3):
-        try:
-            ohlcv = exchange.fetch_ohlcv(symbol, timeframe, limit=210)
-            break
-        except Exception as e:
-            if n == 2:
-                adapter.warning(f"Unable to fetch ohlcv for {symbol} - {str(e)}")
-                return None
+async def analyser(symbol:str, exchange:ccxt.Exchange, ohlcv:List=[])-> None:
+    if len(ohlcv) == 0:
+        for n in range(3):
+            try:
+                ohlcv = exchange.fetch_ohlcv(symbol, timeframe, limit=210)
+                break
+            except Exception as e:
+                if n == 2:
+                    adapter.warning(f"Unable to fetch ohlcv for {symbol} - {str(e)}")
+                    return None
             
     ema_50, ema_100, _macd, _rsi = await asyncio.gather(ema(exchange, symbol, 50, timeframe, ohlcv=ohlcv),
                                                         ema(exchange, symbol, 100, timeframe, ohlcv=ohlcv),
@@ -94,7 +95,8 @@ async def analyser(symbol:str, exchange:ccxt.Exchange)-> None:
             candle_analysis = candle_main(ohlcv=ohlcv, signal=sig_type)
             if candle_analysis is True:
                 sig_type = "CS_" + sig_type
-            await run_thread(symbol, sig_type)
+            return {'signal': sig_type, 'symbol': symbol}
+            # await run_thread(symbol, sig_type)
         
 
 async def main():

@@ -8,7 +8,7 @@ from utils.psar_calculator import psar
 from executor.checker import Checker
 from utils.candle_patterns import candle_main
 import threading
-# from typing import Dict, List
+from typing import Dict, List
 from typing import Literal
 from helper.adapter import adapter
 from helper import watchlist
@@ -40,15 +40,16 @@ async def new_checker(symbol, sig_type, _psar):
         await trade.execute(symbol, sig_type, reverse=False)
 
 
-async def analyser(symbol:str, exchange:ccxt.Exchange)-> None:
-    for n in range(3):
-        try:
-            ohlcv = exchange.fetch_ohlcv(symbol, timeframe, limit=210)
-            break
-        except Exception as e:
-            if n == 2:
-                adapter.warning(f"Unable to fetch ohlcv for {symbol} - {str(e)}")
-                return None
+async def analyser(symbol:str, exchange:ccxt.Exchange, ohlcv:List=[])-> None:
+    if len(ohlcv) == 0:
+        for n in range(3):
+            try:
+                ohlcv = exchange.fetch_ohlcv(symbol, timeframe, limit=210)
+                break
+            except Exception as e:
+                if n == 2:
+                    adapter.warning(f"Unable to fetch ohlcv for {symbol} - {str(e)}")
+                    return None
             
     ema_100, _psar, _rsi = await asyncio.gather(ema(exchange, symbol, 100, timeframe, ohlcv=ohlcv),
                                           psar(exchange, symbol, timeframe, ohlcv=ohlcv),

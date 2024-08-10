@@ -11,6 +11,7 @@ from strategies.adx_psar import analyser as adx_psar
 from strategies.rsi_strategy import analyser as rsi_str
 from strategies.ema_rsi_boll import analyser as ema_rsi
 from executor.checker import Checker
+from colorama import Fore, Style
 
 
 strategies = {'adx_t3': adx_t3, 'macd': macd,
@@ -21,7 +22,7 @@ def tester(symbol, _ohlcv, name):
     good_trades = 0
     bad_trades = 0
     available = True
-    print(len(_ohlcv))
+    # print(len(_ohlcv))
     active_trade = None
     analyser = strategies[name]
 
@@ -39,20 +40,24 @@ def tester(symbol, _ohlcv, name):
                     if temp[-1][3] <= active_trade.sl:
                         bad_trades += 1
                         available = True
+                        print(f"{Fore.RED}{start_dt}, entry={trade.entry_price}, signal={trade.signal}, tp={trade.tp}, sl={trade.sl}{Fore.RESET}")
                     elif temp[-1][2] >= active_trade.tp:
                         good_trades += 1
                         available = True
                         active_trade = None
+                        print(f"{Fore.GREEN}{start_dt}, entry={trade.entry_price}, signal={trade.signal}, tp={trade.tp}, sl={trade.sl}{Fore.RESET}")
 
                 elif 'SELL' in active_trade.signal:
                     if temp[-1][3] >= active_trade.sl:
                         bad_trades += 1
                         available = True
                         active_trade = None
+                        print(f"{Fore.RED}{start_dt}, entry={trade.entry_price}, signal={trade.signal}, tp={trade.tp}, sl={trade.sl}{Fore.RESET}")
                     elif temp[-1][2] <= active_trade.tp:
                         good_trades += 1
                         available = True
                         active_trade = None
+                        print(f"{Fore.GREEN}{start_dt}, entry={trade.entry_price}, signal={trade.signal}, tp={trade.tp}, sl={trade.sl}{Fore.RESET}")
 
             if resp and available:
                 trade = Checker(exchange, capital=100)
@@ -78,9 +83,9 @@ def tester(symbol, _ohlcv, name):
 
 def main():
     symbol = 'TON/USDT:USDT'
-    start_time = datetime(2024, 8, 1, 15, 40)
-    start_ts = datetime.timestamp(start_time)
-    ohlcv = exchange.fetch_ohlcv(symbol, timeframe, limit=962)
+    # start_time = datetime(2024, 8, 1, 15, 40)
+    # start_ts = datetime.timestamp(start_time)
+    ohlcv = exchange.fetch_ohlcv(symbol, timeframe, limit=1000)
     values = {}
     for name in strategies:
         resp = tester(symbol, ohlcv, name)
