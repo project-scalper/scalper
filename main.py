@@ -46,7 +46,8 @@ async def main():
                'APE/USDT:USDT', 'LINK/USDT:USDT', 'NEAR/USDT:USDT']
     # run_to = datetime.now() + timedelta(hours=24)
     _ = exchange.load_markets()
-    for _, bot in storage.all(Bot).items():
+    # for _, bot in storage.all(Bot).items():
+    for bot in storage.search('Bot', capital=100).items():  #To be removed
         user_exchanges[bot.id] = bot.get_exchange()
 
     # current_day = datetime.now().day
@@ -60,7 +61,8 @@ async def main():
                 adapter.info(f"{signal} found.")
             cycled_signal = cycle(signals)
             if len(signals) > 0:
-                bots = storage.search("Bot", active=True, available=True)
+                # bots = storage.search("Bot", active=True, available=True)
+                bots = storage.search('Bot', capital=100, active=True, available=True)  # to be removed
                 today_day = datetime.now().day
                 # if today_day != current_day:
                 #     flag = True

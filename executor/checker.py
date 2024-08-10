@@ -26,10 +26,7 @@ class Checker():
 
         if hasattr(self, "bot_id"):
             self.bot:Bot = model.storage.get("Bot", self.bot_id)
-            # if self.bot.balance > self.bot.capital:
-            #     self.capital = int(self.bot.capital)
-            # else:
-            #     self.capital = int(self.bot.balance)
+            # self.capital = min(self.bot.balance, self.bot.capital)
             self.capital = self.bot.capital
 
         self.risk = self.capital * risk
@@ -209,7 +206,7 @@ class Checker():
     def monitor(self):
         self.start_time = datetime.now()
         self.alerted = False
-        watch_till = datetime.now() + timedelta(hours=24)
+        # watch_till = datetime.now() + timedelta(hours=24)
 
         while True:
             try:
@@ -217,21 +214,21 @@ class Checker():
                 pnl = self.calculate_pnl(ticker['last'])
 
                 if ("BUY" in self.signal and ticker['last'] >= self.tp) or ("SELL" in self.signal and ticker['last'] <= self.tp):
-                    pnl = self.calculate_pnl(self.tp)
+                    self.calculate_pnl(self.tp)
                     msg = f"#{self.symbol}. {self.signal} - start_time={self.start_time}, entry={self.entry_price}, tp={self.tp}, lev={self.leverage}, pnl={pnl}"
                     trade_logger.info(msg)
                     watchlist.trade_counter(self.signal, pnl)
                     # watchlist.reset(self.symbol)
-                    self.update_bot(pnl)
+                    # self.update_bot(self.pnl)
                     return
                 
                 elif ("BUY" in self.signal and ticker['last'] <= self.sl) or ("SELL" in self.signal and ticker['last'] >= self.sl):
-                    pnl = self.calculate_pnl(self.sl)
+                    self.calculate_pnl(self.sl)
                     msg = f"#{self.symbol}. {self.signal} - start_time={self.start_time}, entry={self.entry_price}, tp={self.tp}, lev={self.leverage}, pnl={pnl}"
                     trade_logger.info(msg)
                     watchlist.trade_counter(self.signal, pnl)
                     # watchlist.reset(self.symbol)
-                    self.update_bot(pnl)
+                    # self.update_bot(self.pnl)
                     return
                 
                 # close position when indicators changes signal
@@ -241,7 +238,7 @@ class Checker():
                         # watchlist.reset(self.symbol)
                         msg = f"#{self.symbol}. {self.signal} - Trade closed. start_time={self.start_time}, entry={self.entry_price}, tp={self.tp}, last_price={ticker['last']}, leverage={self.leverage} and pnl={pnl:.3f}"
                         trade_logger.info(msg)
-                        self.update_bot(pnl)
+                        # self.update_bot(pnl)
                         return
 
             except ccxt.NetworkError as e:
@@ -282,7 +279,7 @@ class Checker():
     def delete(self):
         del self
 
-    async def execute(self, symbol:str, signal:str, reverse:bool=False, stop_loss:float=None, use_rr:bool=True):
+    async def execute(self, symbol:str, signal:str, reverse:bool=False, stop_loss=None, use_rr:bool=False):
         self.symbol = symbol
         self.reverse = reverse
         if stop_loss is None:
@@ -299,9 +296,9 @@ class Checker():
         else:
             self.signal = signal
         
-        if "CROSS" in self.signal:
-            self.safety_factor /= 3
-            self.reward /= 3
+        # if "CROSS" in self.signal:
+        #     self.safety_factor /= 3
+        #     self.reward /= 3
 
         self.calculate_entry_price()
         if self.use_rr is True:
@@ -320,6 +317,7 @@ class Checker():
         adapter.info(f"#{self.symbol}. {self.signal} - Entry={self.entry_price}, tp={self.tp}, sl={self.sl}, leverage={self.leverage}")
 
         self.enter_trade()
+        self.update_bot(self.pnl)
 
     def reset(self):
         global active

@@ -8,6 +8,7 @@ import threading
 from helper.adapter import adapter
 from helper import watchlist
 from variables import timeframe
+from typing import List
 import asyncio
 import ccxt
 from model import storage
@@ -50,15 +51,17 @@ async def new_checker(symbol, sig_type:str, exchange):
         await trade.execute(symbol, signal=sig_type, reverse=True)
 
 
-async def analyser(symbol:str, exchange:ccxt.Exchange)-> None:
-    for n in range(3):
-        try:
-            ohlcv = exchange.fetch_ohlcv(symbol, timeframe, limit=210)
-            break
-        except Exception as e:
-            if n == 2:
-                adapter.warning(f"Unable to fetch ohlcv for {symbol} - {str(e)}")
-                return None
+async def analyser(symbol:str, exchange:ccxt.Exchange, ohlcv:List=[])-> None:
+    if len(ohlcv) == 0:
+        for n in range(3):
+            try:
+                ohlcv = exchange.fetch_ohlcv(symbol, timeframe, limit=210)
+                break
+            except Exception as e:
+                if n == 2:
+                    adapter.warning(f"Unable to fetch ohlcv for {symbol} - {str(e)}")
+                    return None
+                
     ema_50, ema_100, _macd, _rsi = await asyncio.gather(ema(exchange, symbol, 50, timeframe, ohlcv=ohlcv),
                                                         ema(exchange, symbol, 100, timeframe, ohlcv=ohlcv),
                                                         macd(exchange, symbol, timeframe, ohlcv=ohlcv),
@@ -161,7 +164,8 @@ async def analyser(symbol:str, exchange:ccxt.Exchange)-> None:
             if sig_type != "NEUTRAL":
                 if candle_main(ohlcv=ohlcv, signal=signal) is True:
                     sig_type += "CS_"
-                await run_thread(symbol, sig_type, exchange)
+                    return {'symbol': symbol, 'signal': sig_type}
+                # await run_thread(symbol, sig_type, exchange)
                 # watchlist.reset(symbol)
-                return
+                return None
         
