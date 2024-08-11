@@ -3,9 +3,9 @@
 # from strategies.macd import analyser
 # from strategies.rsi_strategy import analyser
 # from strategies.macd_2 import analyser
-# from strategies.psar_ema import analyser
+from strategies.psar_ema import analyser
 # from strategies.adx_psar import analyser
-from strategies.adx_t3 import analyser
+# from strategies.adx_t3 import analyser
 from datetime import datetime, timedelta
 from helper.adapter import adapter
 from variables import exchange, time_fmt
