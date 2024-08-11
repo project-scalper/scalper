@@ -58,7 +58,7 @@ async def analyser(symbol:str, exchange:ccxt.Exchange, ohlcv:List=[])-> Union[Di
                                         rsi(exchange, symbol, timeframe, ohlcv=ohlcv),
                                         mavol(exchange, symbol, 20, ohlcv=ohlcv))
     
-    if not _ema_9 or not _ema_21 or not _bbands or not _rsi:
+    if not _ema_9 or not _ema_21 or not _bbands or not _rsi or not _mavol:
         adapter.warning(f"One or more indicators are missing for {symbol}")
         return
 
@@ -123,7 +123,7 @@ async def analyser(symbol:str, exchange:ccxt.Exchange, ohlcv:List=[])-> Union[Di
             stop_loss = _bbands[0]['UPPER']
 
         if rsi_check and bbands_check and mavol_check:
-            return {'symbol': symbol, 'signal': sig, 'stop_loss': stop_loss}
+            return {'symbol': symbol, 'signal': sig}
     return None
         
 

@@ -16,7 +16,7 @@ date_fmt = "%b %d %Y"
 
 
 class Checker():
-    bot_id = None
+    # bot_id = None
     capital = 0
 
     def __init__(self, exchange:ccxt.Exchange, *args, **kwargs):

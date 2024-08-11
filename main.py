@@ -46,8 +46,8 @@ async def main():
                'APE/USDT:USDT', 'LINK/USDT:USDT', 'NEAR/USDT:USDT']
     # run_to = datetime.now() + timedelta(hours=24)
     _ = exchange.load_markets()
-    # for _, bot in storage.all(Bot).items():
-    for bot in storage.search('Bot', capital=100).items():  #To be removed
+    for _, bot in storage.all(Bot).items():
+    # for bot in storage.search('Bot', capital=100):  #To be removed
         user_exchanges[bot.id] = bot.get_exchange()
 
     # current_day = datetime.now().day
@@ -61,14 +61,9 @@ async def main():
                 adapter.info(f"{signal} found.")
             cycled_signal = cycle(signals)
             if len(signals) > 0:
-                # bots = storage.search("Bot", active=True, available=True)
-                bots = storage.search('Bot', capital=100, active=True, available=True)  # to be removed
+                bots = storage.search("Bot", active=True, available=True)
+                # bots = storage.search('Bot', capital=100, active=True, available=True)  # to be removed
                 today_day = datetime.now().day
-                # if today_day != current_day:
-                #     flag = True
-                #     current_day = today_day
-                # else:
-                #     flag = False
 
                 for bot in bots:
                     if bot.id not in user_exchanges:
@@ -79,7 +74,6 @@ async def main():
                     last_save = bot.updated_at.strftime(time_fmt)
 
                     if current_dt.split()[0] != last_save.split()[0]:
-                    # if flag is True:
                         bot.today_pnl = 0
                         bot.trades = []
                         bot.save()
@@ -117,7 +111,6 @@ def refresh_bots():
     async def new_checker(trade:Executor):
         trade.monitor()
         trade.update_bot()
-        # await trade.execute(symbol, sig_type, reverse=False, stop_loss=stop_loss, use_rr=True)
 
 
     bots = storage.all(Bot)
