@@ -17,7 +17,7 @@ date_fmt = "%b %d %Y"
 
 class Checker():
     # bot_id = None
-    capital = 0
+    capital = 100
 
     def __init__(self, exchange:ccxt.Exchange, *args, **kwargs):
         self.exchange = exchange
@@ -33,7 +33,7 @@ class Checker():
         self.risk = self.capital * risk
         self.reward = self.capital * reward
         self.safety_factor = reward_risk
-        self.capital = 100
+        # self.capital = 100
 
     def calculate_entry_price(self):
         """Calculates the limit entry price for the trade"""
