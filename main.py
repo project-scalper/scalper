@@ -85,7 +85,7 @@ async def main():
                         continue
                     
                     sig = next(cycled_signal)
-                    await run_thread(sig['symbol'], sig['signal'], bot_id=bot.id, stop_loss=sig['stop_loss'])
+                    await run_thread(sig['symbol'], sig['signal'], bot_id=bot.id, stop_loss=sig.get('stop_loss'))
             adapter.info("Analysis completed.")
         except Exception as e:
             msg = f"{type(e).__name__} - {str(e)}"
