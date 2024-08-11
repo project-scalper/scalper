@@ -1,6 +1,7 @@
 pandas
 pandas_ta==0.3.14b0
 ccxt
+colorama
 gunicorn
 Flask==2.0.1
 Flask-Cors==3.0.10

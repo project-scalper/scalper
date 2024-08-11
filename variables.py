@@ -11,5 +11,5 @@ daily_target = 0.05
 daily_loss = 0.2
 time_fmt = "%b %d %Y, %I:%M:%S %p"
 
-from exchange import bybit as exchange
+from exchange import okx as exchange
 exchange = exchange
