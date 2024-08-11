@@ -33,6 +33,7 @@ class Checker():
         self.risk = self.capital * risk
         self.reward = self.capital * reward
         self.safety_factor = reward_risk
+        self.capital = 100
 
     def calculate_entry_price(self):
         """Calculates the limit entry price for the trade"""
@@ -98,7 +99,7 @@ class Checker():
         else:
             self.leverage = lev
             # leverage = self.leverage
-            
+
         if self.leverage > 20:
             self.leverage = 20
         
