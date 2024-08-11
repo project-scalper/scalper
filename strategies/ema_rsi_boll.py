@@ -106,6 +106,8 @@ async def analyser(symbol:str, exchange:ccxt.Exchange, ohlcv:List=[])-> Union[Di
     # confirm with moving average volume indicator
     if ohlcv[-1][5] >= _mavol[0]['MAVOL']:
         mavol_check = True
+    else:
+        mavol_check = False
 
     # Check if the indicators has reversed for existing signal
     signal = watchlist.get(symbol)

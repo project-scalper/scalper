@@ -34,8 +34,8 @@ def set_event(symbol, signal, bot_id, stop_loss):
 
 async def new_checker(symbol, sig_type, bot_id, stop_loss):
     exc = user_exchanges.get(bot_id)
-    trade = Executor(exc, bot_id=bot_id)
-    # trade = Checker(exc, bot_id=bot_id)
+    # trade = Executor(exc, bot_id=bot_id)
+    trade = Checker(exc, bot_id=bot_id)
     await trade.execute(symbol, sig_type, reverse=False, stop_loss=stop_loss, use_rr=True)
 
 
@@ -61,8 +61,8 @@ async def main():
                 adapter.info(f"{signal} found.")
             cycled_signal = cycle(signals)
             if len(signals) > 0:
-                bots = storage.search("Bot", active=True, available=True)
-                # bots = storage.search('Bot', capital=100, active=True, available=True)  # to be removed
+                # bots = storage.search("Bot", active=True, available=True)
+                bots = storage.search('Bot', capital=100, active=True, available=True)  # This line is only for testing purpose
                 today_day = datetime.now().day
 
                 for bot in bots:

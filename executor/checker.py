@@ -96,8 +96,9 @@ class Checker():
             self.tp = float(self.exchange.price_to_precision(self.symbol, tp))
             self.sl = float(self.exchange.price_to_precision(self.symbol, self.stop_loss))
         else:
-            self.leverage = leverage
-            leverage = self.leverage
+            self.leverage = lev
+            # leverage = self.leverage
+            
         if self.leverage > 20:
             self.leverage = 20
         
@@ -283,9 +284,11 @@ class Checker():
     async def execute(self, symbol:str, signal:str, reverse:bool=False, stop_loss=None, use_rr:bool=False):
         self.symbol = symbol
         self.reverse = reverse
-        if stop_loss is None:
-            self.psar = watchlist.psar_get(self.symbol)
-        else:
+        # if 'psar' in signal:
+        #     self.psar = watchlist.psar_get(self.symbol)
+        # elif stop_loss:
+        #     self.stop_loss = stop_loss
+        if stop_loss:
             self.stop_loss = stop_loss
         self.use_rr = use_rr
 
@@ -311,7 +314,7 @@ class Checker():
         if not hasattr(self, "tp"):
             self.calculate_tp_sl()  # This method is called to get an estimated tp value without fees
             self.calculate_fee()
-            self.calculate_tp_sl()  # This method is called again to account for fees
+            # self.calculate_tp_sl()  # This method is called again to account for fees
         else:
             self.calculate_fee()
 
