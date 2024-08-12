@@ -306,11 +306,12 @@ class Checker():
         #     self.reward /= 3
 
         self.calculate_entry_price()
-        if self.use_rr is True:
-            self.calculate_leverage()
-        else:
+        self.leverage = lev
+        # if self.use_rr is True:
+        #     self.calculate_leverage()
+        # else:
         # self.calculate_fee()
-            self.leverage = lev
+        #     self.leverage = lev
 
         if not hasattr(self, "tp"):
             self.calculate_tp_sl()  # This method is called to get an estimated tp value without fees
