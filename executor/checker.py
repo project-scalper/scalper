@@ -16,7 +16,7 @@ date_fmt = "%b %d %Y"
 
 
 class Checker():
-    # bot_id = None
+    bot_id = None
     capital = 100
 
     def __init__(self, exchange:ccxt.Exchange, *args, **kwargs):
@@ -28,7 +28,7 @@ class Checker():
         if hasattr(self, "bot_id"):
             self.bot:Bot = model.storage.get("Bot", self.bot_id)
             # self.capital = min(self.bot.balance, self.bot.capital)
-            self.capital = self.bot.capital
+            # self.capital = self.bot.capital
 
         self.risk = self.capital * risk
         self.reward = self.capital * reward
