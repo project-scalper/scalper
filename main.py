@@ -36,7 +36,7 @@ async def new_checker(symbol, sig_type, bot_id, stop_loss):
     exc = user_exchanges.get(bot_id)
     # trade = Executor(exc, bot_id=bot_id)
     trade = Checker(exc, bot_id=bot_id, capital=100)
-    await trade.execute(symbol, sig_type, reverse=False, stop_loss=stop_loss, use_rr=True)
+    await trade.execute(symbol, sig_type, reverse=False, stop_loss=stop_loss, use_rr=False)
 
 
 async def main():
