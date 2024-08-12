@@ -2,7 +2,8 @@
 
 from helper.adapter import adapter, trade_logger
 from datetime import datetime, timedelta
-from variables import risk, reward, timeframe, reward_risk, lev
+from variables import risk, reward, timeframe, reward_risk, lev, daily_target, daily_loss
+
 from strategies.macd_2 import active
 import time
 import ccxt
@@ -33,6 +34,8 @@ class Checker():
         self.risk = self.capital * risk
         self.reward = self.capital * reward
         self.safety_factor = reward_risk
+        self.max_daily_loss = daily_loss * self.capital
+        self.daily_target = daily_target * self.capital
         # self.capital = 100
 
     def calculate_entry_price(self):

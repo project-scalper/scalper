@@ -7,8 +7,8 @@ lev = 5
 timeframe = '5m'
 confirmation_timeframe = '15m'
 reward_risk = 2
-daily_target = 0.05
-daily_loss = 0.2
+daily_target = 0.25
+daily_loss = 0.25
 time_fmt = "%b %d %Y, %I:%M:%S %p"
 
 from exchange import okx as exchange
