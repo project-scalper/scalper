@@ -8,6 +8,7 @@ from utils.rsi_calculator import rsi
 from utils.mavol_calculator import mavol
 from executor.checker import Checker
 import threading
+from helper import watchlist
 from typing import Dict, Union, List
 from helper.adapter import adapter
 from helper import watchlist
@@ -125,6 +126,7 @@ async def analyser(symbol:str, exchange:ccxt.Exchange, ohlcv:List=[])-> Union[Di
             stop_loss = _bbands[0]['UPPER']
 
         if rsi_check and bbands_check and mavol_check:
+            watchlist.put(symbol, sig)
             return {'symbol': symbol, 'signal': sig}
     return None
         
