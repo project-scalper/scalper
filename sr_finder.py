@@ -5,7 +5,8 @@ import pandas as pd
 from scipy.signal import find_peaks
 import ccxt
 
-exchange = ccxt.gate()
+
+exchange = ccxt.bybit()
 mkt = exchange.load_markets()
 
 class SupportResistanceZones:
