@@ -40,7 +40,7 @@ async def new_checker(symbol, sig_type, _psar):
         await trade.execute(symbol, sig_type, reverse=False)
 
 
-async def analyser(symbol:str, exchange:ccxt.Exchange, ohlcv:List=[])-> None:
+async def analyser(symbol:str, exchange:ccxt.Exchange, ohlcv:List=[])-> Dict | None:
     if len(ohlcv) == 0:
         for n in range(3):
             try:

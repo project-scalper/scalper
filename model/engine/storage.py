@@ -43,7 +43,7 @@ class Storage:
         key = f"{obj.__class__.__name__}.{obj.id}"
         self.__objects[key] = obj
 
-    def save(self):
+    def save(self, new_obj=None):
         json_objs = {}
         for key, obj in self.__objects.items():
             json_objs[key] = obj.to_dict()

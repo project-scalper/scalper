@@ -53,9 +53,9 @@ async def analyser(symbol:str, exchange:ccxt.Exchange, ohlcv:List=[])-> Union[Di
                                        ema(exchange, symbol, 50, timeframe, ohlcv=ohlcv),
                                        ema(exchange, symbol, 100, timeframe, ohlcv=ohlcv))
     
-    if not _adx or not _t3:
+    if not all([_adx, _t3, _ema_100, _ema_50]):
         adapter.warning(f"One or more indicators are missing for {symbol}")
-        return
+        return None
 
     trend = 'NEUTRAL'
 

@@ -32,3 +32,7 @@ okx = ccxt.okx({
     'enableRateLimit': True
 })
 
+bitget = ccxt.bitget({
+    'nonce': ccxt.Exchange.milliseconds,
+    'enableRateLimit': True
+})

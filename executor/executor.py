@@ -112,7 +112,7 @@ class Executor(Checker):
             adapter.error(f"{type(e).__name__} - {str(e)}")
             return
         
-        while True:
+        while True: # Continue to monitor when the order gets filled
             order = self.exchange.fetch_open_order(order['id'], self.symbol)
             if order['status'] == 'open':
                 time.sleep(1)
@@ -221,11 +221,11 @@ class Executor(Checker):
         self.symbol = symbol
         # self.signal = signal
 
-        self.reverse = reverse
-        if stop_loss is None:
-            self.psar = watchlist.psar_get(self.symbol)
-        else:
-            self.stop_loss = stop_loss
+        # self.reverse = reverse
+        # if stop_loss is None:
+        #     self.psar = watchlist.psar_get(self.symbol)
+        # else:
+        #     self.stop_loss = stop_loss
 
         self.use_rr = use_rr
 
@@ -240,21 +240,27 @@ class Executor(Checker):
         if "CROSS" in self.signal:
             self.safety_factor /= 3
 
+        # fetch start balance
+        for i in range(3):
+            start_balance = self.exchange.fetch_balance()['free'].get("USDT", 0)
+            if start_balance != 0:
+                break
+            if i == 2:
+                adapter.info(f"Unable to fetch start balance for bot {self.bot.id}")
+                start_balance = self.bot.balance
+                break
+            else:
+                time.sleep(0.5)
+
         try:
             self.calculate_entry_price()
             self.calculate_leverage()
-            self.calculate_fee()
-
-            # fetch start balance
-            for i in range(3):
-                start_balance = self.exchange.fetch_balance()['free'].get("USDT", 0)
-                if start_balance != 0:
-                    break
-                if i == 2:
-                    adapter.info(f"Unable to fetch start balance for bot {self.bot.id}")
-                    start_balance = self.bot.balance
-                else:
-                    time.sleep(0.5)
+            if not hasattr(self, "tp"):
+                self.calculate_tp_sl()  # This method is called to get an estimated tp value without fees
+                self.calculate_fee()
+                self.calculate_tp_sl()  # This method is called again to account for fees
+            else:
+                self.calculate_fee()
 
             self.set_leverage(self.symbol, self.leverage)
 

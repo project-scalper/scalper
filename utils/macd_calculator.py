@@ -24,7 +24,7 @@ async def macd(exchange:ccxt.Exchange, symbol:str, timeframe:str='5m', limit:int
          macd = df.ta.macd(fast=fast, slow=slow, signal=signal)
          df = pd.concat([df, macd], axis=1)
          df = df[-signal:]
-         resp = df.tail(5).to_dict(orient='records')
+         resp = df.to_dict(orient='records')
          # print(resp)
          for item in resp:
             item['datetime'] = datetime.fromtimestamp(item['time'] / 1000)

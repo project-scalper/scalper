@@ -2,7 +2,7 @@
 
 from helper.adapter import adapter, trade_logger
 from datetime import datetime, timedelta
-from variables import risk, reward, timeframe, reward_risk, lev, daily_target, daily_loss
+from variables import risk, reward, timeframe, reward_risk, lev, daily_target, daily_loss, max_simult_trades
 
 from strategies.macd_2 import active
 import time
@@ -18,7 +18,9 @@ date_fmt = "%b %d %Y"
 
 class Checker():
     bot_id = None
-    capital = 100
+    capital = 0
+    symbol = ""
+    signal = ""
 
     def __init__(self, exchange:ccxt.Exchange, *args, **kwargs):
         self.exchange = exchange
@@ -28,15 +30,32 @@ class Checker():
 
         if hasattr(self, "bot_id"):
             self.bot:Bot = model.storage.get("Bot", self.bot_id)
-            # self.capital = min(self.bot.balance, self.bot.capital)
-            # self.capital = self.bot.capital
+            
+        if "atr" in kwargs and kwargs["atr"] is not None:
+            self.atr = kwargs["atr"]
 
-        self.risk = self.capital * risk
-        self.reward = self.capital * reward
-        self.safety_factor = reward_risk
-        self.max_daily_loss = daily_loss * self.capital
-        self.daily_target = daily_target * self.capital
-        # self.capital = 100
+        if not hasattr(self, "atr"):
+            self.risk = self.capital * risk
+            self.reward = self.capital * reward
+            self.safety_factor = reward_risk
+            self.max_daily_loss = daily_loss * self.capital
+            self.daily_target = daily_target * self.capital
+            self.start_dt = datetime.now()
+
+            self.prepare_trade(self.symbol, self.signal)
+            self.is_open = True
+        else:
+            self.entry_price = kwargs["entry_price"]
+            if "BUY" in self.signal:
+                self.tp = self.entry_price + (2 * self.atr)
+                self.sl = self.entry_price - self.atr
+            elif "SELL" in self.signal:
+                self.tp = self.entry_price - (2 * self.atr)
+                self.sl = self.entry_price + self.atr
+                self.risk = kwargs['trade_risk']
+                self.reward = kwargs['trade_reward']
+            
+            self.calculate_leverage()
 
     def calculate_entry_price(self):
         """Calculates the limit entry price for the trade"""
@@ -99,12 +118,21 @@ class Checker():
             self.leverage = round(leverage)
             self.tp = float(self.exchange.price_to_precision(self.symbol, tp))
             self.sl = float(self.exchange.price_to_precision(self.symbol, self.stop_loss))
+        elif hasattr(self, "atr"):
+            if "BUY" in self.signal:
+                amount = self.reward / (self.tp - self.entry_price)
+                leverage = (amount * self.entry_price) / self.capital
+                self.leverage = int(leverage) + 1
+            elif "SELL" in self.signal:
+                amount = self.reward / (self.entry_price - self.tp)
+                leverage = (amount * self.entry_price) / self.capital
+                self.leverage = int(leverage) + 1
         else:
             self.leverage = lev
             # leverage = self.leverage
 
-        if self.leverage > 20:
-            self.leverage = 20
+        if self.leverage > 10:
+            self.leverage = 10
         
         amount = (self.capital * self.leverage) / self.entry_price
         try:
@@ -113,22 +141,15 @@ class Checker():
             raise e
         self.amount = amount
         
-        if self.use_rr is False:
-            self.leverage = lev
-            amount = (self.capital * self.leverage) / self.entry_price
-            try:
-                self.amount = float(self.exchange.amount_to_precision(self.symbol, amount))
-            except Exception as e:
-                raise e
-            
-            self.calculate_fee()
-            fee = self.maker_fee + (self.taker_fee_rate * self.tp)
-            cost = self.amount * self.entry_price
-            if "BUY" in self.signal:
-                tp = (cost + self.reward + fee) / self.amount
-            elif "SELL" in self.signal:
-                tp = (cost - fee - reward) / self.amount
-            self.tp = float(self.exchange.price_to_precision(self.symbol, tp))
+        # if self.use_rr is False:
+        #     self.calculate_fee()
+        #     fee = self.maker_fee + (self.taker_fee_rate * self.tp)
+        #     cost = self.amount * self.entry_price
+        #     if "BUY" in self.signal:
+        #         tp = (cost + self.reward + fee) / self.amount
+        #     elif "SELL" in self.signal:
+        #         tp = (cost - fee - reward) / self.amount
+        #     self.tp = float(self.exchange.price_to_precision(self.symbol, tp))
 
         return leverage
 
@@ -170,7 +191,7 @@ class Checker():
         if not self.entry_price:
             return
 
-        valid_till = datetime.now() + timedelta(minutes=15)
+        valid_till = datetime.now() + timedelta(minutes=30)
         while datetime.now() <= valid_till:
             try:
                 ticker = self.exchange.fetch_ticker(self.symbol)
@@ -178,18 +199,21 @@ class Checker():
                 if ("BUY" in self.signal and ticker['last'] <= self.entry_price) or ("SELL" in self.signal and ticker['last'] >= self.entry_price):
                     self.entry_price = ticker['last']
 
-                    if self.bot.available is False:
+                    # if self.bot.available is False:
+                    if self.bot.trade_counter >= max_simult_trades:
                         adapter.info(f"Bot {self.bot.id} already in another trade")
                         return
 
                     adapter.info(f"#{self.symbol}. {self.signal}. trade entered at {self.entry_price}, tp={self.tp}, sl={self.sl}, leverage={self.leverage}")
-                    self.bot.available = False
+                    # self.bot.available = False
+                    self.bot.trade_counter += 1
                     self.bot.save()
                     self.monitor()
                     return
             except Exception as e:
                 adapter.error(f"{type(e).__name__} - {str(e)}")
             finally:
+                # This prevents overload and rate limiting
                 time.sleep(1)
 
         adapter.info(f"#{self.symbol}. {self.signal} - Unable to enter trade in time.")
@@ -260,8 +284,10 @@ class Checker():
         """Calculates maker fee and taker fee"""
         for i in range(3):
             try:
-                maker_fee:float = self.exchange.fetchTradingFee(self.symbol)['maker'] * self.amount * self.entry_price
-                taker_fee_rate:float = self.exchange.fetchTradingFee(self.symbol)['taker'] * self.amount
+                # maker_fee:float = self.exchange.fetchTradingFee(self.symbol)['maker'] * self.amount * self.entry_price
+                # taker_fee_rate:float = self.exchange.fetchTradingFee(self.symbol)['taker'] * self.amount
+                maker_fee = self.exchange.markets[self.symbol]['taker'] * self.amount * self.entry_price
+                taker_fee_rate = self.exchange.markets[self.symbol]['maker']
                 taker_fee = taker_fee_rate * self.tp
                 taker_fee_sl = taker_fee_rate * self.sl
                 break
@@ -285,13 +311,9 @@ class Checker():
     def delete(self):
         del self
 
-    async def execute(self, symbol:str, signal:str, reverse:bool=False, stop_loss=None, use_rr:bool=False):
+    def prepare_trade(self, symbol:str, signal:str, reverse:bool=False, stop_loss=None, use_rr:bool=False):
         self.symbol = symbol
         self.reverse = reverse
-        # if 'psar' in signal:
-        #     self.psar = watchlist.psar_get(self.symbol)
-        # elif stop_loss:
-        #     self.stop_loss = stop_loss
         if stop_loss:
             self.stop_loss = stop_loss
         self.use_rr = use_rr
@@ -303,27 +325,58 @@ class Checker():
                 self.signal = signal.replace("SELL", "BUY")
         else:
             self.signal = signal
-        
-        # if "CROSS" in self.signal:
-        #     self.safety_factor /= 3
-        #     self.reward /= 3
 
         self.calculate_entry_price()
         self.leverage = lev
-        # if self.use_rr is True:
-        #     self.calculate_leverage()
-        # else:
-        # self.calculate_fee()
-        #     self.leverage = lev
 
         if not hasattr(self, "tp"):
             self.calculate_tp_sl()  # This method is called to get an estimated tp value without fees
             self.calculate_fee()
-            # self.calculate_tp_sl()  # This method is called again to account for fees
+            self.calculate_tp_sl()  # This method is called again to account for fees
         else:
             self.calculate_fee()
 
         adapter.info(f"#{self.symbol}. {self.signal} - Entry={self.entry_price}, tp={self.tp}, sl={self.sl}, leverage={self.leverage}")
+        
+    async def execute(self):
+        # self.symbol = symbol
+        # self.reverse = reverse
+        # # if 'psar' in signal:
+        # #     self.psar = watchlist.psar_get(self.symbol)
+        # # elif stop_loss:
+        # #     self.stop_loss = stop_loss
+        # if stop_loss:
+        #     self.stop_loss = stop_loss
+        # self.use_rr = use_rr
+
+        # if reverse is True:
+        #     if "BUY" in signal:
+        #         self.signal = signal.replace("BUY", "SELL")
+        #     elif "SELL" in signal:
+        #         self.signal = signal.replace("SELL", "BUY")
+        # else:
+        #     self.signal = signal
+        
+        # # if "CROSS" in self.signal:
+        # #     self.safety_factor /= 3
+        # #     self.reward /= 3
+
+        # self.calculate_entry_price()
+        # self.leverage = lev
+        # # if self.use_rr is True:
+        # #     self.calculate_leverage()
+        # # else:
+        # # self.calculate_fee()
+        # #     self.leverage = lev
+
+        # if not hasattr(self, "tp"):
+        #     self.calculate_tp_sl()  # This method is called to get an estimated tp value without fees
+        #     self.calculate_fee()
+        #     self.calculate_tp_sl()  # This method is called again to account for fees
+        # else:
+        #     self.calculate_fee()
+
+        # adapter.info(f"#{self.symbol}. {self.signal} - Entry={self.entry_price}, tp={self.tp}, sl={self.sl}, leverage={self.leverage}")
 
         self.enter_trade()
         self.update_bot(self.pnl)
@@ -380,7 +433,8 @@ class Checker():
         self.bot.daily_pnl[-1]['msg'] += pnl
         self.bot.pnl_history.append(pnl)
         self.bot.pnl_history = self.bot.pnl_history[-5:]
-        self.bot.available = True
+        # self.bot.available = True
+        self.bot.trade_counter -= 1
         # self.bot.balance += pnl
         self.bot.update_balance()
 

@@ -30,6 +30,7 @@ class Bot(BaseModel):
         self.pnl_history = []
         self.active = True
         self.available = True
+        self.trade_counter = 0
         
         super().__init__(*args, **kwargs)
         if "user_id" not in kwargs:

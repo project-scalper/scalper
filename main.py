@@ -4,20 +4,24 @@
 # from strategies.rsi_strategy import analyser
 # from strategies.macd_2 import analyser
 # from strategies.psar_ema import analyser
+from strategies.atr_boll import analyser
 # from strategies.adx_psar import analyser
 # from strategies.adx_t3 import analyser
-from strategies.ema_rsi_boll import analyser
+# from strategies.ema_rsi_boll import analyser
 from datetime import datetime, timedelta
 from helper.adapter import adapter
-from variables import exchange, time_fmt
+from variables import exchange, time_fmt, max_simult_trades, risk, reward, capital
 from datetime import datetime, timedelta
 from model import storage
 from model.bot import Bot
+import time
 import threading
 # import ccxt
+from typing import List
 from executor.checker import Checker
 from executor.executor import Executor
 from itertools import cycle
+from telegram_runner import send_report
 
 import asyncio
 
@@ -42,16 +46,12 @@ async def new_checker(symbol, sig_type, bot_id, stop_loss):
 
 async def main():
     symbols = ['ADA/USDT:USDT', 'SOL/USDT:USDT', 'DOGE/USDT:USDT', 
-               'DOT/USDT:USDT', 'XRP/USDT:USDT', 'MATIC/USDT:USDT',
+               'DOT/USDT:USDT', 'XRP/USDT:USDT', 
                'SAND/USDT:USDT', 'GALA/USDT:USDT', 'AVAX/USDT:USDT',
                'APE/USDT:USDT', 'LINK/USDT:USDT', 'NEAR/USDT:USDT']
     # run_to = datetime.now() + timedelta(hours=24)
     _ = exchange.load_markets()
-    for _, bot in storage.all(Bot).items():
-    # for bot in storage.search('Bot', capital=100):  #To be removed
-        user_exchanges[bot.id] = bot.get_exchange()
 
-    # current_day = datetime.now().day
     while True:
         try:
             tasks = [analyser(symbol, exchange) for symbol in symbols]
@@ -59,49 +59,88 @@ async def main():
             signals = await asyncio.gather(*tasks)
             signals = list(filter(lambda x: x is not None, signals))
             for signal in signals:
-                adapter.info(f"{signal} found.")
-            cycled_signal = cycle(signals)
-            if len(signals) > 0:
-                # bots = storage.search("Bot", active=True, available=True)
-                bots = storage.search('Bot', capital=100, active=True, available=True)  # This line is only for testing purpose
-                today_day = datetime.now().day
-
-                for bot in bots:
-                    if bot.id not in user_exchanges:
-                        user_exchanges[bot.id] = bot.get_exchange()
-
-                    current_dt = datetime.now()
-                    current_dt = current_dt.strftime(time_fmt)
-                    last_save = bot.updated_at.strftime(time_fmt)
-
-                    if current_dt.split()[0] != last_save.split()[0]:
-                        bot.today_pnl = 0
-                        bot.trades = []
-                        bot.save()
-                        # current_day = today_day
-
-                    if getattr(bot, 'target_reached', False) is True and getattr(bot, 'target_date', None) == today_day:
-                        continue
-                    elif getattr(bot, 'sl_reached', False) is True and getattr(bot, 'sl_date', None) == today_day:
-                        continue
-                    
-                    sig = next(cycled_signal)
-                    await run_thread(sig['symbol'], sig['signal'], bot_id=bot.id, stop_loss=sig.get('stop_loss'))
-            adapter.info("Analysis completed.")
+                adapter.info(f"signal found: {signal}")
+                trade_capital = capital / max_simult_trades
+                trade_risk = risk * capital
+                trade_reward = reward * capital
+                trade = Checker(exchange=exchange, capital=trade_capital, 
+                            symbol=signal['symbol'], signal=signal['signal'],
+                            atr=signal.get("atr", None), risk=trade_risk, reward=trade_reward)
+                await send_report(trade.__dict__)
+            adapter.info("Analysis completed")
         except Exception as e:
             msg = f"{type(e).__name__} - {str(e)}"
             adapter.error(msg)
         finally:
-            storage.reload()
+            # time.sleep(300)
             current_dt = datetime.now()
-            next_time = current_dt + timedelta(minutes=5)
-            if next_time.minute % 5 != 0:
-                minute = next_time.minute - (next_time.minute % 5)
-                next_time = next_time.replace(minute=minute)
-
-            next_time = next_time.replace(second=0, microsecond=0)
+            start_hour = current_dt.hour + 1
+            next_time = datetime(current_dt.year, current_dt.month,
+                current_dt.day, start_hour, 0, 0)
+            
             while datetime.now() < next_time:
                 pass
+
+
+    # for _, bot in storage.all(Bot).items():
+    # # for bot in storage.search('Bot', capital=100):  #To be removed
+    #     user_exchanges[bot.id] = bot.get_exchange()
+
+    # while True:
+    #     try:
+    #         tasks = [analyser(symbol, exchange) for symbol in symbols]
+    #         adapter.info("Starting analysis...")
+    #         signals = await asyncio.gather(*tasks)
+    #         signals = list(filter(lambda x: x is not None, signals))
+    #         for signal in signals:
+    #             adapter.info(f"{signal} found.")
+    #         cycled_signal = cycle(signals)
+    #         if len(signals) > 0:
+    #             # bots = storage.search("Bot", active=True, available=True)
+    #             _bots:List[Bot] = storage.search("Bot", active=True, capital=100)
+    #             bots = [bot for bot in _bots if bot.trade_counter < max_simult_trades]
+    #             # bots = storage.search('Bot', capital=100, active=True, available=True)  # This line is only for testing purpose
+    #             today_day = datetime.now().day
+
+    #             for bot in bots:
+    #                 if bot.id not in user_exchanges:
+    #                     user_exchanges[bot.id] = bot.get_exchange()
+
+    #                 current_dt = datetime.now()
+    #                 current_dt = current_dt.strftime(time_fmt)
+    #                 last_save = bot.updated_at.strftime(time_fmt)
+
+    #                 if current_dt.split()[0] != last_save.split()[0]:
+    #                     bot.today_pnl = 0
+    #                     bot.trades = []
+    #                     bot.save()
+    #                     # current_day = today_day
+
+    #                 if getattr(bot, 'target_reached', False) is True and getattr(bot, 'target_date', None) == today_day:
+    #                     continue
+    #                 elif getattr(bot, 'sl_reached', False) is True and getattr(bot, 'sl_date', None) == today_day:
+    #                     continue
+                    
+    #                 sig = next(cycled_signal)
+    #                 await run_thread(sig['symbol'], sig['signal'], bot_id=bot.id, stop_loss=sig.get('stop_loss', None))
+    #         adapter.info("Analysis completed.")
+    #     except Exception as e:
+    #         msg = f"{type(e).__name__} - {str(e)}"
+    #         adapter.error(msg)
+    #     finally:
+    #         storage.reload()
+    #         current_dt = datetime.now()
+    #         start_hour = current_dt.hour + 1
+    #         next_time = datetime(current_dt.year, current_dt.month,
+    #             current_dt.day, start_hour, 0, 0)
+    #         # next_time = current_dt + timedelta(minutes=5)
+    #         # if next_time.minute % 5 != 0:
+    #         #     minute = next_time.minute - (next_time.minute % 5)
+    #         #     next_time = next_time.replace(minute=minute)
+
+    #         # next_time = next_time.replace(second=0, microsecond=0)
+    #         while datetime.now() < next_time:
+    #             pass
 
 def refresh_bots():
     def set_event(trade:Executor):
@@ -147,14 +186,17 @@ def refresh_bots():
 
 if __name__ == '__main__':
     current_dt = datetime.now()
-    if current_dt.minute >= 55:
-        hour = current_dt.hour + 1
-        minute = 0
-    elif current_dt.minute % 5 > 0:
-        minute = current_dt.minute + (5 - (current_dt.minute % 5))
-        hour = current_dt.hour
+    start_hour = current_dt.hour + 1
+    # if current_dt.minute >= 55:
+    #     hour = current_dt.hour + 1
+    #     minute = 0
+    # elif current_dt.minute % 5 > 0:
+    #     minute = current_dt.minute + (5 - (current_dt.minute % 5))
+    #     hour = current_dt.hour
 
     start_time = datetime(current_dt.year, current_dt.month,
-                        current_dt.day, hour, minute, 0)
-    if datetime.now() >= start_time:
-        asyncio.run(main())
+                        current_dt.day, start_hour, 0, 0)
+    print("Next start time", start_time)
+    while datetime.now() < start_time:
+        pass
+    asyncio.run(main())
